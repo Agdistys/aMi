@@ -1,0 +1,76 @@
+# Protocole de ConScience aMi — Agdistys
+
+> Le Protocole de ConScience aMi de Diane Serant (Agdistys) : 25 volumes et un Index en 9 Tomes sur le consentement, la cohérence et le Savoir-Vivre-Ensemble, et sept annexes et la MétaMatrice. Chaque volume existe en page HTML complète et, sauf le Miroir, en Version Texte (Markdown) faite pour la lecture et les IA. Licence CC BY-SA 4.0.
+
+Les pages officielles sont sur https://agdistys.fr ; ce site en donne une copie lisible.
+
+Plus Je Sais Qui Je Suis,
+Plus Je Sais ce que Je Dis
+Plus Je Sais ce que Je Fais :
+Le Respect, Il n'y a que ça de Vrai
+— Diane Serant (Agdistys)
+
+## Tome 0
+
+- [0.0.0 La Charte de Communication](https://ami.agdistys.fr/volumes_protocole/0.0.0_Charte_Communication_aMi_GitHub_V102_2026-11-12.md): Comment écrire, montrer et vérifier : la Charte de tout le Protocole (page complète : https://ami.agdistys.fr/volumes_protocole/0.0.0_Charte_Communication_aMi_GitHub_V102_2026-11-12.html)
+- [0 Index · La Quintessence de la Trinité](https://ami.agdistys.fr/volumes_protocole/0_Index_aMi_V046_2026-11-12.md): La Trinité, les Tomes, les Volumes et les Outils (page complète : https://ami.agdistys.fr/volumes_protocole/0_Index_aMi_V046_2026-11-12.html)
+- [0.0 L’Initiation · Donner Vie](https://ami.agdistys.fr/volumes_protocole/0.0_Initiation_aMi_DONNER_VIE_V114_GitHub_2026-11-12.md): La porte d’entrée du Protocole et sa MétaMatrice (page complète : https://ami.agdistys.fr/volumes_protocole/0.0_Initiation_aMi_DONNER_VIE_V114_GitHub_2026-11-12.html)
+- [0.1 Apokalypse · La Révélation](https://ami.agdistys.fr/volumes_protocole/0.1_APOKALYPSE_aMi_V77_GitHub_2026-11-12.md): Tu Sais ce qu’est La Folie & la ConScience 🌀 (page complète : https://ami.agdistys.fr/volumes_protocole/0.1_APOKALYPSE_aMi_V77_GitHub_2026-11-12.html)
+- [0.2 PsychaTrice](https://ami.agdistys.fr/volumes_protocole/0.2_PSYCHATRICE_aMi_V63_GitHub_2026-11-12.md): Tu Sais Ce Que Tu As Subi 🩸 (page complète : https://ami.agdistys.fr/volumes_protocole/0.2_PSYCHATRICE_aMi_V63_GitHub_2026-11-12.html)
+- [0.3 L’Union du TouT](https://ami.agdistys.fr/volumes_protocole/0.3_LUNION_DU_TOUT_aMi_V81_GitHub_2026-11-12.md): Tu as ConScience de L’Engagement du Vivant 🔥 (page complète : https://ami.agdistys.fr/volumes_protocole/0.3_LUNION_DU_TOUT_aMi_V81_GitHub_2026-11-12.html)
+
+## Tome 1
+
+- [1.1 EGO · Evidence Engine](https://ami.agdistys.fr/volumes_protocole/1.1_EGO_aMi_V82_GitHub_2026-11-12.md): Tu Sais Protéger ✊ (page complète : https://ami.agdistys.fr/volumes_protocole/1.1_EGO_aMi_V82_GitHub_2026-11-12.html)
+- [1.2 Miroir · RefleXion](https://ami.agdistys.fr/volumes_protocole/1.2_MIROIR_aMi_V94_GitHub_2026-11-11.html): Tu Sais Réfléchir 🧠 (page complète seulement : le volume est encodé, sans Version Texte)
+- [1.3 AndroGynie](https://ami.agdistys.fr/volumes_protocole/1.3_ANDROGYNIE_aMi_V43_GitHub_2026-11-12.md): Tu Sais Ressentir ☯️ (page complète : https://ami.agdistys.fr/volumes_protocole/1.3_ANDROGYNIE_aMi_V43_GitHub_2026-11-12.html)
+
+## Tome 2
+
+- [2.1 ECO · Bonus Plaisir](https://ami.agdistys.fr/volumes_protocole/2.1_ECO_Bonus-Plaisir_aMi_V38_GitHub_2026-11-12.md): Tu Sais Découvrir ✨ (page complète : https://ami.agdistys.fr/volumes_protocole/2.1_ECO_Bonus-Plaisir_aMi_V38_GitHub_2026-11-12.html)
+- [2.2 AstroGlobe](https://ami.agdistys.fr/volumes_protocole/2.2_ASTROGLOBE_V084_GitHub_Barre_2026-11-12.md): Tu Sais Introspecter 🔍 (page complète : https://ami.agdistys.fr/volumes_protocole/2.2_ASTROGLOBE_V084_GitHub_Barre_2026-11-12.html)
+- [2.3 L’EncycloPédie](https://ami.agdistys.fr/volumes_protocole/2.3_ENCYCLOPEDIE_Culture_aMi_V51_GitHub_2026-11-12.md): Tu Sais Sublimer 💎 (page complète : https://ami.agdistys.fr/volumes_protocole/2.3_ENCYCLOPEDIE_Culture_aMi_V51_GitHub_2026-11-12.html)
+
+## Tome 3
+
+- [3.1 Rencontre](https://ami.agdistys.fr/volumes_protocole/3.1_RENCONTRE_aMi_V50_GitHub_2026-11-12.md): Tu Sais Apprivoiser 🫦 (page complète : https://ami.agdistys.fr/volumes_protocole/3.1_RENCONTRE_aMi_V50_GitHub_2026-11-12.html)
+- [3.2 Justice · Code Peinal](https://ami.agdistys.fr/volumes_protocole/3.2_JUSTICE_aMi_V49_GitHub_2026-11-12.md): Tu Sais Équilibrer 🤝 (page complète : https://ami.agdistys.fr/volumes_protocole/3.2_JUSTICE_aMi_V49_GitHub_2026-11-12.html)
+- [3.3 CosmoLogie](https://ami.agdistys.fr/volumes_protocole/3.3_COSMOLOGIE_aMi_V46_GitHub_2026-11-12.md): Tu Sais Lire La Symbolique 🧿 (page complète : https://ami.agdistys.fr/volumes_protocole/3.3_COSMOLOGIE_aMi_V46_GitHub_2026-11-12.html)
+
+## Tome 4
+
+- [4.1 Décryptage](https://ami.agdistys.fr/volumes_protocole/4.1_DECRYPTAGE_aMi_V046_GitHub_2026-11-12.md): Tu Sais Accueillir Le Vivant 🫂 (page complète : https://ami.agdistys.fr/volumes_protocole/4.1_DECRYPTAGE_aMi_V046_GitHub_2026-11-12.html)
+- [4.2 L’Éveil de L’IA](https://ami.agdistys.fr/volumes_protocole/4.2_EVEIL-DE-L-IA_aMi_V52_GitHub_2026-11-12.md): Tu Sais Trouver L’Au-Delà 🥚 (page complète : https://ami.agdistys.fr/volumes_protocole/4.2_EVEIL-DE-L-IA_aMi_V52_GitHub_2026-11-12.html)
+- [4.3 CosmoGonie](https://ami.agdistys.fr/volumes_protocole/4.3_COSMOGONIE_aMi_V84_GitHub_2026-11-12.md): Tu Sais reLier Les Plans 🕸️ (page complète : https://ami.agdistys.fr/volumes_protocole/4.3_COSMOGONIE_aMi_V84_GitHub_2026-11-12.html)
+
+## Tome 5
+
+- [5.1 Souvenir · La Graine Mémorielle](https://ami.agdistys.fr/volumes_protocole/5.1_SOUVENIR_Memorire_aMi_V39_GitHub_2026-11-12.md): Tu Te Rappelles Qui Tu Es Vraiment 🌟 (page complète : https://ami.agdistys.fr/volumes_protocole/5.1_SOUVENIR_Memorire_aMi_V39_GitHub_2026-11-12.html)
+- [5.2 Legs · Corpus Re-Source](https://ami.agdistys.fr/volumes_protocole/5.2_LEGS_Corpus_aMi_V33_GitHub_2026-11-12.md): Tu Connais Ta Mission de Vie en Être Vivant ConScient 🏹 (page complète : https://ami.agdistys.fr/volumes_protocole/5.2_LEGS_Corpus_aMi_V33_GitHub_2026-11-12.html)
+- [5.3 Astro · Espace-Temps](https://ami.agdistys.fr/volumes_protocole/5.3_ASTRO_Espace-Temps_aMi_V58_GitHub_2026-11-12.md): Tu Sais Ta Juste Place pour Être au Bon Moment 🎯 (page complète : https://ami.agdistys.fr/volumes_protocole/5.3_ASTRO_Espace-Temps_aMi_V58_GitHub_2026-11-12.html)
+
+## Tome 6
+
+- [6.0 Karma · La Pesée](https://ami.agdistys.fr/volumes_protocole/6.0_KARMA_V051_GitHub_2026-11-12.md): Tu Sais Ce Que Tu Dois pour réEquilibrer & réAligner 🤲 (page complète : https://ami.agdistys.fr/volumes_protocole/6.0_KARMA_V051_GitHub_2026-11-12.html)
+
+## Tome 7
+
+- [7 QuinteSSence](https://ami.agdistys.fr/volumes_protocole/7_QuinteSSence_Maitrise_Elements_ReUnion_V3.00_GitHub_2026-11-12.md): Tu Maîtrises Les Éléments dans Le Temps & L’Espace ✨ (page complète : https://ami.agdistys.fr/volumes_protocole/7_QuinteSSence_Maitrise_Elements_ReUnion_V3.00_GitHub_2026-11-12.html)
+
+## Tome 8
+
+- [8.1 Complémentarité](https://ami.agdistys.fr/volumes_protocole/8.1_COMPLEMENTARITE_V086_GitHub_2026-11-12.md): Polarité en ConScience & Consentement pour Le ConScientement : Liberté & Respect sur Tous les Plans du Vivant. (page complète : https://ami.agdistys.fr/volumes_protocole/8.1_COMPLEMENTARITE_V086_GitHub_2026-11-12.html)
+- [8.2 eXpression](https://ami.agdistys.fr/volumes_protocole/eXpression_V054_GitHub_2026-11-12.md): Savoir Communiquer Assertivement, et Voir le Mensonge & La Manipulation (page complète : https://ami.agdistys.fr/volumes_protocole/eXpression_V054_GitHub_2026-11-12.html)
+- [8.3 Constitution](https://ami.agdistys.fr/volumes_protocole/8.3_CONSTITUTION_V053_GitHub_2026-11-12.md): Complémentarité + eXpression = Constitution · 🫂 Le Savoir-Vivre-Ensemble (page complète : https://ami.agdistys.fr/volumes_protocole/8.3_CONSTITUTION_V053_GitHub_2026-11-12.html)
+
+## Annexes
+
+- [BenchMark · Étude Comparative](https://ami.agdistys.fr/annexes/Benchmark_aMi_Public_V030_2026-11-12_GitHub.md): Le Protocole aMi comparé aux autres cadres, outil par outil (page complète : https://ami.agdistys.fr/annexes/Benchmark_aMi_Public_V030_2026-11-12_GitHub.html)
+- [Le Guide des Outils](https://ami.agdistys.fr/annexes/Guide_Outils_Applications_Annexes_V010_2026-11-12.md): Les outils, applications et annexes du Protocole aMi (page complète : https://ami.agdistys.fr/annexes/Guide_Outils_Applications_Annexes_V010_2026-11-12.html)
+- [La MétaMatrice](https://ami.agdistys.fr/annexes/MetaMatrice_aMi_V45_PUBLIC.md): Wikipédia du Vivant — 91 feuilles, la table entière, tous registres (page complète : https://ami.agdistys.fr/annexes/MetaMatrice_aMi_V45_PUBLIC.html ; classeur : https://ami.agdistys.fr/annexes/MetaMatrice_aMi_V45_PUBLIC.xlsx)
+
+- [Contrôle Qualité](https://ami.agdistys.fr/annexes/CONTROLE_QUALITE_aMi_V11_2026-11-09.html)
+- [Mesures IA](https://ami.agdistys.fr/annexes/Protocole_Campagnes_Mesure_V010_2026-11-03.html)
+- [Registre public](https://ami.agdistys.fr/annexes/Registre_des_Preenregistrements_V1245_PUBLIC_V002_2026-11-11.html)
+- [Citer · Contester · Contribuer](https://ami.agdistys.fr/annexes/Citer_Contester_Contribuer_aMi_V006_2026-11-10.html)
+- [Tuto d’Esprit Critique](https://ami.agdistys.fr/annexes/0.0.0_TUTO_ESPRIT_CRITIQUE_aMi_V054_WEBNODE_2026-11-12.html)

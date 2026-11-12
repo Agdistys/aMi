@@ -1,0 +1,11 @@
+# Les dossiers de travail autour du dépôt restent sur le Mac.
+/*
+!/.gitignore
+!/.github/
+!/volumes_protocole/
+!/annexes/
+!/fichiers_depot/
+!/index.html
+!/README.md
+!/llms.txt
+.DS_Store
