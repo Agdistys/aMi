@@ -1,0 +1,87 @@
+<div class="ami-annex-host" data-ami-annex-loader>
+  <p role="status">Ouverture de l’annexe…</p>
+  <p data-ami-annex-fallback hidden><a href="https://agdistys.github.io/aMi/">Lire l’annexe sur GitHub Pages</a></p>
+  <script type="application/json" data-ami-annex-config>{}</script>
+  <script>
+/* __AMI_ANNEX_SHELL__ */
+(async () => {
+  'use strict';
+
+  const holder = document.currentScript.parentElement;
+  const status = holder.querySelector('[role="status"]');
+  const fallback = holder.querySelector('[data-ami-annex-fallback]');
+  let frame;
+  let chrome;
+
+  function showFallback() {
+    frame?.remove();
+    chrome?.nav.remove();
+    chrome?.footer.remove();
+    status.textContent = 'L’annexe est temporairement indisponible dans cette page.';
+    fallback.hidden = false;
+    holder.dataset.amiAnnexMounted = 'fallback';
+  }
+
+  try {
+    const config = JSON.parse(holder.querySelector('[data-ami-annex-config]').textContent);
+    const address = new URL(config.url);
+    if (address.origin !== 'https://agdistys.github.io' ||
+        !/^\/aMi\/annexes\/[A-Za-z0-9_.%\/-]+\.html$/.test(address.pathname) ||
+        address.search || address.hash || address.username || address.password ||
+        !/^[a-f0-9]{64}$/.test(config.sha256) || !Number.isSafeInteger(config.bytes) ||
+        config.bytes < 1 || !config.slug || !config.label) {
+      throw new Error('Configuration de l’annexe invalide');
+    }
+    fallback.querySelector('a').href = address.href;
+    const response = await fetch(address, {redirect:'error',credentials:'omit'});
+    if (!response.ok || response.url !== address.href) throw new Error('Annexe indisponible');
+    const buffer = await response.arrayBuffer();
+    if (buffer.byteLength !== config.bytes) throw new Error('Taille de l’annexe différente');
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256',buffer));
+    const sha256 = Array.from(digest, value => value.toString(16).padStart(2,'0')).join('');
+    if (sha256 !== config.sha256) throw new Error('Version de l’annexe différente');
+
+    const addressAttr = address.href.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    const prologue = '<base id="ami-annex-frame-document" href="' + addressAttr + '" target="_blank">' +
+      '<style>html,body{height:auto!important;min-height:0!important}html{overflow-y:hidden!important}body{overflow-x:clip}</style>';
+    let content = new TextDecoder('utf-8',{fatal:true}).decode(buffer)
+      .replace(/<script\b(?=[^>]*\bdata-ami-annex-standalone(?:\s|=|>))[^>]*>\s*<\/script\s*>/gi,'')
+      .replace(/<link\b(?=[^>]*\bdata-ami-annex-standalone(?:\s|=|>))[^>]*>/gi,'');
+    if (/<head(?:\s[^>]*)?>/i.test(content.slice(0,16000))) {
+      content = content.replace(/<head(?:\s[^>]*)?>/i, opening => opening + prologue);
+    } else {
+      content = content.replace(/^(\s*(?:<!doctype[^>]*>\s*)?(?:<html(?:\s[^>]*)?>\s*)?)/i, beginning =>
+        beginning + '<head><meta charset="utf-8">' + prologue + '</head>');
+    }
+    const options = {...config,embedded:true};
+    chrome = AmiAnnexShell.mount(holder,options);
+    frame = document.createElement('iframe');
+    frame.className = 'ami-annex-frame';
+    frame.title = config.label;
+    frame.setAttribute('scrolling','no');
+    frame.setAttribute('sandbox','allow-same-origin allow-scripts allow-popups allow-forms allow-downloads');
+    frame.setAttribute('allow','fullscreen');
+    frame.allowFullscreen = true;
+    frame.addEventListener('load', () => {
+      try {
+        if (!frame.contentDocument?.getElementById('ami-annex-frame-document') ||
+            !AmiAnnexShell.connect(frame,chrome,options)) {
+          showFallback();
+          return;
+        }
+        status.hidden = true;
+        holder.dataset.amiAnnexMounted = 'true';
+      } catch (error) {
+        console.warn('Montage de l’annexe aMi',error);
+        showFallback();
+      }
+    }, {once:true});
+    frame.srcdoc = content;
+    holder.insertBefore(frame,chrome.footer);
+  } catch (error) {
+    console.warn('Chargement de l’annexe aMi',error);
+    showFallback();
+  }
+})();
+  </script>
+</div>

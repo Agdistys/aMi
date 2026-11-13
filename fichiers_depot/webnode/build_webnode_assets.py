@@ -3,6 +3,7 @@
 from argparse import ArgumentParser
 from base64 import b64encode
 from hashlib import sha256
+from html import escape
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
@@ -11,7 +12,8 @@ import re
 
 PUBLISHER = 'https://agdistys.github.io/aMi/'
 ROUTE = re.compile(r'/ami(?:-[a-z0-9]+(?:-[a-z0-9]+)*)?/')
-VOLUME_FILE = re.compile(r'volumes_protocole/[a-zA-Z0-9_.-]+\.html')
+VOLUME_FILE = re.compile(r'(?:volumes_protocole|annexes)/[a-zA-Z0-9_.-]+\.html')
+ANNEX_ROUTE = re.compile(r'/(?:benchmark|catalogue-des-outils-ami|lettre-ouverte|metaconscience|metamatrice)/')
 JAVASCRIPT_TYPES = {'', 'text/javascript', 'application/javascript'}
 
 
@@ -56,7 +58,7 @@ def once(text, before, after):
 
 def source_for(path, source_dir, site_dir):
     if not VOLUME_FILE.fullmatch(path):
-        raise ValueError(f'Volume non autorisé : {path}')
+        raise ValueError(f'Fichier HTML non autorisé : {path}')
     source = (source_dir / path).read_bytes()
     if source != (site_dir / path).read_bytes():
         raise ValueError(f'Volume déployé différent de la source : {path}')
@@ -167,7 +169,7 @@ def read_annexes(path):
         return {}
     data = json.loads(path.read_text())
     for route,entry in data.items():
-        if not ROUTE.fullmatch(route) and not re.fullmatch(r'/(?:benchmark|catalogue-des-outils-ami|lettre-ouverte)/',route):
+        if not ROUTE.fullmatch(route) and not ANNEX_ROUTE.fullmatch(route):
             raise ValueError(f'Route annexe interdite : {route}')
         if entry['kind'] not in ('link','links') or not isinstance(entry['label'],str):
             raise ValueError(f'Type de route annexe inconnu : {route}')
@@ -183,6 +185,46 @@ def read_annexes(path):
     return data
 
 
+def native_entry(code, path, raw, assets, label, href):
+    adapter = adapter_bytes(code)
+    filename = sha256(adapter).hexdigest()+'.js'
+    (assets/filename).write_bytes(adapter)
+    return {
+        'kind':'native', 'label':label, 'href':href,
+        'adapter':{'path':'webnode/adapters/'+filename,'integrity':integrity(adapter)},
+        'source':{'path':path,'sha256':sha256(raw).hexdigest(),'bytes':len(raw)},
+    }
+
+
+def adapt_annex(template, slug, label, path, raw):
+    pattern = r'(<script\b[^>]*\bdata-ami-annex-config(?:="")?[^>]*>)(.*?)(</script>)'
+    config = {
+        'slug':slug, 'label':label, 'url':PUBLISHER+path,
+        'sha256':sha256(raw).hexdigest(), 'bytes':len(raw),
+    }
+    encoded = json.dumps(config,ensure_ascii=False,separators=(',',':')).replace('<','\\u003c')
+    code, count = re.subn(pattern,lambda match:match[1]+encoded+match[3],template,flags=re.S)
+    if count != 1:
+        raise ValueError('Configuration du modèle annexe absente ou répétée')
+    return code
+
+
+def standalone_annex(raw, slug, label, asset):
+    text = raw.decode('utf-8')
+    script = (
+        f'<script defer src="../webnode/adapters/{asset}" '
+        f'data-ami-annex-standalone data-slug="{escape(slug,quote=True)}" '
+        f'data-label="{escape(label,quote=True)}"></script>'
+    )
+    body_end = list(re.finditer(r'</body\s*>',text,re.I))
+    if body_end:
+        position = body_end[-1].start()
+        text = text[:position]+script+'\n'+text[position:]
+    else:
+        text += '\n'+script+'\n'
+    return text.encode('utf-8')
+
+
 def main():
     parser = ArgumentParser()
     parser.add_argument('--source',type=Path,required=True)
@@ -192,6 +234,8 @@ def main():
     parser.add_argument('--templates',type=Path)
     parser.add_argument('--write-templates',type=Path)
     parser.add_argument('--annexes',type=Path)
+    parser.add_argument('--annex-template',type=Path)
+    parser.add_argument('--annex-shell',type=Path)
     parser.add_argument('--bootstrap',type=Path,default=Path(__file__).with_name('bootstrap.html'))
     args = parser.parse_args()
     routes = read_routes(args.source)
@@ -230,12 +274,32 @@ def main():
             code = adapt_astro(code,path,raw)
         else:
             code = adapt_generic(code,slug,path,raw)
-        adapter = adapter_bytes(code)
-        filename = sha256(adapter).hexdigest()+'.js'
-        (assets/filename).write_bytes(adapter)
-        entries[route] = {'kind':'native','label':'Ouvrir le volume sur GitHub Pages','href':PUBLISHER+('' if slug == 'ami' else slug+'/'),
-                          'adapter':{'path':'webnode/adapters/'+filename,'integrity':integrity(adapter)},
-                          'source':{'path':path,'sha256':sha256(raw).hexdigest(),'bytes':len(raw)}}
+        entries[route] = native_entry(
+            code, path, raw, assets,
+            'Ouvrir le volume sur GitHub Pages', PUBLISHER+('' if slug == 'ami' else slug+'/'),
+        )
+    if args.annex_template:
+        if not args.annex_shell:
+            parser.error('--annex-shell est nécessaire avec --annex-template')
+        shell = args.annex_shell.read_bytes()
+        shell_path = assets/(sha256(shell).hexdigest()+'.js')
+        shell_path.write_bytes(shell)
+        template = once(args.annex_template.read_text(), '/* __AMI_ANNEX_SHELL__ */', shell.decode())
+        annex_content = {}
+        for route, entry in list(annexes.items()):
+            if entry['kind'] != 'link':
+                continue
+            slug = urlparse(entry['href']).path.removeprefix('/aMi/').strip('/')
+            path = routes.get(slug,'')
+            if not path.startswith('annexes/'):
+                raise ValueError(f'Annexe hors des routes publiées : {route}')
+            if slug not in annex_content:
+                raw = source_for(path, args.source, args.site)
+                raw = standalone_annex(raw, slug, entry['label'], shell_path.name)
+                (args.site/path).write_bytes(raw)
+                code = adapt_annex(template, slug, entry['label'], path, raw)
+                annex_content[slug] = native_entry(code, path, raw, assets, entry['label'], entry['href'])
+            annexes[route] = annex_content[slug]
     catalogue = {'schema':1,'routes':{**entries,**annexes}}
     (args.site/'webnode/catalogue-v1.json').write_text(json.dumps(catalogue,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     snippet = args.bootstrap.read_text()

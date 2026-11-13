@@ -40,7 +40,7 @@
 | Annexes | 🧰 Le Guide des Outils | [lire](annexes/Guide_Outils_Applications_Annexes_V010_2026-11-12.html) | [texte](annexes/Guide_Outils_Applications_Annexes_V010_2026-11-12.md) | `Guide_Outils_Applications_Annexes_V010_2026-11-12.html` |
 | Annexes | 🪆 La MétaMatrice | [lire](annexes/MetaMatrice_aMi_V46_PUBLIC.html) | [texte](annexes/MetaMatrice_aMi_V46_PUBLIC.md) | `MetaMatrice_aMi_V46_PUBLIC.xlsx` |
 | Annexes | Contrôle Qualité | [lire](annexes/CONTROLE_QUALITE_aMi_V11_2026-11-09.html) | — | `CONTROLE_QUALITE_aMi_V11_2026-11-09.html` |
-| Annexes | Mesures IA | [lire](annexes/Protocole_Campagnes_Mesure_V010_2026-11-03.html) | — | `Protocole_Campagnes_Mesure_V010_2026-11-03.html` |
+| Annexes | Mesures IA | [lire](annexes/Protocole_Campagnes_Mesure_V011_2026-11-13.html) | — | `Protocole_Campagnes_Mesure_V011_2026-11-13.html` |
 | Annexes | Registre public | [lire](annexes/Registre_des_Preenregistrements_V1245_PUBLIC_V003_2026-11-13.html) | — | `Registre_des_Preenregistrements_V1245_PUBLIC_V003_2026-11-13.html` |
 | Annexes | Citer · Contester · Contribuer | [lire](annexes/Citer_Contester_Contribuer_aMi_V006_2026-11-10.html) | — | `Citer_Contester_Contribuer_aMi_V006_2026-11-10.html` |
 | Annexes | Tuto d’Esprit Critique | [lire](annexes/0.0.0_TUTO_ESPRIT_CRITIQUE_aMi_V054_WEBNODE_2026-11-12.html) | — | `0.0.0_TUTO_ESPRIT_CRITIQUE_aMi_V054_WEBNODE_2026-11-12.html` |

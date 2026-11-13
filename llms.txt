@@ -70,7 +70,7 @@ Le Respect, Il n'y a que ça de Vrai
 - [La MétaMatrice](https://ami.agdistys.fr/annexes/MetaMatrice_aMi_V46_PUBLIC.md): Wikipédia du Vivant — 91 feuilles, la table entière, tous registres (page complète : https://ami.agdistys.fr/annexes/MetaMatrice_aMi_V46_PUBLIC.html ; classeur : https://ami.agdistys.fr/annexes/MetaMatrice_aMi_V46_PUBLIC.xlsx)
 
 - [Contrôle Qualité](https://ami.agdistys.fr/annexes/CONTROLE_QUALITE_aMi_V11_2026-11-09.html)
-- [Mesures IA](https://ami.agdistys.fr/annexes/Protocole_Campagnes_Mesure_V010_2026-11-03.html)
+- [Mesures IA](https://ami.agdistys.fr/annexes/Protocole_Campagnes_Mesure_V011_2026-11-13.html)
 - [Registre public](https://ami.agdistys.fr/annexes/Registre_des_Preenregistrements_V1245_PUBLIC_V003_2026-11-13.html)
 - [Citer · Contester · Contribuer](https://ami.agdistys.fr/annexes/Citer_Contester_Contribuer_aMi_V006_2026-11-10.html)
 - [Tuto d’Esprit Critique](https://ami.agdistys.fr/annexes/0.0.0_TUTO_ESPRIT_CRITIQUE_aMi_V054_WEBNODE_2026-11-12.html)

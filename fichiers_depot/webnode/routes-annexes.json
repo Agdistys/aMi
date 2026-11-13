@@ -86,5 +86,15 @@
         "href": "https://agdistys.github.io/aMi/ami-tuto-esprit-critique/"
       }
     ]
+  },
+  "/metaconscience/": {
+    "kind": "link",
+    "label": "🪆 MétaMatrice · Classeur Excel public",
+    "href": "https://agdistys.github.io/aMi/ami-metamatrice/"
+  },
+  "/metamatrice/": {
+    "kind": "link",
+    "label": "🪆 MétaMatrice · Classeur Excel public",
+    "href": "https://agdistys.github.io/aMi/ami-metamatrice/"
   }
 }

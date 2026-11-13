@@ -46,4 +46,6 @@ python3 "$source_dir/fichiers_depot/webnode/build_webnode_assets.py" \
   --source "$source_dir" --site "$site_dir" \
   --templates "$source_dir/fichiers_depot/webnode/templates" \
   --annexes "$source_dir/fichiers_depot/webnode/routes-annexes.json" \
+  --annex-template "$source_dir/fichiers_depot/webnode/annex.html" \
+  --annex-shell "$source_dir/fichiers_depot/webnode/annex-shell.js" \
   --bootstrap "$source_dir/fichiers_depot/webnode/bootstrap.html"

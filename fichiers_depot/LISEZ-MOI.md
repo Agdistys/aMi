@@ -14,7 +14,7 @@ Une pré-release correspond à un commit précis. Pages sert le HTML de la branc
 
 ## Bloc Webnode commun
 
-`webnode/bootstrap.html` est le bloc HTML à coller une seule fois dans chaque page Webnode du Protocole. Le même code choisit le volume ou le lien selon l’adresse de la page. Les pages d’annexe ouvrent leur édition GitHub Pages dans le même onglet.
+`webnode/bootstrap.html` est le bloc HTML à coller une seule fois dans chaque page Webnode du Protocole. Le même code choisit le volume ou l’annexe selon l’adresse de la page. Le sommaire des annexes affiche des liens. Les pages d’annexe affichent leur édition GitHub Pages dans la page Webnode, avec un seul défilement.
 
 Pour publier une nouvelle édition, ajouter le fichier charté et mettre à jour sa cible dans `routes-webnode.tsv`. Pour l’Index, mettre à jour le renvoi de `index.html`. Le déploiement recalcule le catalogue et les empreintes des fichiers. Les corrections d’affichage propres à Webnode se font dans `webnode/templates/`. Si une nouvelle édition change la racine HTML attendue, adapter son modèle au cours de la même mise à jour. Les anciennes éditions restent accessibles à leurs adresses.
 
