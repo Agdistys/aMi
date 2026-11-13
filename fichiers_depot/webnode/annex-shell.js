@@ -36,15 +36,15 @@
     .ami-annex-host {width:100%;min-width:0;background:#09090e;color:#efe8d7}
     .ami-annex-frame {display:block;width:100%;border:0;margin:0;overflow:hidden;background:#09090e}
     .ami-annex-bar,.ami-annex-footer {box-sizing:border-box;color:#f3e8cf;background:#0b0b11;font-family:Jost,system-ui,sans-serif;text-align:center}
-    .ami-annex-bar {position:sticky;top:var(--ami-annex-host-top,0px);z-index:101;border-block-end:1px solid #766025}
+    .ami-annex-bar {position:sticky;top:var(--ami-annex-host-top,0px);z-index:101;border-block-end:1px solid #766025;hyphens:none;overflow-wrap:normal;word-break:normal}
     .ami-annex-bar a,.ami-annex-footer a {color:#ffd06a;text-underline-offset:.22em}
     .ami-annex-progress {height:3px;background:#2c2315}
     .ami-annex-progress span {display:block;height:100%;background:linear-gradient(90deg,#e33232,#de8936,#9abe50,#ffd06a);transform:scaleX(0);transform-origin:left}
-    .ami-annex-row {display:grid;grid-template-columns:1fr minmax(0,2.5fr) 1fr;align-items:center;gap:.5rem;min-height:48px;padding:.2rem clamp(.4rem,2vw,1rem)}
+    .ami-annex-row {display:grid;grid-template-columns:minmax(max-content,1fr) minmax(0,2.5fr) minmax(max-content,1fr);align-items:center;gap:.5rem;min-height:48px;padding:.2rem clamp(.4rem,2vw,1rem)}
     .ami-annex-row > a,.ami-annex-row > button {justify-self:start}
     .ami-annex-row > a {display:inline-flex;align-items:center;min-height:44px;font-weight:700}
     .ami-annex-current {line-height:1.2;font:700 clamp(.95rem,3vw,1.2rem) Georgia,serif;color:#ffdc8b}
-    .ami-annex-menu-toggle {justify-self:end!important;border:1px solid #987237;background:#151019;color:#ffd06a;border-radius:.45rem;font:700 .9rem system-ui,sans-serif;min-height:44px;padding:.2rem .55rem;cursor:pointer}
+    .ami-annex-menu-toggle {justify-self:end!important;border:1px solid #987237;background:#151019;color:#ffd06a;border-radius:.45rem;font:700 .9rem system-ui,sans-serif;min-height:44px;padding:.2rem .55rem;cursor:pointer;white-space:nowrap}
     .ami-annex-menu {margin:0;padding:.4rem .65rem .7rem;list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:.3rem .65rem;max-height:42vh;overflow:auto}
     .ami-annex-menu[hidden] {display:none}
     .ami-annex-menu a {display:inline-flex;align-items:center;min-height:40px;padding:0 .35rem}
