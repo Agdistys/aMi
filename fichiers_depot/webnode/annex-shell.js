@@ -202,8 +202,12 @@
     for (const bar of doc.querySelectorAll('.h-w.wnd-fixed, #layout > header, header[role=banner], header#header')) {
       if (bar.contains(nav) || nav.contains(bar)) continue;
       const box = bar.getBoundingClientRect();
-      if (box.top <= 2 && box.bottom > 0 && box.width >= win.innerWidth * .4 && ['fixed','sticky'].includes(win.getComputedStyle(bar).position)) {
+      const position = win.getComputedStyle(bar).position;
+      if (box.width < win.innerWidth * .4 || !box.height) continue;
+      if (box.top <= 2 && box.bottom > 0 && ['fixed','sticky'].includes(position)) {
         bottom = Math.max(bottom, box.bottom);
+      } else if (bar.matches('.h-w.wnd-fixed')) {
+        bottom = Math.max(bottom, box.height);
       }
     }
     return Math.ceil(bottom);
@@ -453,7 +457,7 @@
         if (host.location.hash !== hash || Math.abs(host.scrollY-jumpedY) > 8) return;
         const top = frame.getBoundingClientRect().top + rawRect.call(target).top;
         const min = headerHeight() + innerOffset + 8;
-        if (top >= min-96 && top < min-2) to(target,{behavior:'instant'});
+        if (top >= min-160 && top < min-2) to(target,{behavior:'instant'});
       },220);
     }
     doc.addEventListener('click', event => {
