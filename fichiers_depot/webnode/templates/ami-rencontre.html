@@ -79,21 +79,13 @@
   try {
     const expected = new URL(cfg.url);
     if (expected.origin !== 'https://agdistys.github.io' || !expected.pathname.startsWith('/aMi/volumes_protocole/')) throw Error('Source invalide.');
+    const response = await fetch(expected, { redirect:'error', credentials:'omit', cache:'force-cache' });
+    if (!response.ok || response.url !== expected.href) throw Error('Le volume est indisponible.');
     if (!crypto.subtle) throw Error('La vérification du volume exige une page HTTPS.');
-    async function verifiedBytes(url, cache) {
-      const response = await fetch(url, { redirect:'error', credentials:'omit', cache, signal:AbortSignal.timeout(15000) });
-      if (!response.ok || response.url !== url.href) throw Error('Le volume est indisponible.');
-      const buffer = await response.arrayBuffer();
-      if (buffer.byteLength !== cfg.bytes) throw Error('La taille du volume ne correspond pas au bloc.');
-      const digest = await crypto.subtle.digest('SHA-256', buffer);
-      const hash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2,'0')).join('');
-      if (hash !== cfg.sha256) throw Error('La version reçue ne correspond pas au bloc.');
-      return buffer;
-    }
-    const versioned = new URL(expected);
-    versioned.searchParams.set('v', cfg.sha256);
-    const bytes = await verifiedBytes(versioned, 'default')
-      .catch(() => verifiedBytes(expected, 'reload'));
+    const bytes = await response.arrayBuffer();
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    const hash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2,'0')).join('');
+    if (hash !== cfg.sha256 || bytes.byteLength !== cfg.bytes) throw Error('La version reçue ne correspond pas au bloc.');
     const raw = new TextDecoder('utf-8', { fatal:true }).decode(bytes);
     const source = new DOMParser().parseFromString(raw, 'text/html');
     const fragment = document.createDocumentFragment();

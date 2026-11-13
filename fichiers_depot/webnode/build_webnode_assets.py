@@ -125,6 +125,51 @@ def adapt_index(code,path,raw):
                 "    }")
 
 
+def compatible_css(code):
+    if 'const sheet = new CSSStyleSheet();' not in code:
+        return code
+    code = once(code, '    const sheet = new CSSStyleSheet();\n', '')
+    code = once(code, '    sheet.replaceSync(source);\n', '')
+    return once(code, "    return Array.from(sheet.cssRules, render).join('\\n');", """    if (typeof CSSStyleSheet !== 'undefined' && typeof CSSStyleSheet.prototype.replaceSync === 'function') {
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(source);
+      return Array.from(sheet.cssRules, render).join('\\n');
+    }
+    const parser = document.createElement('style');
+    parser.media = 'not all';
+    parser.textContent = source;
+    document.head.append(parser);
+    try {
+      return Array.from(parser.sheet.cssRules, render).join('\\n');
+    } finally {
+      parser.remove();
+    }""")
+
+
+def recover_volume_fetch(code):
+    start = "    const response = await fetch(expected, { redirect:'error', credentials:'omit', cache:'force-cache' });"
+    end = "throw Error('La version reçue ne correspond pas au bloc.');"
+    if start not in code:
+        return code
+    opening = code.index(start)
+    closing = code.index(end, opening) + len(end)
+    return code[:opening] + """    if (!crypto.subtle) throw Error('La vérification du volume exige une page HTTPS.');
+    async function verifiedBytes(url, cache) {
+      const response = await fetch(url, { redirect:'error', credentials:'omit', cache });
+      if (!response.ok || response.url !== url.href) throw Error('Le volume est indisponible.');
+      const buffer = await response.arrayBuffer();
+      if (buffer.byteLength !== cfg.bytes) throw Error('La taille du volume ne correspond pas au bloc.');
+      const digest = await crypto.subtle.digest('SHA-256', buffer);
+      const hash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2,'0')).join('');
+      if (hash !== cfg.sha256) throw Error('La version reçue ne correspond pas au bloc.');
+      return buffer;
+    }
+    const versioned = new URL(expected);
+    versioned.searchParams.set('v', cfg.sha256);
+    const bytes = await verifiedBytes(versioned, 'default')
+      .catch(() => verifiedBytes(expected, 'reload'));""" + code[closing:]
+
+
 def adapter_bytes(code):
     scripts = [m for m in re.finditer(r'<script\b([^>]*)>([\s\S]*?)</script>',code,re.I)
                if (kind := re.search(r'\btype\s*=\s*["\']([^"\']+)',m[1])) is None or kind[1] in JAVASCRIPT_TYPES]
@@ -333,6 +378,7 @@ def main():
             }
             code = once(code, '/* __AMI_UNION_VOLUME_LINKS__ */ {}',
                         json.dumps(volume_links, ensure_ascii=False))
+        code = compatible_css(recover_volume_fetch(code))
         entries[route] = native_entry(
             code, path, raw, assets,
             'Ouvrir le volume sur GitHub Pages', PUBLISHER+('' if slug == 'ami' else slug+'/'),
