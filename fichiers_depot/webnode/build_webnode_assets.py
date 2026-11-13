@@ -9,6 +9,7 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse
 import json
 import re
+from public_reading import REGISTER, canonicalize, publish
 
 PUBLISHER = 'https://agdistys.github.io/aMi/'
 ROUTE = re.compile(r'/ami(?:-[a-z0-9]+(?:-[a-z0-9]+)*)?/')
@@ -131,6 +132,10 @@ def adapter_bytes(code):
         raise ValueError('Le bloc doit avoir un script principal inline unique')
     script = scripts[0]
     markup = code[:script.start()]+'<span data-ami-adapter-script-slot hidden></span>'+code[script.end():]
+    markup = re.sub(r'(<p\b[^>]*\brole="status"[^>]*>)Ouverture[^<]*</p>',
+                    lambda m: m[1]+'</p>',markup)
+    markup = re.sub(r'\s*<a data-astro-link\b', '\n  <a hidden data-astro-link', markup)
+    markup = '<style>[data-ami-public-block] :is([data-ami-volume-status],[data-astro-status],[data-index-loading],[data-ami-annex-loader] > [role=status]):empty{display:none}</style>'+markup
     prefix = f'''// aMi · intégration Webnode générée.\n{{\n  const entryScript = document.currentScript;
   const entryPoint = entryScript?.parentElement;
   if (!entryPoint?.matches('[data-ami-webnode-anchor]')) throw Error('Ancre Webnode absente.');
@@ -194,6 +199,49 @@ def native_entry(code, path, raw, assets, label, href):
         'adapter':{'path':'webnode/adapters/'+filename,'integrity':integrity(adapter)},
         'source':{'path':path,'sha256':sha256(raw).hexdigest(),'bytes':len(raw)},
     }
+
+
+def charte_navigation(raw, routes, index):
+    """Reuse the Charte’s navbar, palette and responsive rules in the annex shell."""
+    charte = raw.decode('utf-8')
+    navbar = re.search(r'<nav\b[^>]*id="amiBarre"[^>]*>[\s\S]*?</nav>', charte)
+    palette = re.search(r'#ami-charte\s*\{\s*/\* la Charte des Couleurs.*?--r:4px}', charte, re.S)
+    rules = re.search(r'#ami-charte \.ami-barre\{--noir:var\(--onyx\);--plaque:[\s\S]*?(?=\n#ami-charte \.ami-pied\{--noir:)', charte)
+    zoom = re.search(r'#ami-charte \.coin-zoom\{[\s\S]*?(?=/\* ── les liens du pied)', charte)
+    if not all((navbar, palette, rules, zoom)):
+        raise ValueError('La barre canonique de la Charte est incomplète')
+
+    def css_style(name):
+        style = re.search(r'<style id="'+name+r'">([\s\S]*?)</style>', charte)
+        if not style:
+            raise ValueError('Style canonique absent : '+name)
+        return style[1]
+
+    def route_link(match):
+        path = match[1]
+        # The Charte may name an older edition. Follow the stable route.
+        stem = lambda value: re.split(r'_V[0-9]', value, maxsplit=1)[0]
+        slug = 'ami' if stem(path) == stem(index) else next(
+            (slug for slug,value in routes.items() if stem(value) == stem(path)), None,
+        )
+        if slug is None:
+            raise ValueError('Cible du menu canonique absente : '+path)
+        return f'data-ami-route="{slug}" href="{PUBLISHER + ("" if slug == "ami" else slug+"/")}"'
+
+    markup = re.sub(r'href="\.\./(volumes_protocole/[^"]+)"', route_link, navbar[0])
+    markup = re.sub(
+        r'href="\.\./(ami-[a-z0-9-]+)/"', lambda m:f'data-ami-route="{m[1]}" href="{PUBLISHER+m[1]}/"',
+        markup,
+    )
+    markup = once(markup,'class="ami-barre replie"','class="ami-barre ami-annex-bar replie"')
+    css = '\n'.join((palette[0], rules[0], zoom[0], css_style('ami-navbar-evolution-v49-css'),
+                     css_style('charte-index-initiation-v54'), css_style('ami-barre-1111'),
+                     css_style('ami-barre-1111-cibles')))
+    css = css.replace('#ami-charte', '[data-ami-annex-chrome]')
+    fonts = re.search(r'<link href="(https://fonts.googleapis.com/css2\?[^"]+)" rel="stylesheet"', charte[charte.find('<style id="ami-navbar-evolution-v49-css">'):])
+    if not fonts:
+        raise ValueError('Police de la barre canonique absente')
+    return {'html':markup, 'css':css, 'fonts':fonts[1].replace('&amp;', '&')}
 
 
 def adapt_annex(template, slug, label, path, raw):
@@ -281,7 +329,12 @@ def main():
     if args.annex_template:
         if not args.annex_shell:
             parser.error('--annex-shell est nécessaire avec --annex-template')
-        shell = args.annex_shell.read_bytes()
+        charte = (args.source/routes['ami-charte']).read_bytes()
+        navigation = charte_navigation(charte, routes, volumes['ami'])
+        shell = once(
+            args.annex_shell.read_text(), '/* __AMI_CHARTE_NAV__ */ null',
+            json.dumps(navigation, ensure_ascii=False, separators=(',',':')),
+        ).encode('utf-8')
         shell_path = assets/(sha256(shell).hexdigest()+'.js')
         shell_path.write_bytes(shell)
         template = once(args.annex_template.read_text(), '/* __AMI_ANNEX_SHELL__ */', shell.decode())
@@ -294,7 +347,13 @@ def main():
             if not path.startswith('annexes/'):
                 raise ValueError(f'Annexe hors des routes publiées : {route}')
             if slug not in annex_content:
-                raw = source_for(path, args.source, args.site)
+                if slug == 'ami-registre':
+                    path = REGISTER
+                    raw = (args.site/path).read_bytes()
+                else:
+                    raw = source_for(path, args.source, args.site)
+                if slug == 'ami-registre':
+                    raw = canonicalize(raw.decode(),slug).encode()
                 raw = standalone_annex(raw, slug, entry['label'], shell_path.name)
                 (args.site/path).write_bytes(raw)
                 code = adapt_annex(template, slug, entry['label'], path, raw)
@@ -304,6 +363,7 @@ def main():
     (args.site/'webnode/catalogue-v1.json').write_text(json.dumps(catalogue,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     snippet = args.bootstrap.read_text()
     (args.site/'webnode/bloc-webnode-v1.txt').write_text(snippet)
+    publish(args.source,args.site,routes,volumes['ami'],snippet)
     print(f'{len(entries)} intégrateurs natifs, {len(annexes)} routes annexes')
 
 

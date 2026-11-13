@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ami.agdistys.fr/sitemap.xml
+Sitemap: https://agdistys.github.io/aMi/sitemap.xml

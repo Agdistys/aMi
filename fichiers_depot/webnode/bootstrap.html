@@ -1,7 +1,6 @@
 <div data-ami-webnode-anchor>
-  <p role="status">Ouverture du Protocole aMi…</p>
-  <p data-ami-webnode-fallback hidden><a href="https://agdistys.github.io/aMi/">Ouvrir le Protocole aMi</a></p>
-  <noscript><a href="https://agdistys.github.io/aMi/">Ouvrir le Protocole aMi</a></noscript>
+  <p role="status" hidden></p>
+  <p data-ami-webnode-fallback hidden><a href="https://agdistys.github.io/aMi/">Lire le Protocole aMi</a></p>
   <script>
   (async () => {
     const current = document.currentScript;
@@ -61,7 +60,10 @@
     } catch (error) {
       if (!anchor.isConnected) return;
       status.textContent = 'Le contenu intégré est momentanément indisponible.';
-      fallback.hidden = false;
+      if (!anchor.closest('[data-ami-public-block]')) {
+        status.hidden = false;
+        fallback.hidden = false;
+      }
       console.warn('Protocole aMi',error.message);
     }
   })();

@@ -1,6 +1,7 @@
 (() => {
   'use strict';
 
+  const charteNavigation = /* __AMI_CHARTE_NAV__ */ null;
   const web = 'https://www.agdistys.fr/';
   const pages = 'https://agdistys.github.io/aMi/';
   const siteRoutes = {
@@ -35,20 +36,23 @@
   const chromeCSS = `
     .ami-annex-host {width:100%;min-width:0;background:#09090e;color:#efe8d7}
     .ami-annex-frame {display:block;width:100%;border:0;margin:0;overflow:hidden;background:#09090e}
-    .ami-annex-bar,.ami-annex-footer {box-sizing:border-box;color:#f3e8cf;background:#0b0b11;font-family:Jost,system-ui,sans-serif;text-align:center}
-    .ami-annex-bar {position:sticky;top:var(--ami-annex-host-top,0px);z-index:101;border-block-end:1px solid #766025;hyphens:none;overflow-wrap:normal;word-break:normal}
-    .ami-annex-bar a,.ami-annex-footer a {color:#ffd06a;text-underline-offset:.22em}
-    .ami-annex-progress {height:3px;background:#2c2315}
-    .ami-annex-progress span {display:block;height:100%;background:linear-gradient(90deg,#e33232,#de8936,#9abe50,#ffd06a);transform:scaleX(0);transform-origin:left}
-    .ami-annex-row {display:grid;grid-template-columns:minmax(max-content,1fr) minmax(0,2.5fr) minmax(max-content,1fr);align-items:center;gap:.5rem;min-height:48px;padding:.2rem clamp(.4rem,2vw,1rem)}
-    .ami-annex-row > a,.ami-annex-row > button {justify-self:start}
-    .ami-annex-row > a {display:inline-flex;align-items:center;min-height:44px;font-weight:700}
-    .ami-annex-current {line-height:1.2;font:700 clamp(.95rem,3vw,1.2rem) Georgia,serif;color:#ffdc8b}
-    .ami-annex-menu-toggle {justify-self:end!important;border:1px solid #987237;background:#151019;color:#ffd06a;border-radius:.45rem;font:700 .9rem system-ui,sans-serif;min-height:44px;padding:.2rem .55rem;cursor:pointer;white-space:nowrap}
-    .ami-annex-menu {margin:0;padding:.4rem .65rem .7rem;list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:.3rem .65rem;max-height:42vh;overflow:auto}
-    .ami-annex-menu[hidden] {display:none}
-    .ami-annex-menu a {display:inline-flex;align-items:center;min-height:40px;padding:0 .35rem}
-    .ami-annex-menu [aria-current="page"] {color:#fff2d5;text-decoration-thickness:2px}
+    .ami-annex-footer {box-sizing:border-box;color:#f3e8cf;background:#0b0b11;font-family:Jost,system-ui,sans-serif;text-align:center}
+    .ami-annex-footer a {color:#ffd06a;text-underline-offset:.22em}
+    [data-ami-annex-chrome] #amiBarre.ami-annex-bar {top:var(--ami-annex-host-top,0px);z-index:101;max-height:46vh;hyphens:none;overflow-wrap:normal;word-break:normal;letter-spacing:0;text-transform:none}
+    [data-ami-annex-chrome] #amiBarre :is(a,button,span) {hyphens:none;text-transform:none;text-shadow:none}
+    [data-ami-annex-chrome] #amiBarre.ami-annex-bar > :is(.coin,.coin-zoom) {margin:0}
+    [data-ami-annex-chrome] #amiBarre #amiPlein.actif {background:var(--noir);border-color:var(--or-somb);box-shadow:none;filter:none}
+    [data-ami-annex-chrome] #amiBarre #amiZoomV {display:none}
+    [data-ami-annex-chrome] #amiBarre a[aria-current="page"] {color:var(--or-pale);text-decoration:underline;text-underline-offset:.2em}
+    .ami-annex-progress {position:absolute;inset:0 0 auto;height:3px;pointer-events:none}
+    .ami-annex-progress span {display:block;height:100%;background:linear-gradient(90deg,var(--rubis) 0%,var(--moldavite) 34%,var(--or) 72%,var(--or-pale) 100%);box-shadow:0 0 8px rgba(255,197,69,.4);transform:scaleX(0);transform-origin:left}
+    [data-ami-annex-chrome]:fullscreen,[data-ami-annex-chrome].ami-annex-faux {overflow:auto!important;background:#09090e;width:100%;max-width:none}
+    [data-ami-annex-chrome].ami-annex-faux {position:fixed!important;inset:0;z-index:2147483000;margin:0}
+    html.ami-annex-lock {overflow:hidden}
+    @media(max-width:390px) {
+      [data-ami-annex-chrome] #amiBarre .dir .p-ti {white-space:normal;text-wrap:balance}
+      [data-ami-annex-chrome] #amiBarre .dir .sub {white-space:normal}
+    }
     .ami-annex-footer {border-block-start:1px solid #766025;padding:1.25rem .75rem 1.5rem}
     .ami-annex-footer p {margin:.3rem 0}
     .ami-annex-footer-title {font:700 clamp(1.15rem,4vw,1.5rem) Georgia,serif;color:#ffe0a0}
@@ -71,6 +75,8 @@
 
   const readingCSS = `
     html.ami-annex-reading {color-scheme:dark}
+    html.ami-annex-high-contrast {filter:contrast(1.3)}
+    @media (prefers-contrast:more) {html.ami-annex-high-contrast {filter:contrast(1.2)}}
     .ami-annex-reading :is(h1,h2,h3,summary) {overflow-wrap:anywhere}
     .ami-annex-reading :is(h1,h2) {text-wrap:balance}
     details.ami-annex-chapter {box-sizing:border-box;border:1px solid #766025;border-radius:.55rem;background:#101018;color:#efe8d7;margin:.65rem 0;min-width:0}
@@ -139,10 +145,90 @@
     return pledge;
   }
 
+  function navigationLink(slug, embedded) {
+    const webSlug = siteRoutes[slug] || (slug === 'ami-lunion-du-tout' ? 'union-du-tout' : slug);
+    return embedded && slug !== 'ami-tuto-esprit-critique'
+      ? web + webSlug + '/' : pages + (slug === 'ami' ? '' : slug+'/');
+  }
+
+  function configureDrawers(doc, nav, config) {
+    const heart = nav.querySelector('#amiCoeur');
+    const doors = [...nav.querySelectorAll('.porte[data-c]')];
+    const setDoor = (door, open) => {
+      const drawer = nav.querySelector('.tiroir[data-c="'+door.dataset.c+'"]');
+      door.setAttribute('aria-expanded',String(open));
+      drawer?.classList.toggle('on',open);
+    };
+    let animation;
+    function setOpen(open) {
+      nav.classList.toggle('replie',!open);
+      heart.setAttribute('aria-expanded',String(open));
+      heart.title = open ? '❤️‍🔥 Refermer — ne laisser que le cœur'
+        : '❤️‍🔥 Éclore — le nom, Le Temple, La Forêt, L’Atelier';
+      if (open) {
+        clearTimeout(animation);
+        nav.classList.add('fleurit');
+        animation = setTimeout(() => nav.classList.remove('fleurit'),700);
+      } else {
+        doors.forEach(door => setDoor(door,false));
+      }
+    }
+    heart.addEventListener('click',() => setOpen(nav.classList.contains('replie')));
+    nav.addEventListener('keydown',event => {
+      if (event.key !== 'Escape' || nav.classList.contains('replie')) return;
+      setOpen(false);
+      heart.focus();
+    });
+    doors.forEach(door => {
+      const drawer = nav.querySelector('.tiroir[data-c="'+door.dataset.c+'"]');
+      drawer.id = 'ami-annex-drawer-'+door.dataset.c;
+      door.setAttribute('aria-controls',drawer.id);
+      door.addEventListener('click',() => setDoor(door,!drawer.classList.contains('on')));
+    });
+    for (const tome of nav.querySelectorAll('button.m[data-p]')) {
+      const volumes = nav.querySelector('.vols[data-p="'+tome.dataset.p+'"]');
+      tome.setAttribute('aria-expanded','false');
+      tome.addEventListener('click',() => {
+        const open = tome.classList.toggle('on');
+        tome.setAttribute('aria-expanded',String(open));
+        volumes?.classList.toggle('on',open);
+      });
+    }
+    for (const anchor of nav.querySelectorAll('a[data-ami-route]')) {
+      anchor.href = navigationLink(anchor.dataset.amiRoute,config.embedded);
+    }
+    const drawer = nav.querySelector('.tiroir[data-c="annexes"] .plq');
+    // Keep the Charter's Annexes drawer and add the other public annex routes.
+    const listed = new Map([
+      ['📊 BenchMark · Étude Comparative','ami-benchmark'],
+      ['🔏 Registre des Mesures','ami-registre'],
+      ['📏 Campagnes de Mesures IA','ami-tests'],
+      ['🧰 Catalogue des Outils aMi','ami-catalogue-des-outils'],
+    ]);
+    const present = new Set();
+    for (const anchor of drawer.querySelectorAll('a[href]')) {
+      const slug = listed.get(anchor.title);
+      if (!slug) continue;
+      present.add(slug);
+      anchor.href = navigationLink(slug,config.embedded);
+      if (slug === config.slug) anchor.setAttribute('aria-current','page');
+    }
+    const row = drawer.appendChild(element(doc,'div','ln anx-ln'));
+    for (const [slug,label] of annexes) {
+      if (present.has(slug)) continue;
+      if (row.childNodes.length) row.append(element(doc,'span','op anx-s','•'));
+      const anchor = link(doc,label,navigationLink(slug,config.embedded),slug === config.slug);
+      anchor.className = 'm';
+      row.append(anchor);
+    }
+  }
+
   function makeChrome(doc, config) {
     const inWebnode = !!config.embedded;
-    const nav = element(doc, 'nav', 'ami-annex-bar');
-    nav.setAttribute('aria-label', 'Navigation du Protocole aMi');
+    const fragment = doc.createElement('template');
+    fragment.innerHTML = charteNavigation.html;
+    const nav = fragment.content.firstElementChild;
+    configureDrawers(doc,nav,config);
     const progress = element(doc, 'div', 'ami-annex-progress');
     progress.setAttribute('role', 'progressbar');
     progress.setAttribute('aria-label', 'Progression de lecture');
@@ -150,36 +236,7 @@
     progress.setAttribute('aria-valuemax', '100');
     progress.setAttribute('aria-valuenow', '0');
     const fill = progress.appendChild(element(doc, 'span'));
-    const row = element(doc, 'div', 'ami-annex-row');
-    row.append(link(doc, '❤️‍🔥 aMi', inWebnode ? web + 'ami/' : pages));
-    row.append(element(doc, 'span', 'ami-annex-current', config.label));
-    const toggle = row.appendChild(element(doc, 'button', 'ami-annex-menu-toggle', '☰ Annexes'));
-    toggle.type = 'button';
-    toggle.setAttribute('aria-expanded', 'false');
-    const menu = element(doc, 'ul', 'ami-annex-menu');
-    menu.id = 'ami-annex-navigation';
-    menu.hidden = true;
-    toggle.setAttribute('aria-controls', menu.id);
-    const routes = [['ami-charte', '⚖️ Charte'], ...annexes];
-    for (const [slug, text] of routes) {
-      const item = menu.appendChild(element(doc, 'li'));
-      const url = inWebnode && slug !== 'ami-tuto-esprit-critique'
-        ? web + (siteRoutes[slug] || slug) + '/'
-        : pages + slug + '/';
-      item.append(link(doc, text, url, slug === config.slug));
-    }
-    const setOpen = open => {
-      menu.hidden = !open;
-      toggle.setAttribute('aria-expanded', String(open));
-    };
-    toggle.addEventListener('click', () => setOpen(menu.hidden));
-    nav.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && !menu.hidden) {
-        setOpen(false);
-        toggle.focus();
-      }
-    });
-    nav.append(progress,row,menu);
+    nav.prepend(progress);
     const footer = element(doc, 'footer', 'ami-annex-footer');
     footer.append(element(doc, 'p', 'ami-annex-footer-title', config.label));
     footer.append(element(doc, 'p', '', 'Protocole de ConScience aMi · Agdistys · Diane Serant'));
@@ -213,10 +270,146 @@
     return Math.ceil(bottom);
   }
 
+  function scrollSurface(host) {
+    const doc = host.ownerDocument;
+    return doc.fullscreenElement === host || host.classList.contains('ami-annex-faux') ? host : null;
+  }
+
+  function controls(host, chrome, schedule, config) {
+    const doc = host.ownerDocument;
+    const win = doc.defaultView;
+    const nav = chrome.nav;
+    const contrast = nav.querySelector('#amiContraste');
+    const reading = nav.querySelector('#amiLecture');
+    const full = nav.querySelector('#amiPlein');
+    const steps = [.9,1,1.15,1.3,1.5,1.75,2,2.4];
+    let zoom = 1;
+    let fullscreenScroll;
+    const buttonState = (button,on) => {
+      button.classList.toggle('actif',on);
+      button.setAttribute('aria-pressed',String(on));
+    };
+    const readingDoc = () => host.querySelector('.ami-annex-frame')?.contentDocument || doc;
+    const openForReading = new Set();
+    reading.addEventListener('click',() => {
+      const on = reading.getAttribute('aria-pressed') === 'false';
+      buttonState(reading,on);
+      if (on) {
+        const content = readingDoc();
+        const chapters = [...content.querySelectorAll('.amim-chapter,.ami-annex-chapter,details.chapter')];
+        const fallback = [...content.querySelectorAll('details')].filter(fold =>
+          !fold.parentElement.closest('details') && !fold.matches('.record'),
+        );
+        for (const fold of chapters.length ? chapters : fallback) {
+          if (!fold.open && fold.getClientRects().length) {
+            openForReading.add(fold);
+            fold.open = true;
+          }
+        }
+      } else {
+        for (const fold of openForReading) fold.open = false;
+        openForReading.clear();
+      }
+      schedule();
+    });
+    function setContrast(on) {
+      host.classList.toggle('ami-contraste',on);
+      readingDoc().documentElement.classList.toggle('ami-annex-high-contrast',on);
+      buttonState(contrast,on);
+    }
+    contrast.addEventListener('click',() => {
+      const on = !host.classList.contains('ami-contraste');
+      setContrast(on);
+      try { win.localStorage.setItem('ami-contraste',on?'1':'0'); } catch {}
+    });
+    function initialContrast() {
+      let preference = null;
+      try { preference = win.localStorage.getItem('ami-contraste'); } catch {}
+      setContrast(preference === null ? win.matchMedia('(prefers-contrast: more)').matches : preference === '1');
+    }
+    initialContrast();
+    host.addEventListener('load',event => {
+      if (event.target.matches?.('.ami-annex-frame')) initialContrast();
+    },true);
+
+    function updateFullscreen() {
+      const active = !!scrollSurface(host);
+      host.classList.toggle('ami-plein',active);
+      buttonState(full,active);
+      full.textContent = active ? '✕' : '⛶';
+      full.setAttribute('aria-label',active ? 'Quitter le plein écran' : 'Plein écran');
+      const content = readingDoc();
+      if (content !== doc) content.documentElement.style.zoom = active ? steps[zoom] : '';
+      else host.style.zoom = active && zoom !== 1 ? steps[zoom] : '';
+      const scroll = fullscreenScroll;
+      if (active && scroll && !scroll.started) {
+        scroll.started = true;
+        win.requestAnimationFrame(() => {
+          if (!scrollSurface(host)) return;
+          host.scrollTop = scroll.start;
+          scroll.latest = host.scrollTop;
+        });
+      } else if (!active && scroll) {
+        fullscreenScroll = null;
+        const top = scroll.page + scroll.latest - scroll.start;
+        win.requestAnimationFrame(() => win.scrollTo({top:Math.max(0,top),behavior:'instant'}));
+      }
+      schedule();
+      win.dispatchEvent(new win.Event('resize'));
+    }
+    function zoomBy(delta) {
+      zoom = Math.max(0,Math.min(steps.length-1,zoom+delta));
+      updateFullscreen();
+    }
+    nav.querySelector('#amiZoomM').addEventListener('click',() => zoomBy(-1));
+    nav.querySelector('#amiZoomP').addEventListener('click',() => zoomBy(1));
+    function leaveFallback() {
+      host.classList.remove('ami-annex-faux');
+      doc.documentElement.classList.remove('ami-annex-lock');
+      updateFullscreen();
+    }
+    host.addEventListener('scroll',() => {
+      if (fullscreenScroll?.started && scrollSurface(host)) fullscreenScroll.latest = host.scrollTop;
+    },{passive:true});
+    full.addEventListener('click',async () => {
+      if (doc.fullscreenElement === host) {
+        await doc.exitFullscreen().catch(() => {});
+        return;
+      }
+      if (host.classList.contains('ami-annex-faux')) {
+        leaveFallback();
+        return;
+      }
+      const page = win.scrollY;
+      const start = config.embedded ? Math.max(0,inset(doc,nav)-host.getBoundingClientRect().top) : page;
+      fullscreenScroll = {page,start,latest:start,started:false};
+      try {
+        await host.requestFullscreen();
+      } catch {
+        host.classList.add('ami-annex-faux');
+        doc.documentElement.classList.add('ami-annex-lock');
+      }
+      updateFullscreen();
+    });
+    doc.addEventListener('fullscreenchange',updateFullscreen);
+    doc.addEventListener('keydown',event => {
+      if (event.key === 'Escape' && host.classList.contains('ami-annex-faux')) leaveFallback();
+    });
+  }
+
   function mount(host, config) {
     const doc = host.ownerDocument;
     const win = doc.defaultView;
+    host.setAttribute('data-ami-annex-chrome','');
+    style(doc,'ami-annex-charte-css',charteNavigation.css);
     style(doc, 'ami-annex-chrome', chromeCSS);
+    if (!doc.querySelector('link[data-ami-annex-fonts]')) {
+      const fonts = element(doc,'link');
+      fonts.rel = 'stylesheet';
+      fonts.href = charteNavigation.fonts;
+      fonts.setAttribute('data-ami-annex-fonts','');
+      doc.head.append(fonts);
+    }
     if (config.embedded) {
       // Webnode wrappers with overflow hidden create an unintended sticky container.
       for (let box = host.parentElement; box && box !== doc.body; box = box.parentElement) {
@@ -231,11 +424,14 @@
     let scheduled = false;
     function update() {
       scheduled = false;
-      const top = inset(doc, chrome.nav);
+      const surface = scrollSurface(host);
+      const top = surface ? 0 : inset(doc, chrome.nav);
       chrome.nav.style.setProperty('--ami-annex-host-top', top+'px');
       const bounds = host === doc.body ? doc.documentElement.getBoundingClientRect() : host.getBoundingClientRect();
-      const max = Math.max(1, bounds.height - win.innerHeight + top);
-      const ratio = Math.max(0, Math.min(1, (top - bounds.top) / max));
+      const max = surface ? Math.max(1,surface.scrollHeight-surface.clientHeight)
+        : Math.max(1,bounds.height-win.innerHeight+top);
+      const distance = surface ? surface.scrollTop : top-bounds.top;
+      const ratio = Math.max(0,Math.min(1,distance/max));
       chrome.fill.style.transform = 'scaleX('+ratio+')';
       chrome.progress.setAttribute('aria-valuenow', String(Math.round(ratio * 100)));
       if (!config.embedded) {
@@ -249,8 +445,10 @@
       win.requestAnimationFrame(update);
     }
     win.addEventListener('scroll', schedule, {passive:true});
+    host.addEventListener('scroll',schedule,{passive:true});
     win.addEventListener('resize', schedule, {passive:true});
     new win.ResizeObserver(schedule).observe(chrome.nav);
+    controls(host,chrome,schedule,config);
     update();
     return chrome;
   }
@@ -334,6 +532,7 @@
     if (!doc?.body) return false;
     const host = frame.ownerDocument.defaultView;
     const body = doc.body;
+    const hostRoot = chrome.nav.parentElement;
     const rawRect = win.Element.prototype.getBoundingClientRect;
     const nativeInto = win.Element.prototype.scrollIntoView;
     const nativeScroll = win.scrollTo.bind(win);
@@ -409,7 +608,7 @@
     }
 
     function headerHeight() {
-      return inset(frame.ownerDocument,chrome.nav) + chrome.nav.offsetHeight;
+      return (scrollSurface(hostRoot) ? 0 : inset(frame.ownerDocument,chrome.nav)) + chrome.nav.offsetHeight;
     }
 
     function to(target, options={}) {
@@ -421,7 +620,11 @@
       const pad = headerHeight() + innerOffset + 8;
       if (options.block === 'nearest' && top >= pad && top+bound.height <= host.innerHeight) return;
       const shift = options.block === 'center' ? Math.max(0, (host.innerHeight-pad-bound.height)/2) : 0;
-      host.scrollTo({top:Math.max(0,host.scrollY + top - pad - shift),behavior:options.behavior || 'auto'});
+      const surface = scrollSurface(hostRoot);
+      (surface || host).scrollTo({
+        top:Math.max(0,(surface?.scrollTop ?? host.scrollY)+top-pad-shift),
+        behavior:options.behavior || 'auto',
+      });
     }
 
     // Preserve internal jump logic while the outer Webnode page owns vertical scrolling.
@@ -437,8 +640,9 @@
     win.scrollTo = function (x, y) {
       if (doc.fullscreenElement) return nativeScroll(x,y);
       const target = typeof x === 'object' ? x.top : y;
-      host.scrollTo({
-        top:Math.max(0,host.scrollY + frame.getBoundingClientRect().top + (target || 0) - headerHeight()),
+      const surface = scrollSurface(hostRoot);
+      (surface || host).scrollTo({
+        top:Math.max(0,(surface?.scrollTop ?? host.scrollY) + frame.getBoundingClientRect().top + (target || 0) - headerHeight()),
         behavior:typeof x === 'object' ? x.behavior || 'auto' : 'auto',
       });
     };
@@ -483,12 +687,13 @@
     host.addEventListener('hashchange', () => moveHash(host.location.hash));
     host.addEventListener('popstate', () => moveHash(host.location.hash));
     host.addEventListener('scroll', schedule, {passive:true});
+    hostRoot.addEventListener('scroll',schedule,{passive:true});
     host.addEventListener('resize', schedule, {passive:true});
     win.addEventListener('scroll', () => {
       if (!ready || doc.fullscreenElement || !win.scrollY) return;
       const y = win.scrollY;
       nativeScroll({top:0,left:0,behavior:'instant'});
-      host.scrollBy({top:y,behavior:'instant'});
+      (scrollSurface(hostRoot)||host).scrollBy({top:y,behavior:'instant'});
     },{passive:true});
     new win.ResizeObserver(schedule).observe(body);
     doc.addEventListener('toggle',schedule,true);
