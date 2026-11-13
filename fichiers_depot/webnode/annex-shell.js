@@ -53,6 +53,11 @@
     }
     [data-ami-annex-chrome] .ami-annex-footer {padding-bottom:1.4rem;hyphens:none}
     [data-ami-annex-chrome] .ami-annex-footer .ap-fin {padding-inline:0}
+    [data-ami-annex-chrome] .ami-annex-footer .ap-legal span span {display:inline}
+    [data-ami-annex-chrome] .ami-annex-footer .f-col .f-act b {
+      background-clip:text!important;-webkit-background-clip:text!important;
+      -webkit-text-fill-color:transparent;
+    }
     :is(.ami-annex-bar,.ami-annex-footer) :is(a,button):focus-visible {outline:2px solid #ffd06a;outline-offset:3px}
     @media print {.ami-annex-bar{display:none!important}}
   `;
