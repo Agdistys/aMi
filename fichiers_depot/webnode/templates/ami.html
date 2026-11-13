@@ -358,6 +358,15 @@
     );
     host.append(fragment, nativeStyle);
     placeholder.replaceWith(host);
+    function releaseStickyAncestors() {
+      for (let box = host.parentElement; box && box !== document.body; box = box.parentElement) {
+        const css = getComputedStyle(box);
+        if (css.overflowX === 'hidden') box.style.overflowX = 'clip';
+        if (css.overflowY === 'hidden') box.style.overflowY = 'visible';
+      }
+    }
+    releaseStickyAncestors();
+    window.addEventListener('load', releaseStickyAncestors, {once:true});
     const voiceButtons = [...host.querySelectorAll('#preface .voix-ouvrir')];
     for (const button of voiceButtons) {
       button.addEventListener('click', () => {

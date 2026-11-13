@@ -12,6 +12,66 @@ HEAD = re.compile(r'<head(?:\s[^>]*)?>', re.I)
 CANONICAL = re.compile(r'<link\b[^>]*\brel=["\']canonical["\'][^>]*>', re.I)
 TAG = re.compile(r'<(?:script|style|textarea)\b[^>]*>[\s\S]*?</(?:script|style|textarea)\s*>|<!--.*?-->|<[a-z][\w:-]*(?:[^>"\']|"[^"]*"|\'[^\']*\')*>', re.I | re.S)
 ATTR = re.compile(r'(\b(?:href|src|action|poster|data)\s*=\s*)(["\'])(.*?)\2', re.I | re.S)
+NAVBAR = re.compile(r'<nav\b[^>]*\bid=["\']amiBarre["\'][^>]*>[\s\S]*?</nav>', re.I)
+ENCODED_NAVBAR = re.compile(
+    r'&lt;nav\b(?:(?!&gt;).)*\bid=&quot;amiBarre&quot;(?:(?!&gt;).)*&gt;[\s\S]*?&lt;/nav&gt;'
+)
+LEGACY_NAV_LINKS = {
+    'benchmark': 'ami-benchmark',
+    'catalogue-des-outils-ami': 'ami-catalogue-des-outils',
+    'ami-tests': 'ami-tests',
+}
+WEBNODE_NAV_ROUTES = {'ami-tests': 'ami-mesures-ia'}
+SUBLIMATION_LINK = 'https://www.agdistys.fr/methodologie-sublimation/'
+CURRENT_SUBLIMATION_LINK = 'https://www.agdistys.fr/sublimation/'
+COMPACT_NAV_VOLUMES = {'ami-rencontre', 'ami-justice'}
+COMPACT_NAV_CSS = """@media (hover:hover) and (pointer:fine) {
+  #amiBarre#amiBarre .croix .porte,
+  #amiBarre#amiBarre .tiroir[data-c="foret"] button.m {min-height:0!important}
+}"""
+
+
+def navbar_routes(routes):
+    return {
+        'files': {re.split(r'_V[0-9]', path, maxsplit=1)[0]: slug for slug, path in routes.items()},
+        'pages': {slug: slug for slug in routes},
+        'legacy': LEGACY_NAV_LINKS,
+        'webnode': WEBNODE_NAV_ROUTES,
+    }
+
+
+def without_door_titles(nav):
+    def button(match):
+        tag = match[0]
+        if not re.search(r'\bclass=["\'][^"\']*\bporte\b', tag):
+            return tag
+        return re.sub(r'\s+title=(["\']).*?\1', '', tag)
+
+    return re.sub(r'<button\b[^>]*>', button, nav)
+
+
+def stable_navbar(html, routes, target):
+    def link(match):
+        if match[1].split('=')[0].strip().lower() != 'href':
+            return match[0]
+        value = unescape(match[3])
+        if value.startswith(('#', '?')):
+            return match[0]
+        url = urlsplit(urljoin(PAGES + target, value))
+        if url.netloc == 'agdistys.github.io' and url.path.startswith('/aMi/'):
+            relative = url.path.removeprefix('/aMi/')
+            slug = routes['files'].get(re.split(r'_V[0-9]', relative, maxsplit=1)[0])
+            slug = slug or routes['pages'].get(relative.strip('/'))
+        elif url.netloc in {'agdistys.fr', 'www.agdistys.fr'}:
+            slug = routes['legacy'].get(url.path.strip('/'))
+        else:
+            slug = None
+        if not slug:
+            return match[0]
+        suffix = ('?' + url.query if url.query else '') + ('#' + url.fragment if url.fragment else '')
+        return match[1] + match[2] + escape(href(slug) + suffix, quote=True) + match[2]
+
+    return NAVBAR.sub(lambda m: ATTR.sub(link, without_door_titles(m[0])), html)
 
 
 class Excerpt(HTMLParser):
@@ -133,10 +193,14 @@ def webnode_block(bootstrap, title, description, opening, slug, reading):
 def publish(source, site, routes, index, bootstrap):
     directory = site/'webnode/blocs'
     directory.mkdir(parents=True, exist_ok=True)
-    for slug, path in {'ami': index, **routes}.items():
+    public_routes = {'ami': index, **routes}
+    navigation = navbar_routes(public_routes)
+    for slug, path in public_routes.items():
         target = REGISTER if slug == 'ami-registre' else path
         built = site/target
         html = canonicalize(built.read_text(), slug)
+        if slug in {'ami-initiation', 'ami-lunion-du-tout'}:
+            html = html.replace(f'href="{SUBLIMATION_LINK}"', f'href="{CURRENT_SUBLIMATION_LINK}"')
         summary = Excerpt()
         summary.feed(html)
         title = summary.title or next((text for tag, text in summary.blocks if tag == 'h1'), slug)
@@ -151,8 +215,15 @@ def publish(source, site, routes, index, bootstrap):
             blocks = from_markdown(md)
         elif slug == 'ami-registre':
             reading = PAGES + 'annexes/Registre_Index_Lecture.html'
-        alias_html = relocate(html, target)
+        alias_html = relocate(stable_navbar(html, navigation, target), target)
+        if slug in COMPACT_NAV_VOLUMES:
+            alias_html = HEAD.sub(lambda match: match[0] + '\n<style>' + COMPACT_NAV_CSS + '</style>', alias_html, count=1)
         if slug == 'ami-astroglobe':
+            alias_html = ENCODED_NAVBAR.sub(
+                lambda match: escape(stable_navbar(unescape(match[0]), navigation, target), quote=True),
+                alias_html,
+                count=1,
+            )
             preview = (f'<article><h1>{escape(title)}</h1><p><a href="{reading}">Lire la Version Texte</a></p>'
                        f'{excerpt(blocks, 4500)}</article>')
             alias_html = alias_html.replace('</body>', '<noscript>'+preview+'</noscript>\n</body>', 1)

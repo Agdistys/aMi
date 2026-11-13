@@ -9,7 +9,10 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse
 import json
 import re
-from public_reading import REGISTER, canonicalize, publish
+from public_reading import (
+    COMPACT_NAV_CSS, COMPACT_NAV_VOLUMES, CURRENT_SUBLIMATION_LINK, REGISTER,
+    SUBLIMATION_LINK, canonicalize, navbar_routes, publish, without_door_titles,
+)
 
 PUBLISHER = 'https://agdistys.github.io/aMi/'
 ROUTE = re.compile(r'/ami(?:-[a-z0-9]+(?:-[a-z0-9]+)*)?/')
@@ -170,6 +173,27 @@ def recover_volume_fetch(code):
       .catch(() => verifiedBytes(expected, 'reload'));""" + code[closing:]
 
 
+def adapt_navigation(code, slug, routes):
+    source = (Path(__file__).with_name('volume-navigation.js')).read_text().strip()
+    source = once(source, '/* __AMI_NAV_ROUTES__ */ null',
+                  json.dumps(routes, ensure_ascii=False, separators=(',', ':')))
+    base = 'sourceURL' if slug == 'ami-astroglobe' else 'base' if slug == 'ami' else 'expected'
+    if slug == 'ami-astroglobe':
+        marker = '    const cockpit = frame.contentDocument;'
+        return once(code, marker, marker + '\n' + source + f'\n    tuneNavigation(cockpit, {base});')
+    marker = "    for (const style of fragment.querySelectorAll('style'))"
+    prefix = source + f'\n    tuneNavigation(fragment, {base});\n'
+    if slug in {'ami-initiation', 'ami-lunion-du-tout'}:
+        prefix += (f'    for (const link of fragment.querySelectorAll(\'a[href="{SUBLIMATION_LINK}"]\')) '
+                   f'link.href = "{CURRENT_SUBLIMATION_LINK}";\n')
+    if slug in COMPACT_NAV_VOLUMES:
+        css = COMPACT_NAV_CSS.replace('#amiBarre#amiBarre', '#ami-volume-webnode #amiBarre#amiBarre')
+        # Insert after style isolation so the selectors can start at the host itself.
+        style_marker = '    style.textContent = `\n'
+        code = once(code, style_marker, style_marker + css + '\n')
+    return once(code, marker, prefix + marker)
+
+
 def adapter_bytes(code):
     scripts = [m for m in re.finditer(r'<script\b([^>]*)>([\s\S]*?)</script>',code,re.I)
                if (kind := re.search(r'\btype\s*=\s*["\']([^"\']+)',m[1])) is None or kind[1] in JAVASCRIPT_TYPES]
@@ -276,7 +300,7 @@ def charte_navigation(raw, routes, index):
             raise ValueError('Cible du menu canonique absente : '+path)
         return f'data-ami-route="{slug}" href="{PUBLISHER + ("" if slug == "ami" else slug+"/")}"'
 
-    markup = re.sub(r'href="\.\./(volumes_protocole/[^"]+)"', route_link, navbar[0])
+    markup = re.sub(r'href="\.\./(volumes_protocole/[^"]+)"', route_link, without_door_titles(navbar[0]))
     markup = re.sub(
         r'href="\.\./(ami-[a-z0-9-]+)/"', lambda m:f'data-ami-route="{m[1]}" href="{PUBLISHER+m[1]}/"',
         markup,
@@ -337,6 +361,7 @@ def main():
     routes = read_routes(args.source)
     volumes = {slug:path for slug,path in routes.items() if path.startswith('volumes_protocole/')}
     volumes = {'ami':index_target(args.source),**volumes}
+    navigation_routes = navbar_routes({'ami': volumes['ami'], **routes})
     if args.templates:
         if args.templates.is_dir():
             blocks = {'code-'+file.stem:file.read_text().strip() for file in args.templates.glob('*.html')}
@@ -370,14 +395,7 @@ def main():
             code = adapt_astro(code,path,raw)
         else:
             code = adapt_generic(code,slug,path,raw)
-        if slug == 'ami-lunion-du-tout':
-            # Match versioned navbar links by their charted filename stem.
-            volume_links = {
-                re.split(r'_V[0-9]', source, maxsplit=1)[0]: key
-                for key, source in volumes.items()
-            }
-            code = once(code, '/* __AMI_UNION_VOLUME_LINKS__ */ {}',
-                        json.dumps(volume_links, ensure_ascii=False))
+        code = adapt_navigation(code, slug, navigation_routes)
         code = compatible_css(recover_volume_fetch(code))
         entries[route] = native_entry(
             code, path, raw, assets,
