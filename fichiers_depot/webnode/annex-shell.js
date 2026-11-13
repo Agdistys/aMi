@@ -213,6 +213,14 @@
     const doc = host.ownerDocument;
     const win = doc.defaultView;
     style(doc, 'ami-annex-chrome', chromeCSS);
+    if (config.embedded) {
+      // Webnode wrappers with overflow hidden create an unintended sticky container.
+      for (let box = host.parentElement; box && box !== doc.body; box = box.parentElement) {
+        const css = win.getComputedStyle(box);
+        if (css.overflowX === 'hidden') box.style.overflowX = 'clip';
+        if (css.overflowY === 'hidden') box.style.overflowY = 'visible';
+      }
+    }
     const chrome = makeChrome(doc, config);
     host.prepend(chrome.nav);
     host.append(chrome.footer);
@@ -263,7 +271,11 @@
     }
   }
 
-  function reveal(target) {
+  function reveal(target, openChapter = false) {
+    if (openChapter) {
+      const own = target.querySelector(':scope > details:is(.amim-chapter,.ami-annex-chapter)');
+      if (own) own.open = true;
+    }
     const summary = target.closest('summary');
     let fold = target.closest('details');
     if (fold && summary?.parentElement === fold) fold = fold.parentElement?.closest('details');
@@ -432,7 +444,17 @@
     }
     function moveHash(hash) {
       const target = targetByHash(hash);
-      if (target) to(target);
+      if (!target) return;
+      reveal(target,true);
+      to(target,{behavior:'instant'});
+      // The site menu may switch to its fixed height after the initial jump.
+      const jumpedY = host.scrollY;
+      host.setTimeout(() => {
+        if (host.location.hash !== hash || Math.abs(host.scrollY-jumpedY) > 8) return;
+        const top = frame.getBoundingClientRect().top + rawRect.call(target).top;
+        const min = headerHeight() + innerOffset + 8;
+        if (top >= min-96 && top < min-2) to(target,{behavior:'instant'});
+      },220);
     }
     doc.addEventListener('click', event => {
       if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey || event.button) return;
@@ -444,7 +466,7 @@
         if (!target) return;
         event.preventDefault();
         if (host.location.hash !== href) host.history.pushState(null,'',href);
-        to(target);
+        moveHash(href);
         return;
       }
       // Keep explicit new-tab links and downloads, and pass normal clicks to the site.
@@ -485,7 +507,7 @@
         let target;
         try { target = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch { return; }
         if (target) {
-          reveal(target);
+          reveal(target,true);
           target.style.scrollMarginTop = chrome.nav.offsetHeight+8+'px';
           target.scrollIntoView();
         }
