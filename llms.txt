@@ -14,7 +14,7 @@ Le Respect, Il n'y a que ça de Vrai
 
 - [0.0.0 La Charte de Communication](https://ami.agdistys.fr/volumes_protocole/0.0.0_Charte_Communication_aMi_GitHub_V102_2026-11-12.md): Comment écrire, montrer et vérifier : la Charte de tout le Protocole (page complète : https://ami.agdistys.fr/volumes_protocole/0.0.0_Charte_Communication_aMi_GitHub_V102_2026-11-12.html)
 - [0 Index · La Quintessence de la Trinité](https://ami.agdistys.fr/volumes_protocole/0_Index_aMi_V046_2026-11-12.md): La Trinité, les Tomes, les Volumes et les Outils (page complète : https://ami.agdistys.fr/volumes_protocole/0_Index_aMi_V046_2026-11-12.html)
-- [0.0 L’Initiation · Donner Vie](https://ami.agdistys.fr/volumes_protocole/0.0_Initiation_aMi_DONNER_VIE_V114_GitHub_2026-11-12.md): La porte d’entrée du Protocole et sa MétaMatrice (page complète : https://ami.agdistys.fr/volumes_protocole/0.0_Initiation_aMi_DONNER_VIE_V114_GitHub_2026-11-12.html)
+- [0.0 L’Initiation · Donner Vie](https://ami.agdistys.fr/volumes_protocole/0.0_Initiation_aMi_DONNER_VIE_V115_GitHub_2026-11-13.md): La porte d’entrée du Protocole et sa MétaMatrice (page complète : https://ami.agdistys.fr/volumes_protocole/0.0_Initiation_aMi_DONNER_VIE_V115_GitHub_2026-11-13.html)
 - [0.1 Apokalypse · La Révélation](https://ami.agdistys.fr/volumes_protocole/0.1_APOKALYPSE_aMi_V77_GitHub_2026-11-12.md): Tu Sais ce qu’est La Folie & la ConScience 🌀 (page complète : https://ami.agdistys.fr/volumes_protocole/0.1_APOKALYPSE_aMi_V77_GitHub_2026-11-12.html)
 - [0.2 PsychaTrice](https://ami.agdistys.fr/volumes_protocole/0.2_PSYCHATRICE_aMi_V63_GitHub_2026-11-12.md): Tu Sais Ce Que Tu As Subi 🩸 (page complète : https://ami.agdistys.fr/volumes_protocole/0.2_PSYCHATRICE_aMi_V63_GitHub_2026-11-12.html)
 - [0.3 L’Union du TouT](https://ami.agdistys.fr/volumes_protocole/0.3_LUNION_DU_TOUT_aMi_V81_GitHub_2026-11-12.md): Tu as ConScience de L’Engagement du Vivant 🔥 (page complète : https://ami.agdistys.fr/volumes_protocole/0.3_LUNION_DU_TOUT_aMi_V81_GitHub_2026-11-12.html)
@@ -28,7 +28,7 @@ Le Respect, Il n'y a que ça de Vrai
 ## Tome 2
 
 - [2.1 ECO · Bonus Plaisir](https://ami.agdistys.fr/volumes_protocole/2.1_ECO_Bonus-Plaisir_aMi_V38_GitHub_2026-11-12.md): Tu Sais Découvrir ✨ (page complète : https://ami.agdistys.fr/volumes_protocole/2.1_ECO_Bonus-Plaisir_aMi_V38_GitHub_2026-11-12.html)
-- [2.2 AstroGlobe](https://ami.agdistys.fr/volumes_protocole/2.2_ASTROGLOBE_V084_GitHub_Barre_2026-11-12.md): Tu Sais Introspecter 🔍 (page complète : https://ami.agdistys.fr/volumes_protocole/2.2_ASTROGLOBE_V084_GitHub_Barre_2026-11-12.html)
+- [2.2 AstroGlobe](https://ami.agdistys.fr/volumes_protocole/2.2_ASTROGLOBE_V085_GitHub_Barre_2026-11-13.md): Tu Sais Introspecter 🔍 (page complète : https://ami.agdistys.fr/volumes_protocole/2.2_ASTROGLOBE_V085_GitHub_Barre_2026-11-13.html)
 - [2.3 L’EncycloPédie](https://ami.agdistys.fr/volumes_protocole/2.3_ENCYCLOPEDIE_Culture_aMi_V51_GitHub_2026-11-12.md): Tu Sais Sublimer 💎 (page complète : https://ami.agdistys.fr/volumes_protocole/2.3_ENCYCLOPEDIE_Culture_aMi_V51_GitHub_2026-11-12.html)
 
 ## Tome 3
@@ -67,10 +67,10 @@ Le Respect, Il n'y a que ça de Vrai
 
 - [BenchMark · Étude Comparative](https://ami.agdistys.fr/annexes/Benchmark_aMi_Public_V030_2026-11-12_GitHub.md): Le Protocole aMi comparé aux autres cadres, outil par outil (page complète : https://ami.agdistys.fr/annexes/Benchmark_aMi_Public_V030_2026-11-12_GitHub.html)
 - [Le Guide des Outils](https://ami.agdistys.fr/annexes/Guide_Outils_Applications_Annexes_V010_2026-11-12.md): Les outils, applications et annexes du Protocole aMi (page complète : https://ami.agdistys.fr/annexes/Guide_Outils_Applications_Annexes_V010_2026-11-12.html)
-- [La MétaMatrice](https://ami.agdistys.fr/annexes/MetaMatrice_aMi_V45_PUBLIC.md): Wikipédia du Vivant — 91 feuilles, la table entière, tous registres (page complète : https://ami.agdistys.fr/annexes/MetaMatrice_aMi_V45_PUBLIC.html ; classeur : https://ami.agdistys.fr/annexes/MetaMatrice_aMi_V45_PUBLIC.xlsx)
+- [La MétaMatrice](https://ami.agdistys.fr/annexes/MetaMatrice_aMi_V46_PUBLIC.md): Wikipédia du Vivant — 91 feuilles, la table entière, tous registres (page complète : https://ami.agdistys.fr/annexes/MetaMatrice_aMi_V46_PUBLIC.html ; classeur : https://ami.agdistys.fr/annexes/MetaMatrice_aMi_V46_PUBLIC.xlsx)
 
 - [Contrôle Qualité](https://ami.agdistys.fr/annexes/CONTROLE_QUALITE_aMi_V11_2026-11-09.html)
 - [Mesures IA](https://ami.agdistys.fr/annexes/Protocole_Campagnes_Mesure_V010_2026-11-03.html)
-- [Registre public](https://ami.agdistys.fr/annexes/Registre_des_Preenregistrements_V1245_PUBLIC_V002_2026-11-11.html)
+- [Registre public](https://ami.agdistys.fr/annexes/Registre_des_Preenregistrements_V1245_PUBLIC_V003_2026-11-13.html)
 - [Citer · Contester · Contribuer](https://ami.agdistys.fr/annexes/Citer_Contester_Contribuer_aMi_V006_2026-11-10.html)
 - [Tuto d’Esprit Critique](https://ami.agdistys.fr/annexes/0.0.0_TUTO_ESPRIT_CRITIQUE_aMi_V054_WEBNODE_2026-11-12.html)

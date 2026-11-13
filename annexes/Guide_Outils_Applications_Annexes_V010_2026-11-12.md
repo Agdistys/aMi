@@ -1,6 +1,6 @@
 # 🧰 Le Guide des Outils — Version Texte pour la lecture et les IA
 
-Source : Guide_Outils_Applications_Annexes_V010_2026-11-12.html · SHA-256 1627d3d5a88656bbcbeb50ad41130d9a8d15cc86a6b48ecb9f78bd9d265640cf
+Source : Guide_Outils_Applications_Annexes_V010_2026-11-12.html · SHA-256 2cb4671227836803c31b1835e0ae4c440770adf97238acfe3df529bc44626d59
 Ce fichier contient le texte éditorial du volume (titres, paragraphes, tableaux, fiches), sans scripts, styles ni images. Les widgets interactifs n’y fonctionnent pas : leurs textes et données éditoriales sont repris quand ils existent dans la page.
 Protocole de ConScience aMi · Agdistys · Diane Serant · Licence CC BY-SA 4.0 · https://agdistys.fr
 
