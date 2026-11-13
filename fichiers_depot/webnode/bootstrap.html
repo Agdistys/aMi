@@ -1,0 +1,69 @@
+<div data-ami-webnode-anchor>
+  <p role="status">Ouverture du Protocole aMi…</p>
+  <p data-ami-webnode-fallback hidden><a href="https://agdistys.github.io/aMi/">Ouvrir le Protocole aMi</a></p>
+  <noscript><a href="https://agdistys.github.io/aMi/">Ouvrir le Protocole aMi</a></noscript>
+  <script>
+  (async () => {
+    const current = document.currentScript;
+    const anchor = current.closest('[data-ami-webnode-anchor]');
+    if (!anchor || anchor.dataset.loading) return;
+    anchor.dataset.loading = 'true';
+    const status = anchor.querySelector('[role="status"]');
+    const fallback = anchor.querySelector('[data-ami-webnode-fallback]');
+    const base = new URL('https://agdistys.github.io/aMi/');
+    const catalogue = new URL('webnode/catalogue-v1.json',base);
+    const route = location.pathname.endsWith('/') ? location.pathname : location.pathname+'/';
+    const publicURL = value => {
+      const url = new URL(value,base);
+      if (url.origin !== base.origin || !url.pathname.startsWith(base.pathname) || url.username || url.password) throw Error('Adresse de lecture invalide.');
+      return url.href;
+    };
+    const link = entry => {
+      if (!entry || typeof entry.href !== 'string' || typeof entry.label !== 'string') throw Error('Lien du catalogue invalide.');
+      const a = document.createElement('a');
+      a.href = publicURL(entry.href);
+      a.textContent = entry.label;
+      return a;
+    };
+    try {
+      const response = await fetch(catalogue,{cache:'no-store',redirect:'error',credentials:'omit'});
+      if (!response.ok || response.url !== catalogue.href) throw Error('Catalogue indisponible.');
+      const data = await response.json();
+      if (data.schema !== 1 || !data.routes || !Object.hasOwn(data.routes,route)) throw Error('Cette page n’est pas dans le catalogue.');
+      const entry = data.routes[route];
+      if (entry.href) fallback.replaceChildren(link(entry));
+      if (entry.kind === 'link') { anchor.replaceChildren(link(entry)); return; }
+      if (entry.kind === 'links') {
+        if (!Array.isArray(entry.links) || entry.links.length > 50) throw Error('Liste d’annexes invalide.');
+        const list = document.createElement('ul');
+        for (const item of entry.links) {const li = document.createElement('li'); li.append(link(item)); list.append(li);}
+        anchor.replaceChildren(list);
+        return;
+      }
+      if (entry.kind !== 'native') throw Error('Type de page invalide.');
+      const adapter = entry.adapter;
+      const match = typeof adapter?.path === 'string' && /^webnode\/adapters\/([a-f0-9]{64})\.js$/.exec(adapter.path);
+      if (!match) throw Error('Intégrateur invalide.');
+      const digest = btoa(String.fromCharCode(...match[1].match(/../g).map(byte => parseInt(byte,16))));
+      if (adapter.integrity !== 'sha256-'+digest) throw Error('Empreinte de l’intégrateur invalide.');
+      const asset = document.createElement('script');
+      asset.crossOrigin = 'anonymous';
+      asset.integrity = adapter.integrity;
+      asset.src = publicURL(adapter.path);
+      if (current.nonce) asset.nonce = current.nonce;
+      await new Promise((resolve,reject) => {
+        const timer = setTimeout(() => {asset.remove();reject(Error('Chargement interrompu.'));},20000);
+        asset.addEventListener('load',() => {clearTimeout(timer);resolve();},{once:true});
+        asset.addEventListener('error',() => {clearTimeout(timer);reject(Error('Intégrateur indisponible.'));},{once:true});
+        anchor.append(asset);
+      });
+      if (anchor.isConnected) throw Error('L’intégrateur n’a pas ouvert la page.');
+    } catch (error) {
+      if (!anchor.isConnected) return;
+      status.textContent = 'Le contenu intégré est momentanément indisponible.';
+      fallback.hidden = false;
+      console.warn('Protocole aMi',error.message);
+    }
+  })();
+  </script>
+</div>

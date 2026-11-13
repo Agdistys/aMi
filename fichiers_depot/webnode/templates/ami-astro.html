@@ -1,0 +1,337 @@
+<div data-ami-volume-loader>
+  <p data-ami-volume-status role="status">Ouverture du volume aMi…</p>
+  <p data-ami-volume-fallback hidden><a href="https://agdistys.github.io/aMi/volumes_protocole/5.3_ASTRO_Espace-Temps_aMi_V58_GitHub_2026-11-12.html">Lire le volume sur GitHub Pages</a></p>
+  <script type="application/json" data-ami-volume-config>{"slug":"ami-astro","url":"https://agdistys.github.io/aMi/volumes_protocole/5.3_ASTRO_Espace-Temps_aMi_V58_GitHub_2026-11-12.html","sha256":"37905f958db73d2dbf9a1fab58f4501b3e3e14ebaa06bc6a31cf207229b2986b","bytes":2562922,"state":"candidate","root":"ami-vol-astro","downloads":["ency-dl-html"],"controls":{"top":["amiHaut"],"toc":["amiSommaire"],"search":["amiRech"]}}</script>
+  <script>(async () => {
+  const holder = document.currentScript.parentElement;
+  const cfg = JSON.parse(holder.querySelector('[data-ami-volume-config]').textContent);
+  if (location.pathname.replace(/\/$/, '') !== '/' + cfg.slug) {
+    holder.hidden = true;
+    return;
+  }
+  const status = holder.querySelector('[data-ami-volume-status]');
+  const scope = ':where(#ami-volume-webnode)';
+  const host = document.createElement('div');
+  host.id = 'ami-volume-webnode';
+  host.dataset.amiRoute = cfg.slug;
+
+  function selectors(value) {
+    const parts = [];
+    let start = 0, depth = 0, quote = '';
+    for (let i = 0; i < value.length; i++) {
+      const c = value[i];
+      if (c === '\\') { i++; continue; }
+      if (quote) { if (c === quote) quote = ''; continue; }
+      if (c === '"' || c === "'") quote = c;
+      else if (c === '(' || c === '[') depth++;
+      else if (c === ')' || c === ']') depth--;
+      else if (c === ',' && depth === 0) { parts.push(value.slice(start, i).trim()); start = i + 1; }
+    }
+    parts.push(value.slice(start).trim());
+    return parts;
+  }
+
+  function scoped(selector) {
+    selector = selector.replace(/^html\s+body(?=\s|[.#:[>+~]|$)/, 'body');
+    const root = selector.match(/^(:root|html|body)(?=$|[ .#:[>+~])(.*)$/);
+    if (!root) return scope + ' ' + selector;
+    const tail = root[2];
+    if (!tail || /^[\s>+~]/.test(tail)) return scope + tail;
+    const state = tail.match(/^\.(lecture|contraste|passe-[\w-]+|ami-[\w-]+)(?=[\s>+~]|$)/);
+    if (state) return root[1] + state[0] + ' ' + scope + tail.slice(state[0].length);
+    return scope + tail;
+  }
+
+  function isolate(css) {
+    const sheet = new CSSStyleSheet();
+    // Les shorthands avec var() perdent leur valeur dans CSSOM quand un longhand diffère.
+    const source = css.replace(/background\s*:\s*((?:linear-gradient\([^;{}]*var\([^;{}]*|var\(--or-metal\)))(?=;\s*(?:-webkit-)?background-(?:clip|size|position|repeat)\s*:)/g, 'background-image:$1');
+    sheet.replaceSync(source);
+    function render(rule) {
+      if (rule.type === CSSRule.STYLE_RULE) return selectors(rule.selectorText).map(scoped).join(',') + '{' + rule.style.cssText + '}';
+      if (rule.cssRules && [4, 12].includes(rule.type)) return rule.cssText.slice(0, rule.cssText.indexOf('{')) + '{' + Array.from(rule.cssRules, render).join('\n') + '}';
+      return rule.cssText;
+    }
+    return Array.from(sheet.cssRules, render).join('\n');
+  }
+
+  function addClosers(root) {
+    for (const details of root.querySelectorAll('details')) {
+      const summary = details.querySelector(':scope > summary');
+      if (!summary || details.querySelector(':scope > button[data-ami-close],:scope > button.br-fin')) continue;
+      const close = document.createElement('button');
+      close.type = 'button';
+      close.dataset.amiClose = '';
+      close.setAttribute('aria-label', 'Refermer ce volet');
+      close.textContent = '▴';
+      close.addEventListener('click', () => {
+        details.open = false;
+        summary.focus({ preventScroll: true });
+        const nav = host.querySelector('#amiBarre');
+        const top = nav?.getBoundingClientRect().bottom || 0;
+        const rect = summary.getBoundingClientRect();
+        if (rect.top < top || rect.bottom > innerHeight) summary.scrollIntoView({ block:'start', behavior:'instant' });
+      });
+      details.append(close);
+    }
+  }
+
+  try {
+    const expected = new URL(cfg.url);
+    if (expected.origin !== 'https://agdistys.github.io' || !expected.pathname.startsWith('/aMi/volumes_protocole/')) throw Error('Source invalide.');
+    const response = await fetch(expected, { redirect:'error', credentials:'omit', cache:'force-cache' });
+    if (!response.ok || response.url !== expected.href) throw Error('Le volume est indisponible.');
+    if (!crypto.subtle) throw Error('La vérification du volume exige une page HTTPS.');
+    const bytes = await response.arrayBuffer();
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    const hash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2,'0')).join('');
+    if (hash !== cfg.sha256 || bytes.byteLength !== cfg.bytes) throw Error('La version reçue ne correspond pas au bloc.');
+    const raw = new TextDecoder('utf-8', { fatal:true }).decode(bytes);
+    const source = new DOMParser().parseFromString(raw, 'text/html');
+    const fragment = document.createDocumentFragment();
+    fragment.append(...source.head.querySelectorAll('meta[name^="ami:"],style,link[rel="stylesheet"],link[rel="preconnect"],script'), ...source.body.childNodes);
+    const root = fragment.querySelector('#' + CSS.escape(cfg.root));
+    if (!root) throw Error('Le volume attendu est absent.');
+    // Keep the source section and heading nodes so section links still resolve.
+    for (const response of root.querySelectorAll('section.ami-volume-response')) {
+      const heading = response.querySelector(':scope > :is(h2,h3)');
+      if (!heading || response.querySelector(':scope > details')) continue;
+      const kicker = response.querySelector(':scope > :is(.ret-label,.response-kick,.vol-response-kick,.ac-kick)');
+      const detail = document.createElement('details');
+      detail.setAttribute('data-ami-response-fold','');
+      const summary = document.createElement('summary');
+      const title = document.createElement('span');
+      title.className = 'ami-response-fold-title';
+      const body = document.createElement('div');
+      body.className = 'reponse-corps ami-response-fold-body';
+      if (kicker) {
+        const label = document.createElement('span');
+        for (const attr of kicker.attributes) label.setAttribute(attr.name,attr.value);
+        label.classList.add('ami-response-fold-label');
+        label.append(...kicker.childNodes);
+        kicker.remove();
+        title.append(label,' ');
+      }
+      title.append(...heading.childNodes);
+      heading.append(title);
+      summary.append(heading);
+      body.append(...response.childNodes);
+      detail.append(summary,body);
+      response.append(detail);
+      response.classList.add('ami-response-folded','ami-response-folded-webnode');
+    }
+
+    for (const style of fragment.querySelectorAll('style')) style.textContent = isolate(style.textContent);
+    for (const item of fragment.querySelectorAll('[href],[src],[poster],[action]')) {
+      for (const attr of ['href','src','poster','action']) {
+        const link = item.getAttribute(attr);
+        if (link && !/^(#|[a-z][a-z\d+.-]*:|\/\/)/i.test(link)) item.setAttribute(attr, new URL(link, expected).href);
+      }
+    }
+    const oldPass = fragment.querySelector('#passe-bloc-2026-10-26-js');
+    if (oldPass) oldPass.textContent = oldPass.textContent.replace("var R = prem('div[id^=\"ami-\"]') || D.body;", 'var R = D.getElementById(' + JSON.stringify(cfg.root) + ');');
+    const style = document.createElement('style');
+    style.textContent = `
+#ami-volume-webnode[data-ami-mounted="true"], #ami-volume-webnode[data-ami-mounted="true"] * {
+  -webkit-hyphens:none!important;
+  hyphens:none!important;
+}
+#ami-volume-webnode[data-ami-mounted="true"] :is(h1,h2,h3,h4,h5,h6,summary) {
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+}
+#ami-volume-webnode[data-ami-mounted="true"] h1 {
+  min-inline-size:0;
+  max-inline-size:100%;
+}
+      #ami-volume-webnode {min-width:0;text-align:start;overflow-x:clip;overflow-y:visible}
+      #ami-volume-webnode .passe-acces {display:none!important}
+      body:has(#ami-volume-webnode[data-ami-mounted="true"][data-ami-has-top]) > .amiToc-out .amiToc-haut,
+      body:has(#ami-volume-webnode[data-ami-mounted="true"][data-ami-has-toc]) > .amiToc-out .amiToc-som,
+      body:has(#ami-volume-webnode[data-ami-mounted="true"][data-ami-has-toc]) > .amiToc-tiroir,
+      body:has(#ami-volume-webnode[data-ami-mounted="true"][data-ami-has-search]) > .amiToc-out .amiToc-rech,
+      body:has(#ami-volume-webnode[data-ami-mounted="true"][data-ami-has-search]) > .amiRech {display:none!important}
+      #ami-volume-webnode button[data-ami-close] {display:block;width:44px;height:44px;min-width:44px;margin:0 0 0 auto;padding:0;border:0;border-radius:.4rem;background:none;color:transparent;cursor:pointer}
+      #ami-volume-webnode button[data-ami-close]:is(:hover,:focus-visible){color:#ffd06a;outline:1px solid currentColor;outline-offset:-2px}
+      #ami-volume-webnode details:not([open]) > button[data-ami-close]{display:none}
+      #ami-volume-webnode [data-ami-native-progress]{position:fixed;inset:var(--ami-native-progress-top,0px) 0 auto;height:3px;pointer-events:none;z-index:2147483001;background:rgba(255,208,106,.16)}
+      #ami-volume-webnode [data-ami-native-progress] > span{display:block;height:100%;transform-origin:left center;background:linear-gradient(90deg,#e33232,#de8936,#9abe50,#ffd06a)}
+      #ami-volume-webnode:has([data-ami-native-progress]) #prog{visibility:hidden!important}
+      @media print{#ami-volume-webnode :is([data-ami-close],[data-ami-native-progress]){display:none!important}}
+      #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode {
+        padding:0!important;box-sizing:border-box;min-width:0;overflow:visible;
+      }
+      #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode > details[data-ami-response-fold] {
+        box-sizing:border-box!important;display:block;width:100%!important;max-width:100%!important;
+        min-width:0!important;margin:0!important;padding:0!important;border:0;background:none;
+      }
+      #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode > details > summary {
+        list-style:none;display:block;cursor:pointer;position:relative;min-width:0;box-sizing:border-box;
+        padding:clamp(.85rem,2vw,1.4rem) clamp(2.5rem,5vw,4.5rem)!important;text-align:center;
+      }
+      #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode > details > summary::-webkit-details-marker {display:none}
+      #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode > details > summary::after {
+        position:absolute;right:1rem;top:50%;transform:translateY(-50%);color:var(--or-pale,#ffd06a);content:'▾';
+      }
+      #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode > details[open] > summary::after {content:'▴'}
+      #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode > details > summary:focus-visible {
+        outline:2px solid var(--or-pale,#ffd06a);outline-offset:-4px;
+      }
+      #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode > details > summary :is(h2,h3) {
+        display:block;box-sizing:border-box;margin:0!important;padding:0!important;line-height:1.25!important;
+        min-width:0;max-width:100%;white-space:normal;text-wrap:balance;
+      }
+      #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode .ami-response-fold-label {
+        display:block!important;margin:0 0 .45rem!important;font:700 .78rem/1.5 Jost,system-ui,sans-serif!important;
+        color:var(--or-pale,#ffd06a);text-transform:none;
+      }
+      #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode > details > .ami-response-fold-body {
+        box-sizing:border-box;min-width:0;padding:clamp(1rem,3vw,2rem)!important;
+      }
+      #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode > details:not([open]) > .ami-response-fold-body {
+        display:none!important;
+      }
+      @media print {
+        #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode > details:not([open]) > .ami-response-fold-body {
+          display:block!important;
+        }
+        #ami-volume-webnode section.ami-volume-response.ami-response-folded-webnode > details > summary::after {display:none}
+      }
+
+    `;
+    const scripts = [...fragment.querySelectorAll('script')].filter(script => !script.type || /^(text|application)\/javascript$/i.test(script.type) || script.type === 'module');
+    if (scripts.some(script => script.src)) throw Error('Le volume contient un script externe à vérifier.');
+    host.append(fragment, style);
+    holder.replaceWith(host);
+    // Webnode’s wrappers clip overflow, which makes sticky children use the wrong box.
+    for (let box = host.parentElement; box && box !== document.body; box = box.parentElement) {
+      const css = getComputedStyle(box);
+      if (css.overflowX === 'hidden') box.style.overflowX = 'clip';
+      if (css.overflowY === 'hidden') box.style.overflowY = 'visible';
+    }
+    const downloads = new Set(cfg.downloads);
+    host.addEventListener('click', event => {
+      const control = event.target.closest('button[id],a[id]');
+      if (!control || !downloads.has(control.id)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const url = URL.createObjectURL(new Blob([bytes], { type:'text/html;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = expected.pathname.split('/').pop();
+      host.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+    }, true);
+    for (const old of scripts) {
+      if (!old.isConnected) continue;
+      const script = document.createElement('script');
+      for (const attr of old.attributes) script.setAttribute(attr.name, attr.value);
+      script.textContent = old.textContent;
+      old.replaceWith(script);
+    }
+    const controls = Object.fromEntries(Object.entries(cfg.controls || {}).map(([name, ids]) => [name, ids.map(id => host.querySelector('#' + CSS.escape(id))).find(Boolean)]));
+    for (const [key, control] of Object.entries(controls)) if (control) host.dataset['amiHas' + key[0].toUpperCase() + key.slice(1)] = '';
+    const search = controls.search;
+    if (search) document.addEventListener('keydown', event => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'f') return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      search.click();
+    }, true);
+
+    const progress = document.createElement('div');
+    progress.dataset.amiNativeProgress = '';
+    progress.setAttribute('role','progressbar');
+    progress.setAttribute('aria-label','Progression de lecture');
+    progress.setAttribute('aria-valuemin','0');
+    progress.setAttribute('aria-valuemax','100');
+    const fill = progress.appendChild(document.createElement('span'));
+    const clamp = value => Math.max(0,Math.min(1,value));
+    let frame = 0;
+    function measure() {
+      frame = 0;
+      const fullscreen = document.fullscreenElement || document.webkitFullscreenElement || host.querySelector('.ami-faux-fs');
+      const active = fullscreen && host.contains(fullscreen) ? fullscreen : null;
+      const owner = active || host;
+      if (progress.parentElement !== owner) owner.prepend(progress);
+      const site = document.querySelector('.h-w.h-f.wnd-fixed');
+      const offset = active ? 0 : Math.max(0,site?.getBoundingClientRect().bottom || 0);
+      progress.style.setProperty('--ami-native-progress-top',offset+'px');
+      const bounds = root.getBoundingClientRect();
+      const span = active ? active.scrollHeight - active.clientHeight : bounds.height - (document.documentElement.clientHeight - offset);
+      const ratio = clamp(span > 0 ? (active ? active.scrollTop : offset - bounds.top) / span : (bounds.bottom <= innerHeight ? 1 : 0));
+      fill.style.transform = 'scaleX('+ratio+')';
+      progress.setAttribute('aria-valuenow',String(Math.round(ratio*100)));
+    }
+    function schedule() { if (!frame) frame = requestAnimationFrame(measure); }
+    host.addEventListener('scroll',schedule,true);
+    window.addEventListener('scroll',schedule,{passive:true});
+    window.addEventListener('resize',schedule);
+    document.addEventListener('fullscreenchange',schedule);
+    document.addEventListener('webkitfullscreenchange',schedule);
+    host.addEventListener('toggle',schedule,true);
+    new ResizeObserver(schedule).observe(root);
+    new MutationObserver(schedule).observe(root,{attributes:true,attributeFilter:['class']});
+    addClosers(root);
+    schedule();
+    host.dataset.amiMounted = 'true';
+    function fitVolumeHeadlines(root) {
+  const doc = root.ownerDocument;
+  const view = doc.defaultView;
+  const canvas = doc.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) return;
+  const wordWidth = (word, font) => {
+    const count = Array.from(word).length;
+    return context.measureText(word).width + Math.max(0,count - 1) * (Number.parseFloat(font.letterSpacing) || 0);
+  };
+  const originalSize = new WeakMap();
+  function fit() {
+    const titles = [...root.querySelectorAll('h1,.apok-word')];
+    for (const title of titles) {
+      if (!title.hasAttribute('data-ami-headline-fit')) continue;
+      title.removeAttribute('data-ami-headline-fit');
+      const old = originalSize.get(title);
+      if (old.value) title.style.setProperty('font-size',old.value,old.priority);
+      else title.style.removeProperty('font-size');
+    }
+    const targets = [];
+    for (const title of titles) {
+      if (title.matches('.e12-sr,.sr-only,.visually-hidden') || !title.offsetWidth) continue;
+      const parentWidth = title.parentElement.clientWidth;
+      const outerWidth = root.clientWidth;
+      const limit = Math.min(title.clientWidth || parentWidth, parentWidth || title.clientWidth, outerWidth || Infinity);
+      if (limit < 80) continue;
+      const font = view.getComputedStyle(title);
+      context.font = [font.fontStyle,font.fontWeight,font.fontSize,font.fontFamily].join(' ');
+      const words = [...title.childNodes].filter(node => node.nodeType === 3 || (node.nodeType === 1 && !['block','flex','grid'].includes(view.getComputedStyle(node).display))).map(node => node.textContent).join('').trim().split(/\s+/);
+      if (words.length === 1 && !words[0]) continue;
+      const widest = Math.max(...words.map(word => wordWidth(font.textTransform === 'uppercase' ? word.toUpperCase() : word,font)));
+      if (widest > limit) targets.push([title,Math.floor(Number.parseFloat(font.fontSize) * (limit-1) / widest * 10) / 10]);
+    }
+    for (const [title,size] of targets) {
+      originalSize.set(title,{value:title.style.getPropertyValue('font-size'),priority:title.style.getPropertyPriority('font-size')});
+      title.style.setProperty('font-size',size+'px','important');
+      title.dataset.amiHeadlineFit = '';
+    }
+  }
+  let frame = 0;
+  function schedule() {
+    if (!frame) frame = view.requestAnimationFrame(() => {frame = 0;fit();});
+  }
+  view.addEventListener('resize',schedule,{passive:true});
+  doc.fonts?.ready.then(schedule);
+  schedule();
+}
+    fitVolumeHeadlines(host);
+  } catch (error) {
+    if (host.isConnected) host.replaceWith(holder);
+    status.textContent = 'Ce volume n’a pas pu être affiché dans la page.';
+    holder.querySelector('[data-ami-volume-fallback]').hidden = false;
+    console.error('Volume aMi', error);
+  }
+})();
+</script>
+</div>

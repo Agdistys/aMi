@@ -1,0 +1,90 @@
+{
+  "/ami-benchmark/": {
+    "kind": "link",
+    "label": "📊 BenchMark",
+    "href": "https://agdistys.github.io/aMi/ami-benchmark/"
+  },
+  "/ami-catalogue-des-outils/": {
+    "kind": "link",
+    "label": "🧰 Guide des Outils",
+    "href": "https://agdistys.github.io/aMi/ami-catalogue-des-outils/"
+  },
+  "/ami-metamatrice/": {
+    "kind": "link",
+    "label": "🪆 MétaMatrice · Classeur Excel public",
+    "href": "https://agdistys.github.io/aMi/ami-metamatrice/"
+  },
+  "/ami-controle-qualite/": {
+    "kind": "link",
+    "label": "✅ Contrôle Qualité",
+    "href": "https://agdistys.github.io/aMi/ami-controle-qualite/"
+  },
+  "/ami-tests/": {
+    "kind": "link",
+    "label": "📏 Campagnes de Mesures IA",
+    "href": "https://agdistys.github.io/aMi/ami-tests/"
+  },
+  "/ami-registre/": {
+    "kind": "link",
+    "label": "🔏 Registre public",
+    "href": "https://agdistys.github.io/aMi/ami-registre/"
+  },
+  "/ami-citer-contester-contribuer/": {
+    "kind": "link",
+    "label": "📜 Citer · Contester · Contribuer",
+    "href": "https://agdistys.github.io/aMi/ami-citer-contester-contribuer/"
+  },
+  "/ami-tuto-esprit-critique/": {
+    "kind": "link",
+    "label": "🧠 Tuto d’Esprit Critique",
+    "href": "https://agdistys.github.io/aMi/ami-tuto-esprit-critique/"
+  },
+  "/ami-mesures-ia/": {
+    "kind": "link",
+    "label": "📏 Campagnes de Mesures IA",
+    "href": "https://agdistys.github.io/aMi/ami-tests/"
+  },
+  "/lettre-ouverte/": {
+    "kind": "link",
+    "label": "📜 Citer · Contester · Contribuer",
+    "href": "https://agdistys.github.io/aMi/ami-citer-contester-contribuer/"
+  },
+  "/ami-annexes/": {
+    "kind": "links",
+    "label": "Les Annexes aMi sur GitHub Pages",
+    "links": [
+      {
+        "label": "📊 BenchMark",
+        "href": "https://agdistys.github.io/aMi/ami-benchmark/"
+      },
+      {
+        "label": "🧰 Guide des Outils",
+        "href": "https://agdistys.github.io/aMi/ami-catalogue-des-outils/"
+      },
+      {
+        "label": "🪆 MétaMatrice · Classeur Excel public",
+        "href": "https://agdistys.github.io/aMi/ami-metamatrice/"
+      },
+      {
+        "label": "✅ Contrôle Qualité",
+        "href": "https://agdistys.github.io/aMi/ami-controle-qualite/"
+      },
+      {
+        "label": "📏 Campagnes de Mesures IA",
+        "href": "https://agdistys.github.io/aMi/ami-tests/"
+      },
+      {
+        "label": "🔏 Registre public",
+        "href": "https://agdistys.github.io/aMi/ami-registre/"
+      },
+      {
+        "label": "📜 Citer · Contester · Contribuer",
+        "href": "https://agdistys.github.io/aMi/ami-citer-contester-contribuer/"
+      },
+      {
+        "label": "🧠 Tuto d’Esprit Critique",
+        "href": "https://agdistys.github.io/aMi/ami-tuto-esprit-critique/"
+      }
+    ]
+  }
+}

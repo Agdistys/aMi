@@ -1,0 +1,154 @@
+<div id="ami-astroglobe-webnode" style="box-sizing:border-box;display:block;width:100%;max-width:100%;padding:0;margin:0;border:0;color-scheme:only dark">
+  <p data-astro-status role="status">Ouverture de l’AstroGlobe…</p>
+  <a data-astro-link href="https://agdistys.github.io/aMi/ami-astroglobe/">Ouvrir l’AstroGlobe</a>
+  <noscript>L’AstroGlobe interactif nécessite JavaScript.</noscript>
+</div>
+<style>
+  #ami-astroglobe-webnode[data-ready] > :is([data-astro-status],[data-astro-link]){display:none}
+  body:has(#ami-astroglobe-webnode[data-ready]) > :is(.amiToc-out,.amiToc-tiroir,.amiRech){display:none!important}
+</style>
+<script>
+(async () => {
+  if (!/^\/ami-astroglobe\/?$/.test(location.pathname)) return;
+  const host = document.getElementById('ami-astroglobe-webnode');
+  if (!host || host.dataset.loading || host.dataset.ready) return;
+  host.dataset.loading = 'true';
+  const status = host.querySelector('[data-astro-status]');
+  const sourceURL = 'https://agdistys.github.io/aMi/volumes_protocole/2.2_ASTROGLOBE_V084_GitHub_Barre_2026-11-12.html';
+  const integrity = 'sha256-cSJeH1woyU5t1t7kqb6zLkAVI/bhaqHQfhHeE5CCYEo=';
+  const frameId = 'ami-astroglobe-webnode-v20261028';
+  const currentScript = document.currentScript;
+  let frame;
+  function mountScript(source) {
+    const script = document.createElement('script');
+    if (source.id) script.id = source.id;
+    if (currentScript?.nonce) script.nonce = currentScript.nonce;
+    script.textContent = source.textContent;
+    host.append(script);
+    script.remove();
+  }
+  function updateBridge(bridge) {
+    const old = "document.querySelectorAll('header,[role=banner],nav')";
+    const original = bridge.textContent;
+    if (!original.includes(old)) throw Error('Structure du volume inattendue');
+    bridge.textContent = original
+      .replace(old, "document.querySelectorAll('.h-w.wnd-fixed,header,[role=banner],nav')")
+      .replace('r.top<=1&&r.bottom>0', 'r.top<=12&&r.bottom>0')
+      .replace("P.document.querySelectorAll('header,nav,div')", "P.document.querySelectorAll('.h-w.wnd-fixed,header,nav,[role=banner]')")
+      .replace("r.top<=1&&r.height>24", "r.top<=12&&r.height>24")
+      .replace('if(el===F||el.contains(F)) continue;', "if(el===F||el.contains(F)||el.closest('.amiToc-tiroir,.amiRech')) continue;");
+  }
+  try {
+    const response = await fetch(sourceURL, {integrity, credentials:'omit'});
+    if (!response.ok) throw Error('Volume indisponible');
+    const source = new DOMParser().parseFromString(await response.text(), 'text/html');
+    const docFrame = source.getElementById(frameId);
+    const compatibility = source.getElementById('ami-host-decompression-compat');
+    const bridge = Array.from(source.body.querySelectorAll(':scope > script')).find(script => script.textContent.includes('ami-webnode-natural-adapter'));
+    if (!docFrame || !compatibility || !bridge) throw Error('Structure du volume inattendue');
+    updateBridge(bridge);
+    mountScript(compatibility);
+    frame = document.createElement('iframe');
+    for (const attribute of docFrame.attributes) frame.setAttribute(attribute.name, attribute.value);
+    frame.style.visibility = 'hidden';
+    host.append(frame);
+    mountScript(bridge);
+    await new Promise((resolve,reject) => {
+      let elapsed = 0;
+      const timer = setInterval(() => {
+        if (frame.contentDocument?.getElementById('ami-webnode-natural-adapter') && frame.contentDocument.getElementById('ami-astroglobe')) {
+          clearInterval(timer);
+          resolve();
+        } else if ((elapsed += 250) >= 30000) {
+          clearInterval(timer);
+          reject(Error('Initialisation du volume interrompue'));
+        }
+      }, 250);
+    });
+    const cockpit = frame.contentDocument;
+    const volumeTypography = cockpit.createElement('style');
+    volumeTypography.textContent = "html, html * {\n  -webkit-hyphens:none!important;\n  hyphens:none!important;\n}\nhtml :is(h1,h2,h3,h4,h5,h6,summary) {\n  overflow-wrap:normal!important;\n  word-break:normal!important;\n}\nhtml h1 {\n  min-inline-size:0;\n  max-inline-size:100%;\n}";
+    cockpit.head.append(volumeTypography);
+    const volumePalette = cockpit.createElement('style');
+    volumePalette.id = 'ami-astroglobe-palette-webnode';
+    volumePalette.textContent = `
+@media screen {
+  :root { color-scheme: only dark; }
+  html, body, #ami-astroglobe, #ami-astroglobe .a02-une,
+  #ami-astroglobe:fullscreen, #ami-astroglobe:-webkit-full-screen,
+  #ami-astroglobe.ami-faux-fs, #amiBarre {
+    background-color: #09090e !important;
+  }
+  #ami-astroglobe:fullscreen::backdrop,
+  #ami-astroglobe:-webkit-full-screen::backdrop { background: #09090e; }
+}
+@media (forced-colors: active) {
+  #ami-astroglobe .a02-une h1.a02-nom {
+    color: CanvasText !important;
+    -webkit-text-fill-color: CanvasText !important;
+    background: none !important;
+    filter: none;
+  }
+}
+`;
+    cockpit.head.append(volumePalette);
+    function fitVolumeHeadlines(root) {
+  const doc = root.ownerDocument;
+  const view = doc.defaultView;
+  const canvas = doc.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) return;
+  const wordWidth = (word, font) => {
+    const count = Array.from(word).length;
+    return context.measureText(word).width + Math.max(0,count - 1) * (Number.parseFloat(font.letterSpacing) || 0);
+  };
+  const originalSize = new WeakMap();
+  function fit() {
+    const titles = [...root.querySelectorAll('h1,.apok-word')];
+    for (const title of titles) {
+      if (!title.hasAttribute('data-ami-headline-fit')) continue;
+      title.removeAttribute('data-ami-headline-fit');
+      const old = originalSize.get(title);
+      if (old.value) title.style.setProperty('font-size',old.value,old.priority);
+      else title.style.removeProperty('font-size');
+    }
+    const targets = [];
+    for (const title of titles) {
+      if (title.matches('.e12-sr,.sr-only,.visually-hidden') || !title.offsetWidth) continue;
+      const parentWidth = title.parentElement.clientWidth;
+      const outerWidth = root.clientWidth;
+      const limit = Math.min(title.clientWidth || parentWidth, parentWidth || title.clientWidth, outerWidth || Infinity);
+      if (limit < 80) continue;
+      const font = view.getComputedStyle(title);
+      context.font = [font.fontStyle,font.fontWeight,font.fontSize,font.fontFamily].join(' ');
+      const words = [...title.childNodes].filter(node => node.nodeType === 3 || (node.nodeType === 1 && !['block','flex','grid'].includes(view.getComputedStyle(node).display))).map(node => node.textContent).join('').trim().split(/\s+/);
+      if (words.length === 1 && !words[0]) continue;
+      const widest = Math.max(...words.map(word => wordWidth(font.textTransform === 'uppercase' ? word.toUpperCase() : word,font)));
+      if (widest > limit) targets.push([title,Math.floor(Number.parseFloat(font.fontSize) * (limit-1) / widest * 10) / 10]);
+    }
+    for (const [title,size] of targets) {
+      originalSize.set(title,{value:title.style.getPropertyValue('font-size'),priority:title.style.getPropertyPriority('font-size')});
+      title.style.setProperty('font-size',size+'px','important');
+      title.dataset.amiHeadlineFit = '';
+    }
+  }
+  let frame = 0;
+  function schedule() {
+    if (!frame) frame = view.requestAnimationFrame(() => {frame = 0;fit();});
+  }
+  view.addEventListener('resize',schedule,{passive:true});
+  doc.fonts?.ready.then(schedule);
+  schedule();
+}
+    fitVolumeHeadlines(cockpit.body);
+    host.dataset.ready = 'true';
+    frame.style.removeProperty('visibility');
+  } catch (error) {
+    frame?.remove();
+    status.textContent = 'Le volume intégré est momentanément indisponible.';
+    console.warn('AstroGlobe Webnode',error.message);
+  } finally {
+    delete host.dataset.loading;
+  }
+})();
+</script>

@@ -40,3 +40,10 @@ while IFS=$'\t' read -r slug target; do
 </html>
 HTML
 done < "$source_dir/fichiers_depot/routes-webnode.tsv"
+
+# Les montages Webnode suivent la même édition que les routes Pages.
+python3 "$source_dir/fichiers_depot/webnode/build_webnode_assets.py" \
+  --source "$source_dir" --site "$site_dir" \
+  --templates "$source_dir/fichiers_depot/webnode/templates" \
+  --annexes "$source_dir/fichiers_depot/webnode/routes-annexes.json" \
+  --bootstrap "$source_dir/fichiers_depot/webnode/bootstrap.html"
