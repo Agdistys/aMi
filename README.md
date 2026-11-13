@@ -17,7 +17,7 @@
 | 0 | 💔 0.2 PsychaTrice | [lire](volumes_protocole/0.2_PSYCHATRICE_aMi_V63_GitHub_2026-11-12.html) | [texte](volumes_protocole/0.2_PSYCHATRICE_aMi_V63_GitHub_2026-11-12.md) | `0.2_PSYCHATRICE_aMi_V63_GitHub_2026-11-12.html` |
 | 0 | 💍 0.3 L’Union du TouT | [lire](volumes_protocole/0.3_LUNION_DU_TOUT_aMi_V81_GitHub_2026-11-12.html) | [texte](volumes_protocole/0.3_LUNION_DU_TOUT_aMi_V81_GitHub_2026-11-12.md) | `0.3_LUNION_DU_TOUT_aMi_V81_GitHub_2026-11-12.html` |
 | 1 | 👑 1.1 EGO · Evidence Engine | [lire](volumes_protocole/1.1_EGO_aMi_V82_GitHub_2026-11-12.html) | [texte](volumes_protocole/1.1_EGO_aMi_V82_GitHub_2026-11-12.md) | `1.1_EGO_aMi_V82_GitHub_2026-11-12.html` |
-| 1 | 🪞 1.2 Miroir · RefleXion | [lire](volumes_protocole/1.2_MIROIR_aMi_Indisponible.html) | — | `1.2_MIROIR_aMi_Indisponible.html` |
+| 1 | 🪞 1.2 Miroir · RefleXion | [lire](volumes_protocole/1.2_MIROIR_aMi_V95_GitHub_2026-11-13.html) | — | `1.2_MIROIR_aMi_V95_GitHub_2026-11-13.html` |
 | 1 | ❤️‍🔥 1.3 AndroGynie | [lire](volumes_protocole/1.3_ANDROGYNIE_aMi_V43_GitHub_2026-11-12.html) | [texte](volumes_protocole/1.3_ANDROGYNIE_aMi_V43_GitHub_2026-11-12.md) | `1.3_ANDROGYNIE_aMi_V43_GitHub_2026-11-12.html` |
 | 2 | 🌿 2.1 ECO · Bonus Plaisir | [lire](volumes_protocole/2.1_ECO_Bonus-Plaisir_aMi_V38_GitHub_2026-11-12.html) | [texte](volumes_protocole/2.1_ECO_Bonus-Plaisir_aMi_V38_GitHub_2026-11-12.md) | `2.1_ECO_Bonus-Plaisir_aMi_V38_GitHub_2026-11-12.html` |
 | 2 | 🔮 2.2 AstroGlobe | [lire](volumes_protocole/2.2_ASTROGLOBE_V084_GitHub_Barre_2026-11-12.html) | [texte](volumes_protocole/2.2_ASTROGLOBE_V084_GitHub_Barre_2026-11-12.md) | `2.2_ASTROGLOBE_V084_GitHub_Barre_2026-11-12.html` |

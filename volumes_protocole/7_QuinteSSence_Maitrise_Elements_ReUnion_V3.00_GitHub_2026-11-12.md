@@ -1,6 +1,6 @@
 # 🌟 7 QuinteSSence — Version Texte pour la lecture et les IA
 
-Source : 7_QuinteSSence_Maitrise_Elements_ReUnion_V3.00_GitHub_2026-11-12.html · SHA-256 ddb10ea06fe4ef68d20fa5b50a058d90dfde8658f32da2881db89f8183389541
+Source : 7_QuinteSSence_Maitrise_Elements_ReUnion_V3.00_GitHub_2026-11-12.html · SHA-256 012c2176b025ecf86cef6b0888ab4c42102f80b43bf9f0eb51a54e94d85585ad
 Ce fichier contient le texte éditorial du volume (titres, paragraphes, tableaux, fiches), sans scripts, styles ni images. Les widgets interactifs n’y fonctionnent pas : leurs textes et données éditoriales sont repris quand ils existent dans la page.
 Protocole de ConScience aMi · Agdistys · Diane Serant · Licence CC BY-SA 4.0 · https://agdistys.fr
 

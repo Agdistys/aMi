@@ -92,6 +92,75 @@
     fragment.append(...source.head.querySelectorAll('meta[name^="ami:"],style,link[rel="stylesheet"],link[rel="preconnect"],script'), ...source.body.childNodes);
     const root = fragment.querySelector('#' + CSS.escape(cfg.root));
     if (!root) throw Error('Le volume attendu est absent.');
+
+    // The legacy Charte scripts repositioned the page after the reader had resumed scrolling.
+    const readingPatches = {
+  "": [
+    [
+      "    veut vraiment remonter. */\n var memo={}, courant=bs[0].dataset.o;\n function ouvre(k){\n",
+      "    veut vraiment remonter. */\n var memo={}, courant=bs[0].dataset.o, navigation=0;\n function reprendreLaLecture(){ navigation++; }\n window.addEventListener('wheel',reprendreLaLecture,{passive:true,capture:true});\n window.addEventListener('touchmove',reprendreLaLecture,{passive:true,capture:true});\n window.addEventListener('pointerdown',reprendreLaLecture,{passive:true,capture:true});\n window.addEventListener('keydown',function(event){\n   if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(event.key))\n     reprendreLaLecture();\n },true);\n function poserLaLecture(position){\n   var ticket=++navigation;\n   requestAnimationFrame(function(){\n     if(ticket===navigation) position();\n     if(window.__somReste) window.__somReste();\n     avance();\n   });\n }\n function ouvre(k){\n"
+    ],
+    [
+      "      la barre occupe DANS le document, collée ou non. */\n   var haut=hautBarre();\n   /* on ne descend jamais plus bas que le volet ne le permet, et jamais\n      plus haut que la barre : sinon le volet s'ouvre hors de l'écran. */\n   var y=(k in memo) ? memo[k] : haut;\n   /* On LIT une propriété de mise en page avant de mesurer : la lecture\n      force le navigateur à recalculer, donc scrollHeight vaut celui du\n      volet qu'on ouvre et non celui qu'on quitte. Puis on pose, et on\n      repose à la frame suivante — la première pose peut encore être\n      corrigée par une image ou une police qui arrive. */\n   var pose=function(){\n     void document.documentElement.offsetHeight;\n     /* on recalcule le haut du volet À CHAQUE POSE : entre les deux\n        frames, la barre a pu se replier et tout décaler. */\n     var t;\n",
+      "      la barre occupe DANS le document, collée ou non. */\n   poserLaLecture(function(){\n     var t;\n"
+    ],
+    [
+      "     window.scrollTo({top:Math.max(0,Math.min(t,max)),behavior:'auto'});\n   };\n   requestAnimationFrame(function(){\n     pose();\n     requestAnimationFrame(function(){\n       pose();\n       if(window.__somReste) window.__somReste();\n       avance();\n     });\n   });\n",
+      "     window.scrollTo({top:Math.max(0,Math.min(t,max)),behavior:'auto'});\n   });\n"
+    ],
+    [
+      "        barres collantes, et sa position à l'écran n'est pas sa place. */\n     var y=(k in smemo)?smemo[k]:hautBarre();\n     var pose=function(){\n       void document.documentElement.offsetHeight;\n       var t=(k in smemo) ? hautDe(hote)+smemo[k] : hautBarre();\n",
+      "        barres collantes, et sa position à l'écran n'est pas sa place. */\n     poserLaLecture(function(){\n       var t=(k in smemo) ? hautDe(hote)+smemo[k] : hautBarre();\n"
+    ],
+    [
+      "       window.scrollTo({top:Math.max(0,Math.min(t,max)),behavior:'auto'});\n     };\n     requestAnimationFrame(function(){\n       pose();\n       requestAnimationFrame(function(){\n         pose();\n         if(window.__somReste) window.__somReste();\n         avance();});});\n   }\n",
+      "       window.scrollTo({top:Math.max(0,Math.min(t,max)),behavior:'auto'});\n     });\n   }\n"
+    ],
+    [
+      "      var y=smem[bar.dataset.o+':'+cle];\n      requestAnimationFrame(function(){\n        var max=document.documentElement.scrollHeight-window.innerHeight,\n",
+      "      var y=smem[bar.dataset.o+':'+cle];\n      poserLaLecture(function(){\n        var max=document.documentElement.scrollHeight-window.innerHeight,\n"
+    ]
+  ],
+  "ch-pli-js": [
+    [
+      "/* un onglet se retrouve comme on l'a laissé : même endroit, mêmes dépliants */\nvar MEM={};function panVisible(){return [].filter.call(R.querySelectorAll(\"section.pan\"),function(p){return !p.hidden})[0]}\nfunction haut(p){return p.getBoundingClientRect().top+window.pageYOffset}\ndocument.addEventListener(\"click\",function(e){var t=e.target.closest&&e.target.closest(\"[role=tab][data-o]\");if(!t||R.classList.contains(\"lecture\"))return;var p=panVisible();if(!p)return;\n MEM[p.id]={y:window.pageYOffset-haut(p),ouverts:[].filter.call(p.querySelectorAll(\"details.ch-pli,details.ch-sous\"),function(d){return d.open}),lx:[].slice.call(p.querySelectorAll(\".ch-lx.ch-ouvert\"))};\n var cible=t.dataset.o;function remet(){var q=R.querySelector(\"section.pan[data-o=\\\"\"+cible+\"\\\"]\");if(!q||q.hidden)return;var m=MEM[q.id];if(!m)return;\n  q.querySelectorAll(\"details.ch-pli,details.ch-sous\").forEach(function(d){d.open=m.ouverts.indexOf(d)>-1});q.querySelectorAll(\".ch-lx\").forEach(function(c){c.classList.toggle(\"ch-ouvert\",m.lx.indexOf(c)>-1)});\n  window.scrollTo({top:haut(q)+m.y,behavior:\"auto\"})}\n [60,250,600].forEach(function(ms){setTimeout(remet,ms)});plusTard()},true);\ndocument.addEventListener(\"click\",function(e){if(e.target.closest&&e.target.closest(\"button.sog,.sous-btn,#amiLecture\"))plusTard()},true);\n",
+      "/* un onglet se retrouve comme on l'a laissé : même endroit, mêmes dépliants */\nvar MEM={};\nfunction panVisible(){return R.querySelector(\"section.pan:not([hidden])\")}\nR.addEventListener(\"click\",function(e){\n var t=e.target.closest&&e.target.closest(\".bar > [role=tab][data-o]\");\n var p=panVisible();\n if(!t||!p||t.dataset.o===p.dataset.o||R.classList.contains(\"lecture\"))return;\n MEM[p.id]={ouverts:new Set(p.querySelectorAll(\"details.ch-pli[open],details.ch-sous[open]\")),\n  lx:new Set(p.querySelectorAll(\".ch-lx.ch-ouvert\"))};\n queueMicrotask(function(){\n  var q=panVisible();if(!q||q.dataset.o!==t.dataset.o)return;\n  var m=MEM[q.id];if(m){\n   q.querySelectorAll(\"details.ch-pli,details.ch-sous\").forEach(function(d){d.open=m.ouverts.has(d)});\n   q.querySelectorAll(\".ch-lx\").forEach(function(c){c.classList.toggle(\"ch-ouvert\",m.lx.has(c))});\n  }\n  plusTard();\n });\n},true);\ndocument.addEventListener(\"click\",function(e){if(e.target.closest&&e.target.closest(\"button.sog,.sous-btn,#amiLecture\"))plusTard()},true);\n"
+    ]
+  ],
+  "charte-v46-js-2026-10-26": [
+    [
+      "\n /* UN DÉFILEMENT QU'ON PROVOQUE SOI-MÊME N'EST PAS UN DÉFILEMENT.\n    Un clic d'onglet fait descendre la page jusqu'à la rangée : sans cette\n    garde, la rangée s'enroulait à l'instant même où on vient de l'ouvrir,\n    et on ne voyait jamais ses sous-onglets. On la PRÉSENTE, et elle ne\n    s'enroule qu'au premier vrai mouvement — 120 px suffisent.          */\n var presentation = null;\n\n function presente(){\n   presentation = window.scrollY;\n   if(bar) bar.classList.remove('enroulee');\n",
+      "\n /* L'onglet présente sa rangée pendant le repositionnement automatique.\n    La première molette, le premier geste tactile ou la première touche\n    de défilement rend immédiatement la main à la lecture. */\n var presentation = false;\n function presente(){\n   presentation = true;\n   if(bar) bar.classList.remove('enroulee');\n"
+    ],
+    [
+      " }\n\n function lire(){\n   if(Date.now() - mainPosee < 4000) return;\n   if(!bar || !fantome) return;\n   if(presentation !== null){\n     if(Math.abs(window.scrollY - presentation) < 120) return;\n     presentation = null;\n   }\n   var collee = (parseFloat(getComputedStyle(bar).top) || 0) + 2;\n",
+      " }\n function lectureActive(){ presentation = false; }\n window.addEventListener('wheel',function(e){\n   if(Math.abs(e.deltaY)>Math.abs(e.deltaX)) lectureActive();\n },{passive:true,capture:true});\n window.addEventListener('touchmove',lectureActive,{passive:true,capture:true});\n window.addEventListener('keydown',function(e){\n   if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(e.key)) lectureActive();\n },true);\n function lire(){\n   if(Date.now() - mainPosee < 4000 || presentation || !bar || !fantome) return;\n   var collee = (parseFloat(getComputedStyle(bar).top) || 0) + 2;\n"
+    ],
+    [
+      "\n /* UNE TRANSITION SE JUGE QUAND LE DÉFILEMENT EST REPOSÉ.              */\n var tempo = null;\n function auDefilement(){ clearTimeout(tempo); tempo = setTimeout(lire, 180); }\n\n",
+      "\n var frame = 0;\n function auDefilement(){\n   if(frame) return;\n   frame=requestAnimationFrame(function(){frame=0;lire();});\n }\n\n"
+    ],
+    [
+      "\n /* Un clic d'onglet change la sous-rangée : on la regarde à nouveau,\n    après le silence que la Charte s'accorde déjà.                     */\n R.addEventListener('click', function(e){\n   if(!e.target.closest) return;\n   if(e.target.closest('.ong, .sog, .sous-btn, .tab-btn')){\n     setTimeout(function(){ onglelsSansArticle(); presente(); sceau(); }, 720);\n     setTimeout(ligne, 1400);\n   }\n }, true);\n\n",
+      "\n R.addEventListener('click', function(e){\n   if(!e.target.closest || !e.target.closest('.bar .ong, .sbar .sog, .sbar .sous-btn, .sbar .tab-btn')) return;\n   presente();\n   requestAnimationFrame(function(){ onglelsSansArticle(); ligne(); sceau(); });\n });\n\n"
+    ]
+  ]
+};
+    const mainTabs = [...fragment.querySelectorAll('script:not([id])')].find(script =>
+      script.textContent.includes("var memo={}, courant=bs[0].dataset.o;"));
+    const charteScripts = [
+      [mainTabs, readingPatches['']],
+      [fragment.querySelector('#ch-pli-js'), readingPatches['ch-pli-js']],
+      [fragment.querySelector('#charte-v46-js-2026-10-26'), readingPatches['charte-v46-js-2026-10-26']],
+    ];
+    // A new source edition can carry the same correction directly.
+    const readyToPatch = charteScripts.every(([script, patches]) => script &&
+      patches.every(([before]) => script.textContent.split(before).length === 2));
+    if (readyToPatch) {
+      for (const [script, patches] of charteScripts) {
+        for (const [before, after] of patches) script.textContent = script.textContent.replace(before, () => after);
+      }
+    }
     // Keep the source section and heading nodes so section links still resolve.
     for (const response of root.querySelectorAll('section.ami-volume-response')) {
       const heading = response.querySelector(':scope > :is(h2,h3)');

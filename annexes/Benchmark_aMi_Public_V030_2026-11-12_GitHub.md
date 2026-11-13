@@ -1,6 +1,6 @@
 # 📊 BenchMark · Étude Comparative — Version Texte pour la lecture et les IA
 
-Source : Benchmark_aMi_Public_V030_2026-11-12_GitHub.html · SHA-256 89cf3acff6f7a9541d58dc882cea733157e8af879fbad121711f78b8eb2c1b64
+Source : Benchmark_aMi_Public_V030_2026-11-12_GitHub.html · SHA-256 6dc9aa641f9b21fe36d17dadda2284108da89f0d171187298d980477711ac874
 Ce fichier contient le texte éditorial du volume (titres, paragraphes, tableaux, fiches), sans scripts, styles ni images. Les widgets interactifs n’y fonctionnent pas : leurs textes et données éditoriales sont repris quand ils existent dans la page.
 Protocole de ConScience aMi · Agdistys · Diane Serant · Licence CC BY-SA 4.0 · https://agdistys.fr
 

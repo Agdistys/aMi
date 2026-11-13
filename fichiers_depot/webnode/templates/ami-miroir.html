@@ -1,7 +1,7 @@
 <div data-ami-volume-loader>
   <p data-ami-volume-status role="status">Ouverture du volume aMi…</p>
-  <p data-ami-volume-fallback hidden><a href="https://agdistys.github.io/aMi/volumes_protocole/1.2_MIROIR_aMi_Indisponible.html">Lire le volume sur GitHub Pages</a></p>
-  <script type="application/json" data-ami-volume-config>{"slug":"ami-miroir","url":"https://agdistys.github.io/aMi/volumes_protocole/1.2_MIROIR_aMi_Indisponible.html","sha256":"0d6873338bb2af88b829835fb9d102c3b90ddf36697b19ee0174f071a4702242","bytes":3763193,"state":"candidate","root":"ami-vol-miroir","downloads":["dlHtml"],"controls":{"top":["amiHaut"],"toc":["amiSommaire"],"search":["amiRech"]}}</script>
+  <p data-ami-volume-fallback hidden><a href="https://agdistys.github.io/aMi/volumes_protocole/1.2_MIROIR_aMi_V94_GitHub_2026-11-11.html">Lire le volume sur GitHub Pages</a></p>
+  <script type="application/json" data-ami-volume-config>{"slug":"ami-miroir","url":"https://agdistys.github.io/aMi/volumes_protocole/1.2_MIROIR_aMi_V94_GitHub_2026-11-11.html","sha256":"0d6873338bb2af88b829835fb9d102c3b90ddf36697b19ee0174f071a4702242","bytes":3763193,"state":"candidate","root":"ami-vol-miroir","downloads":["dlHtml"],"controls":{"top":["amiHaut"],"toc":["amiSommaire"],"search":["amiRech"]}}</script>
   <script>(async () => {
   const holder = document.currentScript.parentElement;
   const cfg = JSON.parse(holder.querySelector('[data-ami-volume-config]').textContent);
@@ -125,7 +125,7 @@
       #ami-volume-webnode button[data-ami-close] {display:block;width:44px;height:44px;min-width:44px;margin:0 0 0 auto;padding:0;border:0;border-radius:.4rem;background:none;color:transparent;cursor:pointer}
       #ami-volume-webnode button[data-ami-close]:is(:hover,:focus-visible){color:#ffd06a;outline:1px solid currentColor;outline-offset:-2px}
       #ami-volume-webnode details:not([open]) > button[data-ami-close]{display:none}
-      #ami-volume-webnode [data-ami-native-progress]{position:fixed;inset:var(--ami-native-progress-top,0px) 0 auto;height:3px;pointer-events:none;z-index:2147483001;background:rgba(255,208,106,.16)}
+      #ami-volume-webnode #amiBarre [data-ami-native-progress]{position:absolute;inset:0 0 auto;height:3px;pointer-events:none;z-index:2147483001;background:rgba(255,208,106,.16)}
       #ami-volume-webnode [data-ami-native-progress] > span{display:block;height:100%;transform-origin:left center;background:linear-gradient(90deg,#e33232,#de8936,#9abe50,#ffd06a)}
       #ami-volume-webnode:has([data-ami-native-progress]) #prog{visibility:hidden!important}
       @media print{#ami-volume-webnode :is([data-ami-close],[data-ami-native-progress]){display:none!important}}
@@ -179,17 +179,19 @@
     progress.setAttribute('aria-valuemin','0');
     progress.setAttribute('aria-valuemax','100');
     const fill = progress.appendChild(document.createElement('span'));
+    const progressNav = root.querySelector('#amiBarre');
+    if (progressNav) progressNav.prepend(progress);
     const clamp = value => Math.max(0,Math.min(1,value));
     let frame = 0;
     function measure() {
       frame = 0;
       const fullscreen = document.fullscreenElement || document.webkitFullscreenElement || host.querySelector('.ami-faux-fs');
       const active = fullscreen && host.contains(fullscreen) ? fullscreen : null;
-      const owner = active || host;
-      if (progress.parentElement !== owner) owner.prepend(progress);
+      if (!progressNav && progress.parentElement !== (active || host)) (active || host).prepend(progress);
       const site = document.querySelector('.h-w.h-f.wnd-fixed');
-      const offset = active ? 0 : Math.max(0,site?.getBoundingClientRect().bottom || 0);
-      progress.style.setProperty('--ami-native-progress-top',offset+'px');
+      const sitePosition = site && getComputedStyle(site).position;
+      const offset = !active && (sitePosition === 'fixed' || sitePosition === 'sticky')
+        ? Math.max(0,site.getBoundingClientRect().bottom) : 0;
       const bounds = root.getBoundingClientRect();
       const span = active ? active.scrollHeight - active.clientHeight : bounds.height - (document.documentElement.clientHeight - offset);
       const ratio = clamp(span > 0 ? (active ? active.scrollTop : offset - bounds.top) / span : (bounds.bottom <= innerHeight ? 1 : 0));

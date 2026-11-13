@@ -1,6 +1,6 @@
 # 🪬 8.2 eXpression — Version Texte pour la lecture et les IA
 
-Source : eXpression_V054_GitHub_2026-11-12.html · SHA-256 57a673350e353f8f2e7106935c3aa4045ee3f2b29117ade93dfeed861b3089f7
+Source : eXpression_V054_GitHub_2026-11-12.html · SHA-256 c854c7538d34084712760bc89d0448a5cf499eecf2fefac0abe6b17458f3af5f
 Ce fichier contient le texte éditorial du volume (titres, paragraphes, tableaux, fiches), sans scripts, styles ni images. Les widgets interactifs n’y fonctionnent pas : leurs textes et données éditoriales sont repris quand ils existent dans la page.
 Protocole de ConScience aMi · Agdistys · Diane Serant · Licence CC BY-SA 4.0 · https://agdistys.fr
 

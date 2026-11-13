@@ -22,7 +22,7 @@ Le Respect, Il n'y a que ça de Vrai
 ## Tome 1
 
 - [1.1 EGO · Evidence Engine](https://ami.agdistys.fr/volumes_protocole/1.1_EGO_aMi_V82_GitHub_2026-11-12.md): Tu Sais Protéger ✊ (page complète : https://ami.agdistys.fr/volumes_protocole/1.1_EGO_aMi_V82_GitHub_2026-11-12.html)
-- [1.2 Miroir · RefleXion](https://ami.agdistys.fr/volumes_protocole/1.2_MIROIR_aMi_Indisponible.html): Tu Sais Réfléchir 🧠 (page complète seulement : le volume est encodé, sans Version Texte)
+- [1.2 Miroir · RefleXion](https://ami.agdistys.fr/volumes_protocole/1.2_MIROIR_aMi_V95_GitHub_2026-11-13.html): Tu Sais Réfléchir 🧠 (page complète seulement : le volume est encodé, sans Version Texte)
 - [1.3 AndroGynie](https://ami.agdistys.fr/volumes_protocole/1.3_ANDROGYNIE_aMi_V43_GitHub_2026-11-12.md): Tu Sais Ressentir ☯️ (page complète : https://ami.agdistys.fr/volumes_protocole/1.3_ANDROGYNIE_aMi_V43_GitHub_2026-11-12.html)
 
 ## Tome 2
