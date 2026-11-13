@@ -70,6 +70,9 @@
     const source = new DOMParser().parseFromString(raw, 'text/html');
     const fragment = document.createDocumentFragment();
     fragment.append(...source.head.querySelectorAll('style,link[rel=stylesheet],link[rel=preconnect]'), ...source.body.childNodes);
+    // Keep the orbital halo independent of Webnode’s generic .halo styles.
+    const coverHalo = fragment.querySelector('#ami-index .une .scene > .halo');
+    if (coverHalo) coverHalo.className = 'index-orbital-halo';
     const coverTitle = fragment.querySelector('#ami-index .une h1');
     const subtitle = coverTitle?.querySelector(':scope > .petit');
     if (coverTitle && subtitle) {
@@ -334,6 +337,20 @@
       #ami-index-webnode #index-tab-region .passe-plier,
       body:has(#ami-index-webnode[data-index-mounted="true"]) > :is(.amiToc-out,.amiToc-tiroir,.amiRech) {
         display:none !important;
+      }
+    `;
+    nativeStyle.textContent += `
+      #ami-index-webnode #ami-index .une .scene > .index-orbital-halo {
+        position:absolute;top:50%;left:50%;width:100%;height:100%;border-radius:50%;
+        background:none!important;border:1px solid rgba(200,168,74,.12);
+        transform:translate(-50%,-50%);animation:index-orbital-breath 9s ease-in-out infinite;
+      }
+      @keyframes index-orbital-breath {
+        0%,100% {transform:translate(-50%,-50%) scale(.94);opacity:.35;box-shadow:0 0 60px rgba(200,168,74,.03),inset 0 0 60px rgba(200,168,74,.03)}
+        50% {transform:translate(-50%,-50%) scale(1.14);opacity:.9;box-shadow:0 0 150px rgba(200,168,74,.11),inset 0 0 150px rgba(200,168,74,.11)}
+      }
+      @media(prefers-reduced-motion:reduce) {
+        #ami-index-webnode #ami-index .une .scene > .index-orbital-halo {animation:none}
       }
     `;
     const scripts = [...fragment.querySelectorAll('script')].filter(script =>

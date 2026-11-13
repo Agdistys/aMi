@@ -36,8 +36,6 @@
   const chromeCSS = `
     .ami-annex-host {width:100%;min-width:0;background:#09090e;color:#efe8d7}
     .ami-annex-frame {display:block;width:100%;border:0;margin:0;overflow:hidden;background:#09090e}
-    .ami-annex-footer {box-sizing:border-box;color:#f3e8cf;background:#0b0b11;font-family:Jost,system-ui,sans-serif;text-align:center}
-    .ami-annex-footer a {color:#ffd06a;text-underline-offset:.22em}
     [data-ami-annex-chrome] #amiBarre.ami-annex-bar {top:var(--ami-annex-host-top,0px);z-index:101;max-height:46vh;hyphens:none;overflow-wrap:normal;word-break:normal;letter-spacing:0;text-transform:none}
     [data-ami-annex-chrome] #amiBarre :is(a,button,span) {hyphens:none;text-transform:none;text-shadow:none}
     [data-ami-annex-chrome] #amiBarre.ami-annex-bar > :is(.coin,.coin-zoom) {margin:0}
@@ -53,22 +51,8 @@
       [data-ami-annex-chrome] #amiBarre .dir .p-ti {white-space:normal;text-wrap:balance}
       [data-ami-annex-chrome] #amiBarre .dir .sub {white-space:normal}
     }
-    .ami-annex-footer {border-block-start:1px solid #766025;padding:1.25rem .75rem 1.5rem}
-    .ami-annex-footer p {margin:.3rem 0}
-    .ami-annex-footer-title {font:700 clamp(1.15rem,4vw,1.5rem) Georgia,serif;color:#ffe0a0}
-    .ami-annex-footer-principle {font:700 1.05rem Georgia,serif;color:#ffd06a}
-    .ami-annex-footer-motto {font:700 clamp(.95rem,3.3vw,1.12rem) Georgia,serif;color:#e9c685}
-    .ami-annex-pledge {max-width:31rem;margin:1rem auto 0;padding-top:.65rem;border-block-start:1px solid #624a23;font:700 clamp(.92rem,3.2vw,1.15rem) Georgia,serif}
-    .ami-annex-pledge-grid {display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:.4rem;align-items:center;margin:.5rem 0}
-    .ami-annex-pledge-side {display:grid;grid-template-rows:2.3em 2.5em 2.4em;align-items:center}
-    .ami-annex-pledge-grid a,.ami-annex-pledge a {text-decoration:none;color:inherit}
-    .ami-annex-pledge-grid .ami-annex-magenta {color:#f56da8}
-    .ami-annex-pledge-grid .ami-annex-turquoise {color:#72d9d5}
-    .ami-annex-pledge-amp {position:relative;color:#9b683b;font-size:clamp(3.5rem,9vw,5.5rem);line-height:1}
-    .ami-annex-pledge-amp span {position:absolute;inset:0;display:grid;place-content:center;color:#ffd06a;font:700 .72rem Georgia,serif;white-space:nowrap}
-    .ami-annex-pledge .ami-annex-legacy {display:inline-block;color:#9ac345;margin-top:.45rem}
-    .ami-annex-footer-links {display:flex;flex-wrap:wrap;justify-content:center;gap:.2rem .8rem;margin-top:.5rem}
-    .ami-annex-footer-links a {display:inline-flex;align-items:center;min-height:40px}
+    [data-ami-annex-chrome] .ami-annex-footer {padding-bottom:1.4rem;hyphens:none}
+    [data-ami-annex-chrome] .ami-annex-footer .ap-fin {padding-inline:0}
     :is(.ami-annex-bar,.ami-annex-footer) :is(a,button):focus-visible {outline:2px solid #ffd06a;outline-offset:3px}
     @media print {.ami-annex-bar{display:none!important}}
   `;
@@ -115,38 +99,8 @@
     return node;
   }
 
-  function makePledge(doc) {
-    const rendezvous = web+'rencontre/';
-    const union = web+'union-du-tout/';
-    const pledge = element(doc,'div','ami-annex-pledge');
-    pledge.append(link(doc,'Pour Le Désir de',rendezvous));
-    const grid = pledge.appendChild(element(doc,'div','ami-annex-pledge-grid'));
-    const discover = grid.appendChild(element(doc,'div','ami-annex-pledge-side'));
-    const amp = grid.appendChild(element(doc,'div','ami-annex-pledge-amp','&'));
-    amp.setAttribute('aria-hidden','true');
-    amp.append(element(doc,'span','','🌟💎\nen⚡re\n🩸'));
-    amp.lastElementChild.style.whiteSpace = 'pre-line';
-    const unite = grid.appendChild(element(doc,'div','ami-annex-pledge-side'));
-    const sides = [
-      [discover,'Se Découvrir','C = ΔI / ΔE','Plaisir d’Offrir','ami-annex-magenta','ami-annex-turquoise'],
-      [unite,'Se réUnir','Φ = (U × I) / (R × P)','Joie de Consentir','ami-annex-turquoise','ami-annex-magenta'],
-    ];
-    for (const [node,title,equation,caption,eqColor,captionColor] of sides) {
-      const formula = link(doc,equation,union);
-      formula.classList.add(eqColor);
-      const last = link(doc,caption,rendezvous);
-      last.classList.add(captionColor);
-      node.append(link(doc,title,rendezvous),formula,last);
-    }
-    pledge.append(link(doc,'Tu es un Beau Cadeau fait à Moi-Même & Je-u T’aime',rendezvous));
-    const legacy = link(doc,'🌱 Legs = Φ × t',union);
-    legacy.classList.add('ami-annex-legacy');
-    pledge.append(element(doc,'br'),legacy);
-    return pledge;
-  }
-
   function navigationLink(slug, embedded) {
-    const webSlug = siteRoutes[slug] || (slug === 'ami-lunion-du-tout' ? 'union-du-tout' : slug);
+    const webSlug = siteRoutes[slug] || slug;
     return embedded && slug !== 'ami-tuto-esprit-critique'
       ? web + webSlug + '/' : pages + (slug === 'ami' ? '' : slug+'/');
   }
@@ -224,7 +178,6 @@
   }
 
   function makeChrome(doc, config) {
-    const inWebnode = !!config.embedded;
     const fragment = doc.createElement('template');
     fragment.innerHTML = charteNavigation.html;
     const nav = fragment.content.firstElementChild;
@@ -237,19 +190,14 @@
     progress.setAttribute('aria-valuenow', '0');
     const fill = progress.appendChild(element(doc, 'span'));
     nav.prepend(progress);
-    const footer = element(doc, 'footer', 'ami-annex-footer');
-    footer.append(element(doc, 'p', 'ami-annex-footer-title', config.label));
-    footer.append(element(doc, 'p', '', 'Protocole de ConScience aMi · Agdistys · Diane Serant'));
-    footer.append(element(doc, 'p', 'ami-annex-footer-principle', 'Vérité = Respect · Mensonge = Violence'));
-    footer.append(element(doc,'p','ami-annex-footer-motto','Demain Toujours Meilleur qu’Hier en ayant Appris les Leçons d’Aujourd’hui'));
-    footer.append(element(doc,'p','ami-annex-footer-motto','La ConScience est la Vie qui se reconnaît et se protège'));
-    footer.append(makePledge(doc));
-    const footerLinks = footer.appendChild(element(doc, 'div', 'ami-annex-footer-links'));
-    footerLinks.append(
-      link(doc, '❤️‍🔥 Index', inWebnode ? web+'ami/' : pages),
-      link(doc, '🗂️ Les Annexes', web+'ami-annexes/'),
-      link(doc, '📜 Licence CC BY-SA 4.0', 'https://creativecommons.org/licenses/by-sa/4.0/deed.fr'),
-    );
+    fragment.innerHTML = charteNavigation.footer;
+    const footer = fragment.content.firstElementChild;
+    footer.classList.add('ami-annex-footer');
+    const label = /^([^ ]+) (.+)$/.exec(config.label);
+    footer.querySelector('.ap-sceau').textContent = label?.[1] || '❤️‍🔥';
+    footer.querySelector('.ap-titre').textContent = label?.[2] || config.label;
+    footer.querySelector('.ap-vol').textContent = 'Protocole de ConScience aMi · Les Annexes';
+    footer.querySelector('.ap-cit')?.remove();
     return {nav,footer,progress,fill};
   }
 

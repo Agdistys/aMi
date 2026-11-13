@@ -208,7 +208,10 @@ def charte_navigation(raw, routes, index):
     palette = re.search(r'#ami-charte\s*\{\s*/\* la Charte des Couleurs.*?--r:4px}', charte, re.S)
     rules = re.search(r'#ami-charte \.ami-barre\{--noir:var\(--onyx\);--plaque:[\s\S]*?(?=\n#ami-charte \.ami-pied\{--noir:)', charte)
     zoom = re.search(r'#ami-charte \.coin-zoom\{[\s\S]*?(?=/\* ── les liens du pied)', charte)
-    if not all((navbar, palette, rules, zoom)):
+    footer = re.search(r'<footer class="ami-pied">[\s\S]*?</footer>', charte)
+    footer_rules = re.search(r'#ami-charte \.ami-pied\{--noir:[\s\S]*?(?=/\* ── l.empilement des trois barres)', charte)
+    footer_colors = re.search(r'/\* 15 · LE PIED[\s\S]*?(?=/\* 11 · LE HAUT DE PAGE)', charte)
+    if not all((navbar, palette, rules, zoom, footer, footer_rules, footer_colors)):
         raise ValueError('La barre canonique de la Charte est incomplète')
 
     def css_style(name):
@@ -236,12 +239,12 @@ def charte_navigation(raw, routes, index):
     markup = once(markup,'class="ami-barre replie"','class="ami-barre ami-annex-bar replie"')
     css = '\n'.join((palette[0], rules[0], zoom[0], css_style('ami-navbar-evolution-v49-css'),
                      css_style('charte-index-initiation-v54'), css_style('ami-barre-1111'),
-                     css_style('ami-barre-1111-cibles')))
+                     css_style('ami-barre-1111-cibles'), footer_rules[0], footer_colors[0]))
     css = css.replace('#ami-charte', '[data-ami-annex-chrome]')
     fonts = re.search(r'<link href="(https://fonts.googleapis.com/css2\?[^"]+)" rel="stylesheet"', charte[charte.find('<style id="ami-navbar-evolution-v49-css">'):])
     if not fonts:
         raise ValueError('Police de la barre canonique absente')
-    return {'html':markup, 'css':css, 'fonts':fonts[1].replace('&amp;', '&')}
+    return {'html':markup, 'footer':footer[0], 'css':css, 'fonts':fonts[1].replace('&amp;', '&')}
 
 
 def adapt_annex(template, slug, label, path, raw):
@@ -322,6 +325,14 @@ def main():
             code = adapt_astro(code,path,raw)
         else:
             code = adapt_generic(code,slug,path,raw)
+        if slug == 'ami-lunion-du-tout':
+            # Match versioned navbar links by their charted filename stem.
+            volume_links = {
+                re.split(r'_V[0-9]', source, maxsplit=1)[0]: key
+                for key, source in volumes.items()
+            }
+            code = once(code, '/* __AMI_UNION_VOLUME_LINKS__ */ {}',
+                        json.dumps(volume_links, ensure_ascii=False))
         entries[route] = native_entry(
             code, path, raw, assets,
             'Ouvrir le volume sur GitHub Pages', PUBLISHER+('' if slug == 'ami' else slug+'/'),

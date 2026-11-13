@@ -92,6 +92,22 @@
     fragment.append(...source.head.querySelectorAll('meta[name^="ami:"],style,link[rel="stylesheet"],link[rel="preconnect"],script'), ...source.body.childNodes);
     const root = fragment.querySelector('#' + CSS.escape(cfg.root));
     if (!root) throw Error('Le volume attendu est absent.');
+    const volumeLinks = /* __AMI_UNION_VOLUME_LINKS__ */ {};
+    const oldAnnexes = {
+      'benchmark':'ami-benchmark',
+      'ami-tests':'ami-mesures-ia',
+      'catalogue-des-outils-ami':'ami-catalogue-des-outils',
+    };
+    for (const link of root.querySelectorAll('#amiBarre a[href]')) {
+      const path = link.getAttribute('href');
+      const volume = path.match(/^\.\.\/(volumes_protocole\/[^#?]+)(.*)$/);
+      const alias = path.match(/^\.\.\/(ami-[a-z0-9-]+)\/(.*)$/);
+      const annex = path.match(/^https:\/\/(?:www\.)?agdistys\.fr\/([^/#?]+)\/?(.*)$/);
+      const target = volume ? volumeLinks[volume[1].split(/_V[0-9]/)[0]]
+        : alias ? (oldAnnexes[alias[1]] || alias[1])
+        : annex ? oldAnnexes[annex[1]] : null;
+      if (target) link.href = 'https://www.agdistys.fr/' + target + '/' + (volume || alias || annex)[2];
+    }
     const stickyBridge = fragment.querySelector('#ami-union-collant-pont');
     if (stickyBridge) stickyBridge.textContent = stickyBridge.textContent.replace(
       "if (/^(TH|THEAD|TR|TD|CAPTION)$/.test(e.tagName)) return;",
