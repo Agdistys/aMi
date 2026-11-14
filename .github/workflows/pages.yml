@@ -16,6 +16,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - run: bash fichiers_depot/assemble-pages.sh . _site
       - uses: actions/upload-pages-artifact@v4
         with:

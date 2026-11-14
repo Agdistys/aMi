@@ -4,6 +4,7 @@ from hashlib import sha256
 from html import escape
 from urllib.parse import urljoin
 from xml.etree import ElementTree
+from pathlib import Path
 
 from markdown_reading import render_markdown
 from public_graph import publish_graph
@@ -11,6 +12,7 @@ from public_graph import publish_graph
 
 READING_PATH = 'lecture/'
 CORPUS_PATH = READING_PATH + 'protocole-aMi.md'
+BRIEF_PATH = READING_PATH + 'fiche/'
 
 STYLE = """
 :root{color-scheme:dark;background:#0c0c13;color:#ede5d7;font:1rem/1.65 system-ui,sans-serif;hyphens:none;overflow-wrap:anywhere}
@@ -87,6 +89,7 @@ def publish_corpus(site, entries, base_url):
     directory.mkdir(exist_ok=True)
     reading_page = base_url + READING_PATH
     corpus_url = base_url + CORPUS_PATH
+    brief_url = base_url + BRIEF_PATH
     registry = {entry['slug']: entry for entry in entries}
     contribution = registry['ami-citer-contester-contribuer']['page_url']
     md_entries = [entry for entry in entries if entry['markdown']]
@@ -105,7 +108,7 @@ def publish_corpus(site, entries, base_url):
         '## Éditions',
         *(f'- [{entry["title"]}]({entry["reading_url"]})' for entry in entries),
     ]
-    urls = [reading_page, reading_page + 'graphe/']
+    urls = [reading_page, reading_page + 'graphe/', brief_url]
     rows = []
     for entry in entries:
         slug = entry['slug']
@@ -154,6 +157,8 @@ def publish_corpus(site, entries, base_url):
 <p>{link(contribution, 'Citer · Contester · Contribuer')}</p>
 </section>
 <h2>Accès au corpus</h2>
+<p>{link(brief_url, 'Commencer par la fiche de lecture')} · {link(brief_url + 'texte.md', 'Fiche en Markdown')}</p>
+<p>{link(reading_page + 'V001_2026-11-14/', 'Édition unifiée du 14 novembre 2026 · Lire par chapitres')}</p>
 <p>{link(corpus_url, f'Télécharger les {len(md_entries)} Versions Texte réunies (Markdown, {file_size(len(corpus))})')}</p>
 <p>Pour une question ciblée, ouvre l’édition concernée ci-dessous. Le fichier réuni peut dépasser la capacité de lecture d’un assistant en un seul passage.</p>
 <p>{link(reading_page + 'graphe/', 'Explorer le graphe du corpus public')} · {link(reading_page + 'graphe.json', 'Graphe au format JSON')}</p>
@@ -166,4 +171,20 @@ def publish_corpus(site, entries, base_url):
         encoding='utf-8',
     )
     publish_graph(site, entries, base_url, reading_page)
+    brief = Path(__file__).with_name('fiche-lecture-ia.md').read_text(encoding='utf-8')
+    brief_dir = site / BRIEF_PATH
+    brief_dir.mkdir(exist_ok=True)
+    (brief_dir / 'texte.md').write_text(brief, encoding='utf-8')
+    brief_html = render_markdown(brief)
+    (brief_dir / 'index.html').write_text(
+        document('Protocole de ConScience aMi · Fiche de lecture',
+                 'Cadre éthique, repères et sources du Protocole de ConScience aMi.',
+                 brief_url, f'<article>{brief_html}</article>', brief_url + 'texte.md'),
+        encoding='utf-8',
+    )
+    (site / 'webnode/blocs/ami-lecture-ia.txt').write_text(
+        f'<style>.ami-fiche-ia{{max-width:68rem;margin:auto;padding:1rem;text-align:left;overflow-wrap:anywhere}}</style>\n'
+        f'<article class="ami-fiche-ia">{brief_html}</article>\n',
+        encoding='utf-8',
+    )
     add_to_sitemap(site / 'sitemap.xml', urls)

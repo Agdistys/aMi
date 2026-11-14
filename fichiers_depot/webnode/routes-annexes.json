@@ -39,6 +39,11 @@
     "label": "🧠 Tuto d’Esprit Critique",
     "href": "https://agdistys.github.io/aMi/ami-tuto-esprit-critique/"
   },
+  "/ami-graphe/": {
+    "kind": "link",
+    "label": "🗺️ Graphe du corpus public",
+    "href": "https://agdistys.github.io/aMi/lecture/graphe/"
+  },
   "/ami-mesures-ia/": {
     "kind": "link",
     "label": "📏 Campagnes de Mesures IA",

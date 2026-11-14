@@ -284,8 +284,8 @@ def index_reading_link(html):
     return html[:annex_list] + '\n' + graph_annex() + html[annex_list:]
 
 
-def graph_annex():
-    return (f'<li>🗺️ <a href="{PAGES + READING_PATH}graphe/">Graphe du corpus public</a>'
+def graph_annex(url=PAGES + READING_PATH + 'graphe/'):
+    return (f'<li>🗺️ <a href="{escape(url, quote=True)}">Graphe du corpus public</a>'
             ' — les éditions du Protocole et les renvois entre leurs textes.</li>\n')
 
 
@@ -366,7 +366,9 @@ def publish(source, site, routes, index, bootstrap):
                 (directory/(route+suffix)).write_bytes(fragment.read_bytes())
         _, title, direct, head = next(entry for entry in entries if entry[0] == slug)
         entries.append((route, f'{title} (adresse Webnode : {route})', direct, head))
-    (directory/'ami-annexes-graphe.txt').write_text('<ul>\n' + graph_annex() + '</ul>\n', encoding='utf-8')
+    (directory/'ami-annexes-graphe.txt').write_text(
+        '<ul>\n' + graph_annex('https://www.agdistys.fr/ami-graphe/') + '</ul>\n', encoding='utf-8',
+    )
     rows = '\n'.join(
         f'<li><strong>{escape(title)}</strong> : '
         + (f'<a href="{slug}-lecture.txt">Ligne à ajouter</a> · ' if direct else '')
@@ -384,7 +386,8 @@ def publish(source, site, routes, index, bootstrap):
 <p><strong>Ligne à ajouter :</strong> colle ce code HTML à côté du volume déjà installé. Il affiche l’adresse de la Version Texte en HTML.</p>
 <p><strong>Bloc complet :</strong> à utiliser quand tu installes ou remplaces tout le bloc du volume. Il comprend déjà la ligne de lecture.</p>
 <p><strong>Balise pour l’en-tête :</strong> facultative, à ajouter dans les paramètres SEO de la page correspondante.</p>
-<p><a href="ami-annexes-graphe.txt">Lien du graphe à ajouter sur la page des annexes</a>.</p>
+<p><a href="ami-graphe.txt">Bloc pour la page /ami-graphe</a> · <a href="ami-annexes-graphe.txt">Lien du graphe pour le sommaire des annexes</a>.</p>
+<p><a href="ami-lecture-ia.txt">Fiche de lecture à publier directement dans une page Webnode</a>.</p>
 <ul>{rows}</ul></main></body></html>
 ''', encoding='utf-8')
     publish_corpus(site, corpus_entries, PAGES)

@@ -181,13 +181,14 @@ def publish_graph(site, entries, base_url, reading_page):
     (path / 'graphe.json').write_text(json.dumps(graph, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     title = graph['titre']
     reading = escape(reading_page, quote=True)
+    json_url = escape(urljoin(base_url, 'lecture/graphe.json'), quote=True)
     graph_url = escape(urljoin(base_url, 'lecture/graphe/'), quote=True)
     (directory / 'index.html').write_text(f'''<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="description" content="La carte des éditions publiques aMi et des renvois de leurs Versions Texte.">
 <link rel="canonical" href="{graph_url}">
-<link rel="alternate" type="application/json" title="Graphe public aMi" href="../graphe.json">
+<link rel="alternate" type="application/json" title="Graphe public aMi" href="{json_url}">
 <style>
 :root{{color-scheme:dark;background:#09090e;color:#f1e6d3;font:1rem/1.6 system-ui,sans-serif}}
 body{{margin:0}}main{{max-width:65rem;margin:auto;padding:clamp(1rem,4vw,2.5rem)}}
@@ -202,7 +203,7 @@ li:nth-child(odd),li:target{{background:#16131b}}li:target{{outline:1px solid #f
 li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;outline-offset:3px}}
 </style></head><body><main>
 <h1>{title}</h1>
-<p><a id="lecture" href="{reading}">Index de Lecture</a> · <a href="../graphe.json">Données JSON</a> · <a href="#editions">Liste des éditions</a></p>
+<p><a id="lecture" href="{reading}">Index de Lecture</a> · <a href="{json_url}">Données JSON</a> · <a href="#editions">Liste des éditions</a></p>
 <figure>
 {plot(graph)}
 <figcaption>Le centre représente l’Index de Lecture. L’ambre indique les volumes et le turquoise, les annexes. Les traits turquoise suivent les renvois relevés dans les Versions Texte. Les numéros correspondent à la liste ci-dessous.</figcaption>

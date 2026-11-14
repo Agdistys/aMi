@@ -9,6 +9,7 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse
 import json
 import re
+from dated_corpus import publish_dated_corpus
 from public_reading import (
     BAREME, BAREME_LABEL, COMPACT_NAV_CSS, COMPACT_NAV_VOLUMES, CURRENT_SUBLIMATION_LINK, REGISTER,
     SUBLIMATION_LINK, canonicalize, graph_annex, navbar_routes, publish, without_door_titles,
@@ -412,6 +413,8 @@ def main():
         for key,block in blocks.items():
             (args.write_templates/(key.removeprefix('code-')+'.html')).write_text(block+'\n',encoding='utf-8')
     annexes = read_annexes(args.annexes)
+    graph_route = '/ami-graphe/'
+    graph = annexes.pop(graph_route, None)
     entries = {}
     assets = args.site/'webnode/adapters'
     assets.mkdir(parents=True,exist_ok=True)
@@ -466,11 +469,26 @@ def main():
                 code = adapt_annex(template, slug, entry['label'], path, raw)
                 annex_content[slug] = native_entry(code, path, raw, assets, entry['label'], entry['href'])
             annexes[route] = annex_content[slug]
-    catalogue = {'schema':1,'routes':{**entries,**annexes}}
-    (args.site/'webnode/catalogue-v1.json').write_text(json.dumps(catalogue,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     snippet = args.bootstrap.read_text()
     (args.site/'webnode/bloc-webnode-v1.txt').write_text(snippet)
     publish(args.source,args.site,routes,volumes['ami'],snippet)
+    publish_dated_corpus(args.source, args.site, PUBLISHER)
+    if graph and args.annex_template:
+        slug, path = 'ami-graphe', 'annexes/Graphe_Public_aMi.html'
+        graph_page = (args.site/'lecture/graphe/index.html').read_bytes()
+        raw = standalone_annex(graph_page, slug, graph['label'], shell_path.name)
+        (args.site/path).write_bytes(raw)
+        code = adapt_annex(template, slug, graph['label'], path, raw)
+        annexes[graph_route] = native_entry(code, path, raw, assets, graph['label'], graph['href'])
+        (args.site/'webnode/blocs/ami-graphe.txt').write_text(
+            f'<p>Carte des éditions du Protocole aMi et de leurs renvois. '
+            f'<a href="{graph["href"]}">Ouvrir le graphe et ses textes</a>.</p>\n{snippet}',
+            encoding='utf-8',
+        )
+    elif graph:
+        annexes[graph_route] = graph
+    catalogue = {'schema':1,'routes':{**entries,**annexes}}
+    (args.site/'webnode/catalogue-v1.json').write_text(json.dumps(catalogue,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(f'{len(entries)} intégrateurs natifs, {len(annexes)} routes annexes')
 
 

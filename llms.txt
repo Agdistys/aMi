@@ -6,6 +6,9 @@ Les pages Webnode sont sur https://www.agdistys.fr. Les adresses stables ci-dess
 
 ## Entrée en matière
 
+- [Fiche de lecture aMi](https://agdistys.github.io/aMi/lecture/fiche/): Présentation courte du cadre éthique et des sources ([Markdown](https://agdistys.github.io/aMi/lecture/fiche/texte.md)).
+- [Édition unifiée du 14 novembre 2026](https://agdistys.github.io/aMi/lecture/V001_2026-11-14/): Édition publique datée, avec sommaire par volume et chapitres courts en HTML et Markdown.
+
 - [Lire le Protocole aMi](https://agdistys.github.io/aMi/lecture/): Repères éthiques et éditions de lecture en HTML statique.
 - [Corpus public réuni](https://agdistys.github.io/aMi/lecture/protocole-aMi.md): Versions Texte réunies en Markdown, avec sources et périmètre. Pour une question ciblée, ouvrir le volume concerné depuis l’accueil de lecture.
 - [Graphe du corpus public](https://agdistys.github.io/aMi/lecture/graphe/): Catalogue et renvois entre éditions publiques ([JSON](https://agdistys.github.io/aMi/lecture/graphe.json)).
