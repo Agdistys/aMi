@@ -175,12 +175,28 @@ def recover_volume_fetch(code):
 
 def adapt_navigation(code, slug, routes):
     source = (Path(__file__).with_name('volume-navigation.js')).read_text().strip()
+    chrome = Path(__file__).with_name('volume-chrome.css').read_text()
     source = once(source, '/* __AMI_NAV_ROUTES__ */ null',
                   json.dumps(routes, ensure_ascii=False, separators=(',', ':')))
     base = 'sourceURL' if slug == 'ami-astroglobe' else 'base' if slug == 'ami' else 'expected'
     if slug == 'ami-astroglobe':
         marker = '    const cockpit = frame.contentDocument;'
-        return once(code, marker, marker + '\n' + source + f'\n    tuneNavigation(cockpit, {base});')
+        return once(code, marker, marker + '\n' + source + f'\n    tuneNavigation(cockpit, {base});\n'
+                    '    const chromeStyle = cockpit.createElement("style");\n'
+                    f'    chromeStyle.textContent = {json.dumps(chrome)};\n'
+                    '    cockpit.head.append(chromeStyle);')
+    style = 'nativeStyle' if slug == 'ami' else 'style'
+    marker = f'    host.append(fragment, {style});'
+    code = once(code, marker, f'    {style}.textContent += {json.dumps(chrome)};\n' + marker)
+    if slug != 'ami' and slug != 'ami-miroir':
+        code = once(code, '      const owner = active || host;',
+                    '''      const nav = (active || host).querySelector('#amiBarre');
+      const owner = nav || active || host;''')
+        code = once(code, "      const offset = active ? 0 : Math.max(0,site?.getBoundingClientRect().bottom || 0);",
+                    '''      const sitePosition = site && getComputedStyle(site).position;
+      const siteBounds = site?.getBoundingClientRect();
+      const offset = !active && ['sticky','fixed'].includes(sitePosition) && siteBounds.top <= 2
+        ? Math.max(0,siteBounds.bottom) : 0;''')
     marker = "    for (const style of fragment.querySelectorAll('style'))"
     prefix = source + f'\n    tuneNavigation(fragment, {base});\n'
     if slug in {'ami-initiation', 'ami-lunion-du-tout'}:
@@ -313,7 +329,8 @@ def charte_navigation(raw, routes, index):
     fonts = re.search(r'<link href="(https://fonts.googleapis.com/css2\?[^"]+)" rel="stylesheet"', charte[charte.find('<style id="ami-navbar-evolution-v49-css">'):])
     if not fonts:
         raise ValueError('Police de la barre canonique absente')
-    return {'html':markup, 'footer':footer[0], 'css':css, 'fonts':fonts[1].replace('&amp;', '&')}
+    chrome = Path(__file__).with_name('volume-chrome.css').read_text()
+    return {'html':markup, 'footer':footer[0], 'css':css+'\n'+chrome, 'fonts':fonts[1].replace('&amp;', '&')}
 
 
 def adapt_annex(template, slug, label, path, raw):

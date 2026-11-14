@@ -87,11 +87,8 @@
     // L’Index dispose de ses propres chapitres et de ses propres commandes.
     fragment.querySelector('#passe-bloc-2026-10-26-js')?.remove();
     fragment.querySelector('#index-reading-progress-script')?.remove();
-    const sticky = fragment.querySelector('#passe-collant-2026-10-26');
-    if (sticky) sticky.textContent = sticky.textContent.replace(
-      'var c = getComputedStyle(e);\n     if (c.position',
-      "if (e.id === 'index-reading-progress') return;\n     var c = getComputedStyle(e);\n     if (c.position"
-    );
+    const progressBar = fragment.querySelector('#index-reading-progress');
+    if (progressBar) fragment.querySelector('#amiBarre')?.prepend(progressBar);
     const voices = fragment.querySelector('#preface > .voix');
     if (voices) {
       const cards = Array.from(voices.children).filter(card => card.classList.contains('voix-carte'));
@@ -323,12 +320,6 @@
         overflow:hidden;
         clip-path:inset(50%);
         white-space:nowrap;
-      }
-      #ami-index-webnode #ami-index #index-reading-progress {
-        top:var(--top-site,0px) !important;
-      }
-      #ami-index-webnode #ami-index.ami-plein #index-reading-progress {
-        top:0 !important;
       }
       #ami-index-webnode #ami-index.ami-faux-fs .ami-barre {
         display:block;

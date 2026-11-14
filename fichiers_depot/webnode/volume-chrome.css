@@ -1,0 +1,45 @@
+/* Keep the reading line inside the sticky bar, outside the site's offset pass. */
+#amiBarre > :is([data-ami-native-progress], #index-reading-progress) {
+  position: absolute !important;
+  inset: 0 0 auto !important;
+  z-index: 4;
+}
+
+/* A CSS fullscreen surface is still inside Webnode's stacking contexts. */
+body:has(:is(#ami-volume-webnode, #ami-index-webnode) .ami-faux-fs, .ami-annex-host.ami-annex-faux)
+  :is(.h-w.h-f.wnd-fixed, #cookiebar) {
+  visibility: hidden !important;
+}
+
+@media (max-width: 600px) {
+  #amiBarre#amiBarre#amiBarre#amiBarre:has(#amiPlein[aria-pressed="true"]) > .coin-zoom {
+    position: absolute !important;
+    inset: .34rem 2.9rem auto auto !important;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    inline-size: max-content !important;
+    gap: 4px !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  #amiBarre#amiBarre#amiBarre#amiBarre:has(#amiPlein[aria-pressed="true"]) .coin-zoom > :is(#amiZoomM, #amiZoomP) {
+    width: 26px !important;
+    height: 32px !important;
+    min-width: 26px !important;
+    max-width: 26px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    flex: 0 0 26px !important;
+    box-sizing: border-box;
+    font-size: .86rem !important;
+  }
+
+  #amiBarre#amiBarre:has(#amiPlein[aria-pressed="true"]) .coin-zoom > .zv {
+    font-size: .6rem !important;
+    letter-spacing: 0 !important;
+    min-width: 0 !important;
+    white-space: nowrap;
+  }
+}
