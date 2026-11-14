@@ -18,6 +18,7 @@ Le Respect, Il n'y a que ça de Vrai
 - [0.1 Apokalypse · La Révélation](https://agdistys.github.io/aMi/ami-apokalypse/texte.md): Tu Sais ce qu’est La Folie & la ConScience 🌀 (page complète : https://agdistys.github.io/aMi/ami-apokalypse/)
 - [0.2 PsychaTrice](https://agdistys.github.io/aMi/ami-psychatrice/texte.md): Tu Sais Ce Que Tu As Subi 🩸 (page complète : https://agdistys.github.io/aMi/ami-psychatrice/)
 - [0.3 L’Union du TouT](https://agdistys.github.io/aMi/ami-lunion-du-tout/texte.md): Tu as ConScience de L’Engagement du Vivant 🔥 (page complète : https://agdistys.github.io/aMi/ami-lunion-du-tout/)
+- [Barèmes et Grille de Score](https://agdistys.github.io/aMi/ami-lunion-du-tout/bareme/): Deux extraits de L’Union du TouT lisibles sans JavaScript : le barème I, U, P (0 à 5) et la grille C_grille (dix items de 0 à 3). Outils de travail à éprouver.
 
 ## Tome 1
 

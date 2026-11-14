@@ -129,6 +129,8 @@
         position:relative;
       }
       #ami-volume-webnode #ami-vol-union #ami-union .ami-fil-title::after {position:absolute;right:.25rem;top:0;}
+      #ami-volume-webnode .ami-bareme-link {text-align:center;padding:.55rem 1rem;margin:0}
+      #ami-volume-webnode .ami-bareme-link a {color:#ffd06a;text-decoration:underline}
       #ami-volume-webnode #ami-vol-union #amiBarre {position:sticky!important;top:var(--ami-union-site-top,0px)!important;overflow:visible!important;}
       #ami-volume-webnode #ami-vol-union #u35Nav {position:sticky!important;top:calc(var(--ami-union-site-top,0px) + var(--ami-union-nav-height,0px))!important;}
       #ami-volume-webnode #ami-vol-union #reponse-du-volume > details > summary {list-style:none;cursor:pointer;position:relative;padding-inline:1.5rem;}
@@ -260,6 +262,9 @@
       window.addEventListener('scroll',scheduleSticky,{passive:true});
       window.addEventListener('resize',scheduleSticky,{passive:true});
       document.addEventListener('fullscreenchange',scheduleSticky);
+      document.addEventListener('webkitfullscreenchange',scheduleSticky);
+      const header = document.querySelector('.h-w.h-f.wnd-fixed');
+      if (header) new MutationObserver(scheduleSticky).observe(header,{attributes:true,attributeFilter:['class','style']});
       scheduleSticky();
     }
 

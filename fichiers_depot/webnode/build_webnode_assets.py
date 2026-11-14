@@ -10,7 +10,7 @@ from urllib.parse import urljoin, urlparse
 import json
 import re
 from public_reading import (
-    COMPACT_NAV_CSS, COMPACT_NAV_VOLUMES, CURRENT_SUBLIMATION_LINK, REGISTER,
+    BAREME, BAREME_LABEL, COMPACT_NAV_CSS, COMPACT_NAV_VOLUMES, CURRENT_SUBLIMATION_LINK, REGISTER,
     SUBLIMATION_LINK, canonicalize, navbar_routes, publish, without_door_titles,
 )
 
@@ -202,6 +202,18 @@ def adapt_navigation(code, slug, routes):
     if slug in {'ami-initiation', 'ami-lunion-du-tout'}:
         prefix += (f'    for (const link of fragment.querySelectorAll(\'a[href="{SUBLIMATION_LINK}"]\')) '
                    f'link.href = "{CURRENT_SUBLIMATION_LINK}";\n')
+    if slug == 'ami-lunion-du-tout':
+        prefix += f'''    const volumeLinks = fragment.querySelector('#ami-union > .ami-fil-tome-v1');
+    if (volumeLinks) {{
+      const reading = document.createElement('p');
+      reading.className = 'ami-bareme-link';
+      const link = document.createElement('a');
+      link.href = {json.dumps(BAREME)};
+      link.textContent = {json.dumps(BAREME_LABEL)};
+      reading.append(link);
+      volumeLinks.before(reading);
+    }}
+'''
     if slug in COMPACT_NAV_VOLUMES:
         css = COMPACT_NAV_CSS.replace('#amiBarre#amiBarre', '#ami-volume-webnode #amiBarre#amiBarre')
         # Insert after style isolation so the selectors can start at the host itself.
