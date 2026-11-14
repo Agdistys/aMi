@@ -4,6 +4,8 @@ from html.parser import HTMLParser
 from urllib.parse import urljoin, urlsplit
 import re
 
+from corpus_reading import READING_PATH, publish_corpus
+
 PAGES = 'https://agdistys.github.io/aMi/'
 REGISTER = 'annexes/Registre_en_ligne.html'
 UNION = 'ami-lunion-du-tout'
@@ -188,13 +190,21 @@ def alternate_markdown(reading):
     return f'<link rel="alternate" type="text/markdown" title="Version Texte" href="{escape(reading, quote=True)}">'
 
 
-def direct_reading(reading, slug):
-    label = 'Version Texte intégrale (Markdown)' if reading.endswith('.md') else 'Index de Lecture'
+def direct_reading(reading, slug, html_reading):
     url = escape(reading, quote=True)
     extra = f' · {BAREME_LINK}' if slug == UNION else ''
+    if html_reading:
+        primary = escape(html_reading, quote=True)
+        content = (
+            'Pour citer ou analyser le volume, consulte le texte intégral de l’édition publiée. '
+            f'<a style="text-decoration:underline;overflow-wrap:anywhere;hyphens:none" href="{primary}">{primary}</a>'
+            f' · <a href="{url}">Markdown</a>'
+        )
+    else:
+        content = f'<a style="overflow-wrap:anywhere" href="{url}">Index de Lecture</a>'
     return (f'<p class="ami-source-directe" style="box-sizing:border-box;max-width:68rem;margin:.45rem auto;'
             f'padding-inline:clamp(.75rem,3vw,1.5rem);font:normal .9rem/1.5 system-ui,sans-serif;text-align:left">'
-            f'{label} : <a style="text-decoration:underline;overflow-wrap:anywhere;hyphens:none" href="{url}">{url}</a>{extra}</p>\n')
+            f'{content}{extra}</p>\n')
 
 
 def webnode_block(bootstrap, title, description, opening, slug, direct):
@@ -264,12 +274,28 @@ def union_reading_links(html):
     return html[:position] + link + html[position:]
 
 
+def index_reading_link(html):
+    marker = '<section class="index-export emporter"'
+    position = html.index(marker)
+    link = (f'<p style="max-width:980px;margin:1rem auto;padding:0 1rem">'
+            f'<a href="{PAGES + READING_PATH}">Lire le Protocole · Versions Texte et graphe public</a></p>\n')
+    html = html[:position] + link + html[position:]
+    annex_list = html.index('<ul>', html.index('id="ix28-annexes"')) + len('<ul>')
+    return html[:annex_list] + '\n' + graph_annex() + html[annex_list:]
+
+
+def graph_annex():
+    return (f'<li>🗺️ <a href="{PAGES + READING_PATH}graphe/">Graphe du corpus public</a>'
+            ' — les éditions du Protocole et les renvois entre leurs textes.</li>\n')
+
+
 def publish(source, site, routes, index, bootstrap):
     directory = site/'webnode/blocs'
     directory.mkdir(parents=True, exist_ok=True)
     public_routes = {'ami': index, **routes}
     navigation = navbar_routes(public_routes)
     entries = []
+    corpus_entries = []
     for slug, path in public_routes.items():
         target = REGISTER if slug == 'ami-registre' else path
         built = site/target
@@ -283,18 +309,30 @@ def publish(source, site, routes, index, bootstrap):
         md = (source/path).with_suffix('.md')
         alias = site/slug
         alias.mkdir(exist_ok=True)
-        reading, blocks = None, summary.blocks
+        reading, html_reading, blocks = None, None, summary.blocks
         if md.is_file():
             (alias/'texte.md').write_bytes(md.read_bytes())
             reading = PAGES + slug + '/texte.md'
+            html_reading = PAGES + slug + '/lecture/'
             blocks = from_markdown(md)
             (directory/(slug+'-en-tete.txt')).write_text(alternate_markdown(reading)+'\n', encoding='utf-8')
         elif slug == 'ami-registre':
             reading = PAGES + 'annexes/Registre_Index_Lecture.html'
-        direct = direct_reading(reading, slug) if reading else ''
+        direct = direct_reading(reading, slug, html_reading) if reading else ''
+        if slug == 'ami':
+            direct += (f'<p class="ami-source-directe"><a href="{PAGES + READING_PATH}">'
+                       'Lire le Protocole · Versions Texte et graphe public</a></p>\n')
         if direct:
             (directory/(slug+'-lecture.txt')).write_text(direct, encoding='utf-8')
         entries.append((slug, title, bool(direct), bool(reading and reading.endswith('.md'))))
+        corpus_entries.append({
+            'slug': slug,
+            'title': title,
+            'source_url': PAGES + target,
+            'page_url': href(slug),
+            'reading_url': html_reading or reading or href(slug),
+            'markdown': bool(html_reading),
+        })
         alias_html = relocate(stable_navbar(html, navigation, target), target)
         if reading and reading.endswith('.md'):
             alias_html = HEAD.sub(lambda match: match[0]+'\n'+alternate_markdown(reading)+'\n', alias_html, count=1)
@@ -312,6 +350,8 @@ def publish(source, site, routes, index, bootstrap):
         if slug == UNION:
             publish_union_bareme(alias, html, target)
             alias_html = union_reading_links(alias_html)
+        if slug == 'ami':
+            alias_html = index_reading_link(alias_html)
         (alias/'index.html').write_text(alias_html)
         if slug == 'ami':
             (site/'index.html').write_text(alias_html)
@@ -326,6 +366,7 @@ def publish(source, site, routes, index, bootstrap):
                 (directory/(route+suffix)).write_bytes(fragment.read_bytes())
         _, title, direct, head = next(entry for entry in entries if entry[0] == slug)
         entries.append((route, f'{title} (adresse Webnode : {route})', direct, head))
+    (directory/'ami-annexes-graphe.txt').write_text('<ul>\n' + graph_annex() + '</ul>\n', encoding='utf-8')
     rows = '\n'.join(
         f'<li><strong>{escape(title)}</strong> : '
         + (f'<a href="{slug}-lecture.txt">Ligne à ajouter</a> · ' if direct else '')
@@ -340,8 +381,10 @@ def publish(source, site, routes, index, bootstrap):
 <style>:root{{color-scheme:dark;background:#101018;color:#f2e5cd;font:1rem/1.65 system-ui,sans-serif}}main{{max-width:68rem;margin:2rem auto;padding-inline:1rem}}a{{color:#ffd06a}}li{{margin:.5rem 0}}</style>
 </head><body><main>
 <h1>Codes Webnode · aMi</h1>
-<p><strong>Ligne à ajouter :</strong> colle ce code HTML à côté du volume déjà installé. Il affiche l’adresse de lecture complète.</p>
+<p><strong>Ligne à ajouter :</strong> colle ce code HTML à côté du volume déjà installé. Il affiche l’adresse de la Version Texte en HTML.</p>
 <p><strong>Bloc complet :</strong> à utiliser quand tu installes ou remplaces tout le bloc du volume. Il comprend déjà la ligne de lecture.</p>
 <p><strong>Balise pour l’en-tête :</strong> facultative, à ajouter dans les paramètres SEO de la page correspondante.</p>
+<p><a href="ami-annexes-graphe.txt">Lien du graphe à ajouter sur la page des annexes</a>.</p>
 <ul>{rows}</ul></main></body></html>
 ''', encoding='utf-8')
+    publish_corpus(site, corpus_entries, PAGES)

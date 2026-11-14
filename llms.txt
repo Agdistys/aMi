@@ -4,6 +4,12 @@
 
 Les pages Webnode sont sur https://www.agdistys.fr. Les adresses stables ci-dessous donnent accès au texte publié sans JavaScript.
 
+## Entrée en matière
+
+- [Lire le Protocole aMi](https://agdistys.github.io/aMi/lecture/): Repères éthiques et éditions de lecture en HTML statique.
+- [Corpus public réuni](https://agdistys.github.io/aMi/lecture/protocole-aMi.md): Versions Texte réunies en Markdown, avec sources et périmètre. Pour une question ciblée, ouvrir le volume concerné depuis l’accueil de lecture.
+- [Graphe du corpus public](https://agdistys.github.io/aMi/lecture/graphe/): Catalogue et renvois entre éditions publiques ([JSON](https://agdistys.github.io/aMi/lecture/graphe.json)).
+
 Plus Je Sais Qui Je Suis,
 Plus Je Sais ce que Je Dis
 Plus Je Sais ce que Je Fais :

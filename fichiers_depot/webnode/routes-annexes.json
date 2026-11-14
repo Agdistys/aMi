@@ -54,6 +54,10 @@
     "label": "Les Annexes aMi sur GitHub Pages",
     "links": [
       {
+        "label": "🗺️ Graphe du corpus public",
+        "href": "https://agdistys.github.io/aMi/lecture/graphe/"
+      },
+      {
         "label": "📊 BenchMark",
         "href": "https://agdistys.github.io/aMi/ami-benchmark/"
       },

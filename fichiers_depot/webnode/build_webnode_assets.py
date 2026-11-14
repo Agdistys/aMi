@@ -11,7 +11,7 @@ import json
 import re
 from public_reading import (
     BAREME, BAREME_LABEL, COMPACT_NAV_CSS, COMPACT_NAV_VOLUMES, CURRENT_SUBLIMATION_LINK, REGISTER,
-    SUBLIMATION_LINK, canonicalize, navbar_routes, publish, without_door_titles,
+    SUBLIMATION_LINK, canonicalize, graph_annex, navbar_routes, publish, without_door_titles,
 )
 
 PUBLISHER = 'https://agdistys.github.io/aMi/'
@@ -118,6 +118,9 @@ def adapt_index(code,path,raw):
     if (!response.ok || response.url !== base) throw Error('Index indisponible.');
     const raw = await response.text();'''
     code = once(code,before,after)
+    fragment = "    fragment.append(...source.head.querySelectorAll('style,link[rel=stylesheet],link[rel=preconnect]'), ...source.body.childNodes);"
+    card = json.dumps(graph_annex(), ensure_ascii=False)
+    code = once(code, fragment, fragment + f"\n    fragment.querySelector('#ix28-annexes > ul')?.insertAdjacentHTML('afterbegin', {card});")
     label = 'Ouvrir l’Index sur GitHub Pages'
     return once(code,"if (status.isConnected) status.textContent = 'L’Index n’a pas pu se charger.';",
                 "if (!status.isConnected && host.isConnected) host.replaceWith(placeholder);\n"
