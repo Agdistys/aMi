@@ -298,6 +298,27 @@ def publish_dated_corpus(source, site, base_url):
         for name in sorted(hashes):
             info = ZipInfo(name, date_time=(2026, 11, 14, 0, 0, 0))
             archive.writestr(info, (directory / name).read_bytes(), compress_type=ZIP_DEFLATED)
+    pack = {
+        '01-Fiche-de-lecture.md': site/'lecture/fiche/texte.md',
+        '02-Livre-Protocole-aMi.md': directory/'protocole-aMi.md',
+        '03-Graphe-public-aMi.html': site/'lecture/graphe/index.html',
+        '04-Graphe-public-aMi.json': site/'lecture/graphe.json',
+        '05-MetaMatrice-publique.md': site/'ami-metamatrice/texte.md',
+        '06-MetaMatrice-aMi-V46-PUBLIC.xlsx': site/'annexes/MetaMatrice_aMi_V46_PUBLIC.xlsx',
+        '07-Benchmark-public-aMi.md': site/'ami-benchmark/texte.md',
+    }
+    guide = (f'# Pack IA · Protocole aMi\n\nAgdistys · Diane Serant · CC BY-SA 4.0.\n\n'
+             'Commence par la fiche de lecture. Joins ensuite le livre ou un chapitre ciblé. '
+             'Le graphe indique les renvois entre éditions publiques. La MétaMatrice et le Benchmark complètent la lecture.\n\n'
+             f'Sommaire du livre du {DATE_LABEL} : {canonical}\n')
+    with ZipFile(site/'lecture/Pack-IA-aMi.zip', 'w', compression=ZIP_DEFLATED) as archive:
+        archive.writestr('00-Lire-d-abord.md', guide)
+        checksums = []
+        for name, path in pack.items():
+            raw = path.read_bytes()
+            archive.writestr(name, raw)
+            checksums.append(f'{sha256(raw).hexdigest()}  {name}')
+        archive.writestr('SHA256SUMS.txt', '\n'.join(checksums) + '\n')
     pages = [canonical, canonical + BOOK_NAME]
     pages.extend(canonical + block['html']['fichier'] for volume in manifest_volumes for block in volume['blocs'])
     add_to_sitemap(site/'sitemap.xml', pages)

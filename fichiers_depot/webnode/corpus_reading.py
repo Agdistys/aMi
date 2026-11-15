@@ -5,6 +5,7 @@ from html import escape
 from urllib.parse import urljoin
 from xml.etree import ElementTree
 from pathlib import Path
+import re
 
 from markdown_reading import render_markdown
 from public_graph import publish_graph
@@ -158,6 +159,7 @@ def publish_corpus(site, entries, base_url):
 <p>{link(contribution, 'Citer · Contester · Contribuer')}</p>
 </section>
 <h2>Accès au corpus</h2>
+<p>{link(reading_page + 'Pack-IA-aMi.zip', 'Télécharger le pack IA')}</p>
 <p>{link(brief_url, 'Commencer par la fiche de lecture')} · {link(brief_url + 'texte.md', 'Fiche en Markdown')}</p>
 <p>{link(reading_page + 'V001_2026-11-14/', 'Édition unifiée du 14 novembre 2026 · Lire par chapitres')}</p>
 <p>{link(corpus_url, f'Télécharger les {len(md_entries)} Versions Texte réunies (Markdown, {file_size(len(corpus))})')}</p>
@@ -183,9 +185,15 @@ def publish_corpus(site, entries, base_url):
                  brief_url, f'<article>{brief_html}</article>', brief_url + 'texte.md'),
         encoding='utf-8',
     )
+    fiche_style = """<style>
+.ami-fiche-ia{box-sizing:border-box;max-width:68rem;margin:1.5rem auto;padding:clamp(1rem,4vw,2.5rem);text-align:left;overflow-wrap:anywhere;hyphens:none;color:#ede5d7;background:#101019;border:1px solid #745923;border-radius:.8rem}
+.ami-fiche-ia :is(h2,h3,a){color:#ffcf77}.ami-fiche-ia h2{font-family:Georgia,serif;border-bottom:1px solid #745923;padding-bottom:.5rem;margin-top:1.75rem;text-align:left}
+.ami-fiche-ia h3{text-align:left}.ami-fiche-ia ul{padding-inline-start:1.25rem}.ami-fiche-ia li{margin-block:.4em}.ami-fiche-ia :is(p,li){text-align:left;color:#ede5d7}
+.ami-fiche-ia a{text-decoration:underline;text-underline-offset:.18em}
+</style>"""
+    webnode_brief = re.sub(r'^<h1\b[^>]*>[^\n]*</h1>\s*', '', brief_html, count=1)
     (site / 'webnode/blocs/ami-lecture-ia.txt').write_text(
-        f'<style>.ami-fiche-ia{{max-width:68rem;margin:auto;padding:1rem;text-align:left;overflow-wrap:anywhere}}</style>\n'
-        f'<article class="ami-fiche-ia">{brief_html}</article>\n',
+        f'{fiche_style}\n<article class="ami-fiche-ia" aria-label="Fiche de lecture aMi">{webnode_brief}</article>\n',
         encoding='utf-8',
     )
     add_to_sitemap(site / 'sitemap.xml', urls)

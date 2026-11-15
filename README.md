@@ -8,6 +8,8 @@
 
 ## Livre-protocole · édition du 14 novembre 2026
 
+- [Télécharger le pack IA (ZIP)](https://agdistys.github.io/aMi/lecture/Pack-IA-aMi.zip) · fiche, livre Markdown, graphe public et MétaMatrice publique.
+
 - [Télécharger le livre en un seul fichier HTML ou Markdown](https://agdistys.github.io/aMi/lecture/V001_2026-11-14/#telechargements) · le HTML se lit hors ligne avec son sommaire.
 - [Ouvrir le livre HTML](https://agdistys.github.io/aMi/lecture/V001_2026-11-14/Livre-Protocole-aMi_V001_2026-11-14.html).
 - [Lire l’édition V001 par blocs](https://agdistys.github.io/aMi/lecture/V001_2026-11-14/) · HTML et Markdown.

@@ -126,14 +126,37 @@ def make_graph(site, entries, base_url, reading_page):
     }
 
 
-def plot(graph):
+def _tome(node):
+    if node['type'] == 'annexe':
+        return 9
+    if node['id'] == 'ami-karma':
+        return 6
+    match = re.search(r'(?<!\d)([0-8])(?:\.\d| ·)', node['titre'])
+    return int(match[1]) if match else 0
+
+
+def plot(graph, *, flower=False):
     center = (360, 300)
     positions = {'lecture': center}
-    for kind, rx, ry in (('volume', 320, 250), ('annexe', 180, 139)):
-        group = [node for node in graph['noeuds'] if node['type'] == kind]
-        for index, node in enumerate(group):
-            angle = tau * (index / len(group) - .25)
-            positions[node['id']] = (round(center[0] + rx * cos(angle)), round(center[1] + ry * sin(angle)))
+    petals = []
+    if flower:
+        for family in range(10):
+            angle = tau * (family / 10 - .25)
+            x, y = cos(angle), sin(angle)
+            tilt = round(angle * 360 / tau)
+            petals.append(f'<ellipse class="petal" cx="485" cy="300" rx="121" ry="55" transform="rotate({tilt} 360 300)"/>')
+            group = [node for node in graph['noeuds'][1:] if _tome(node) == family]
+            for index, node in enumerate(group):
+                column, row = divmod(index, 3)
+                distance = 137 + 35 * column
+                offset = (row - (min(3, len(group) - 3 * column) - 1) / 2) * 32
+                positions[node['id']] = (round(360 + x * distance - y * offset), round(300 + y * distance + x * offset))
+    else:
+        for kind, rx, ry in (('volume', 320, 250), ('annexe', 180, 139)):
+            group = [node for node in graph['noeuds'] if node['type'] == kind]
+            for index, node in enumerate(group):
+                angle = tau * (index / len(group) - .25)
+                positions[node['id']] = (round(center[0] + rx * cos(angle)), round(center[1] + ry * sin(angle)))
     paths = []
     for link in graph['liens']:
         x1, y1 = positions[link['source']]
@@ -150,7 +173,8 @@ def plot(graph):
             f'<circle class="{node["type"]}" cx="{x}" cy="{y}" r="{radius}"/>'
             f'<text x="{x}" y="{y}" text-anchor="middle" dominant-baseline="central">{label}</text></a>'
         )
-    return '<svg viewBox="0 0 720 600" role="group" aria-label="Carte des éditions">' + ''.join(paths + marks) + '</svg>'
+    label = 'Fleur synaptique' if flower else 'Carte des éditions'
+    return f'<svg viewBox="0 0 720 600" role="group" aria-label="{label}">' + ''.join(petals + paths + marks) + '</svg>'
 
 
 def edition_rows(graph):
@@ -197,6 +221,9 @@ figure{{margin:1.35rem 0;background:#14121b;border:1px solid #745923;border-radi
 figcaption{{padding:0 1rem 1rem}}svg{{display:block;width:min(100%,45rem);margin:auto}}
 line.indexe{{stroke:#705832;stroke-width:.8}}line.cite{{stroke:#60c1c4;stroke-width:1;opacity:.6}}
 circle.volume{{fill:#ffe19a}}circle.annexe{{fill:#85dadd}}circle.index{{fill:#fff4d2}}
+.petal{{fill:#9d6bb52b;stroke:#b486c2;stroke-opacity:.6}}
+.graph-controls label{{display:inline-block;padding:.25rem .85rem .25rem .2rem;cursor:pointer}}
+#graphe-vue-fleur:checked ~ .graph-orbits,#graphe-vue-orbite:checked ~ .graph-flower{{display:none}}
 svg a:is(:hover,:focus-visible) circle{{stroke:white;stroke-width:3}}svg text{{fill:#160e05;font-size:14px;font-weight:700}}
 ol{{padding-inline-start:2rem}}li{{padding:.7rem .8rem;scroll-margin-top:1rem}}
 li:nth-child(odd),li:target{{background:#16131b}}li:target{{outline:1px solid #ffd06a}}
@@ -204,10 +231,18 @@ li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;out
 </style></head><body><main>
 <h1>{title}</h1>
 <p><a id="lecture" href="{reading}">Index de Lecture</a> · <a href="{json_url}">Données JSON</a> · <a href="#editions">Liste des éditions</a></p>
-<figure>
+<fieldset class="graph-controls"><legend>Disposition du graphe</legend>
+<input type="radio" name="graphe-vue" id="graphe-vue-orbite" checked><label for="graphe-vue-orbite">Orbites</label>
+<input type="radio" name="graphe-vue" id="graphe-vue-fleur"><label for="graphe-vue-fleur">Fleur synaptique</label>
+<figure class="graph-orbits">
 {plot(graph)}
 <figcaption>Le centre représente l’Index de Lecture. L’ambre indique les volumes et le turquoise, les annexes. Les traits turquoise suivent les renvois relevés dans les Versions Texte. Les numéros correspondent à la liste ci-dessous.</figcaption>
 </figure>
+<figure class="graph-flower">
+{plot(graph, flower=True)}
+<figcaption>Les pétales regroupent les éditions par tome et les annexes. Les traits turquoise gardent les mêmes renvois publics que la vue Orbites.</figcaption>
+</figure>
+</fieldset>
 <h2 id="editions">Les éditions et leurs renvois</h2>
 <ol>{edition_rows(graph)}</ol>
 </main></body></html>
