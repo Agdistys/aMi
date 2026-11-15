@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
       - run: bash fichiers_depot/assemble-pages.sh . _site
         env:
-          AMI_PAGES_BASE: ${{ vars.AMI_PAGES_BASE }}
+          AMI_PAGES_BASE: ${{ vars.AMI_PAGES_BASE || 'https://ami.agdistys.fr/' }}
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
