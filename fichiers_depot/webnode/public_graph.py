@@ -2,7 +2,8 @@
 
 from html import escape
 import json
-from math import cos, sin, tau
+from itertools import combinations
+from math import cos, hypot, sin, sqrt, tau
 import re
 from urllib.parse import unquote, urljoin, urlsplit
 
@@ -135,46 +136,90 @@ def _tome(node):
     return int(match[1]) if match else 0
 
 
+FAMILIES = (
+    ('Le Seuil', '#68a9e4'), ('Le Soi', '#ff9d60'),
+    ('Le Monde', '#8bd082'), ('Le Lien', '#f286ac'),
+    ('Le Sens', '#e0c965'), ('Le Temps', '#ab97ed'),
+    ('Le Karma', '#66cfbf'), ('La Maîtrise', '#f18b76'),
+    ('Évolution et Maturation', '#e8a7d9'), ('Annexes', '#85dadd'),
+)
+
+
+def force_positions(graph):
+    nodes = graph['noeuds']
+    ids = [node['id'] for node in nodes]
+    families = {node['id']: _tome(node) for node in nodes[1:]}
+    positions = {
+        slug: [22 * sqrt(i) * cos(i * 2.4), 22 * sqrt(i) * sin(i * 2.4)]
+        for i, slug in enumerate(ids)
+    }
+    pairs = list(combinations(ids, 2))
+    edges = [link for link in graph['liens'] if link['relation'] == 'cite']
+    for step in range(180):
+        moves = {slug: [-x * .015, -y * .015] for slug, (x, y) in positions.items()}
+        for first, second in pairs:
+            x, y = positions[first]
+            dx, dy = x - positions[second][0], y - positions[second][1]
+            distance = max(hypot(dx, dy), 1)
+            force = 450 / distance**2
+            if first in families and families[first] == families.get(second):
+                force -= max(0, distance - 35) * .011 / distance
+            for axis, delta in enumerate((dx, dy)):
+                moves[first][axis] += delta * force
+                moves[second][axis] -= delta * force
+        for edge in edges:
+            first, second = edge['source'], edge['cible']
+            dx, dy = (a - b for a, b in zip(positions[first], positions[second]))
+            distance = max(hypot(dx, dy), 1)
+            force = (distance - 49) * .06 / distance
+            for axis, delta in enumerate((dx, dy)):
+                moves[first][axis] -= delta * force
+                moves[second][axis] += delta * force
+        cooling = 1 - .8 * step / 180
+        for slug in ids[1:]:
+            for axis in (0, 1):
+                positions[slug][axis] += max(-9, min(9, moves[slug][axis])) * cooling
+
+    extent_x = max(1, max(abs(x) for x, _ in positions.values()))
+    extent_y = max(1, max(abs(y) for _, y in positions.values()))
+    scale = min(320 / extent_x, 260 / extent_y)
+    return {slug: (round(360 + x * scale), round(300 + y * scale))
+            for slug, (x, y) in positions.items()}
+
+
 def plot(graph, *, flower=False):
     center = (360, 300)
     positions = {'lecture': center}
-    petals = []
     if flower:
-        for family in range(10):
-            angle = tau * (family / 10 - .25)
-            x, y = cos(angle), sin(angle)
-            tilt = round(angle * 360 / tau)
-            petals.append(f'<ellipse class="petal" cx="485" cy="300" rx="121" ry="55" transform="rotate({tilt} 360 300)"/>')
-            group = [node for node in graph['noeuds'][1:] if _tome(node) == family]
-            for index, node in enumerate(group):
-                column, row = divmod(index, 3)
-                distance = 137 + 35 * column
-                offset = (row - (min(3, len(group) - 3 * column) - 1) / 2) * 32
-                positions[node['id']] = (round(360 + x * distance - y * offset), round(300 + y * distance + x * offset))
+        positions = force_positions(graph)
     else:
         for kind, rx, ry in (('volume', 320, 250), ('annexe', 180, 139)):
             group = [node for node in graph['noeuds'] if node['type'] == kind]
             for index, node in enumerate(group):
                 angle = tau * (index / len(group) - .25)
                 positions[node['id']] = (round(center[0] + rx * cos(angle)), round(center[1] + ry * sin(angle)))
+    types = {node['id']: node['type'] for node in graph['noeuds']}
     paths = []
     for link in graph['liens']:
         x1, y1 = positions[link['source']]
         x2, y2 = positions[link['cible']]
-        paths.append(f'<line class="{link["relation"]}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}"/>')
+        layers = ' '.join({'layer-' + types[link[key]] for key in ('source', 'cible')})
+        paths.append(f'<line class="{link["relation"]} {layers}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}"/>')
     marks = []
     for index, node in enumerate(graph['noeuds']):
         x, y = positions[node['id']]
         title = escape(node['titre'], quote=True)
         label = str(index) if index else 'aMi'
         radius = 15 if index else 25
+        color = FAMILIES[_tome(node)][1] if flower and index else '#fff4d2'
+        fill = f' style="fill:{color}"' if flower else ''
         marks.append(
-            f'<a href="#{node["id"]}" aria-label="{title}"><title>{title}</title>'
-            f'<circle class="{node["type"]}" cx="{x}" cy="{y}" r="{radius}"/>'
+            f'<a href="#{node["id"]}" class="layer-{node["type"]}" aria-label="{title}"><title>{title}</title>'
+            f'<circle class="{node["type"]}" cx="{x}" cy="{y}" r="{radius}"{fill}/>'
             f'<text x="{x}" y="{y}" text-anchor="middle" dominant-baseline="central">{label}</text></a>'
         )
     label = 'Fleur synaptique' if flower else 'Carte des éditions'
-    return f'<svg viewBox="0 0 720 600" role="group" aria-label="{label}">' + ''.join(petals + paths + marks) + '</svg>'
+    return f'<svg viewBox="0 0 720 600" role="group" aria-label="{label}">' + ''.join(paths + marks) + '</svg>'
 
 
 def edition_rows(graph):
@@ -221,8 +266,13 @@ figure{{margin:1.35rem 0;background:#14121b;border:1px solid #745923;border-radi
 figcaption{{padding:0 1rem 1rem}}svg{{display:block;width:min(100%,45rem);margin:auto}}
 line.indexe{{stroke:#705832;stroke-width:.8}}line.cite{{stroke:#60c1c4;stroke-width:1;opacity:.6}}
 circle.volume{{fill:#ffe19a}}circle.annexe{{fill:#85dadd}}circle.index{{fill:#fff4d2}}
-.petal{{fill:#9d6bb52b;stroke:#b486c2;stroke-opacity:.6}}
-svg :is(line,.petal,text){{pointer-events:none}}
+.graph-flower:has(#fleur-volumes:not(:checked)) .layer-volume,
+.graph-flower:has(#fleur-annexes:not(:checked)) .layer-annexe,
+.graph-flower:has(#fleur-index:not(:checked)) .indexe{{display:none}}
+.graph-flower .indexe{{opacity:.36}}
+.graph-families{{display:flex;gap:.35rem 1rem;flex-wrap:wrap;padding:0;list-style:none}}
+.graph-families li{{background:none;padding:0}}
+svg :is(line,text){{pointer-events:none}}
 svg a circle{{pointer-events:fill}}
 .graph-controls label{{display:inline-block;padding:.25rem .85rem .25rem .2rem;cursor:pointer}}
 #graphe-vue-fleur:checked ~ .graph-orbits,#graphe-vue-orbite:checked ~ .graph-flower{{display:none}}
@@ -241,8 +291,15 @@ li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;out
 <figcaption>Le centre représente l’Index de Lecture. L’ambre indique les volumes et le turquoise, les annexes. Les traits turquoise suivent les renvois relevés dans les Versions Texte. Les numéros correspondent à la liste ci-dessous.</figcaption>
 </figure>
 <figure class="graph-flower">
+<fieldset><legend>Calques</legend>
+<label><input type="checkbox" id="fleur-volumes" checked> Volumes</label>
+<label><input type="checkbox" id="fleur-annexes" checked> Annexes</label>
+<label><input type="checkbox" id="fleur-index" checked> Liens de l’Index</label>
+</fieldset>
 {plot(graph, flower=True)}
-<figcaption>Les pétales regroupent les éditions par tome et les annexes. Les traits turquoise gardent les mêmes renvois publics que la vue Orbites.</figcaption>
+<figcaption>Les renvois rapprochent les nœuds. Les couleurs indiquent les familles.
+<ul class="graph-families">{''.join(f'<li><span aria-hidden="true" style="color:{color}">●</span> {label}</li>' for label, color in FAMILIES)}</ul>
+</figcaption>
 </figure>
 </fieldset>
 <h2 id="editions">Les éditions et leurs renvois</h2>
