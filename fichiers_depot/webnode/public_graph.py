@@ -222,6 +222,8 @@ figcaption{{padding:0 1rem 1rem}}svg{{display:block;width:min(100%,45rem);margin
 line.indexe{{stroke:#705832;stroke-width:.8}}line.cite{{stroke:#60c1c4;stroke-width:1;opacity:.6}}
 circle.volume{{fill:#ffe19a}}circle.annexe{{fill:#85dadd}}circle.index{{fill:#fff4d2}}
 .petal{{fill:#9d6bb52b;stroke:#b486c2;stroke-opacity:.6}}
+svg :is(line,.petal,text){{pointer-events:none}}
+svg a circle{{pointer-events:fill}}
 .graph-controls label{{display:inline-block;padding:.25rem .85rem .25rem .2rem;cursor:pointer}}
 #graphe-vue-fleur:checked ~ .graph-orbits,#graphe-vue-orbite:checked ~ .graph-flower{{display:none}}
 svg a:is(:hover,:focus-visible) circle{{stroke:white;stroke-width:3}}svg text{{fill:#160e05;font-size:14px;font-weight:700}}
