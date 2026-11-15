@@ -431,6 +431,9 @@ def main():
             code = adapt_astro(code,path,raw)
         else:
             code = adapt_generic(code,slug,path,raw)
+            if slug == 'ami-memoire':
+                code = once(code, "location.pathname.replace(/\\/$/, '') !== '/' + cfg.slug",
+                            "!['/' + cfg.slug, '/ami-souvenir'].includes(location.pathname.replace(/\\/$/, ''))")
         code = adapt_navigation(code, slug, navigation_routes)
         code = compatible_css(recover_volume_fetch(code))
         entries[route] = native_entry(
