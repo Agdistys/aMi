@@ -8,6 +8,8 @@
 
 ## Livre-protocole · édition du 14 novembre 2026
 
+- [Télécharger le livre en un seul fichier HTML ou Markdown](https://agdistys.github.io/aMi/lecture/V001_2026-11-14/#telechargements) · le HTML se lit hors ligne avec son sommaire.
+- [Ouvrir le livre HTML](https://agdistys.github.io/aMi/lecture/V001_2026-11-14/Livre-Protocole-aMi_V001_2026-11-14.html).
 - [Lire l’édition V001 par blocs](https://agdistys.github.io/aMi/lecture/V001_2026-11-14/) · HTML et Markdown.
 - [Télécharger l’édition V001 (ZIP)](https://agdistys.github.io/aMi/lecture/V001_2026-11-14/Protocole-aMi_V001_2026-11-14.zip) · intégrale Markdown, sommaires, 105 blocs en HTML et Markdown, manifeste et empreintes.
 - [Intégrale Markdown V001](https://agdistys.github.io/aMi/lecture/V001_2026-11-14/protocole-aMi.md) · 24,4 Mo. Si le navigateur affiche le texte, utilise **Enregistrer sous**.

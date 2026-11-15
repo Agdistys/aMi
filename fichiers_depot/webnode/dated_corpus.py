@@ -14,6 +14,7 @@ from markdown_reading import render_markdown
 
 DATED_PATH = 'lecture/V001_2026-11-14/'
 ARCHIVE_NAME = 'Protocole-aMi_V001_2026-11-14.zip'
+BOOK_NAME = 'Livre-Protocole-aMi_V001_2026-11-14.html'
 VERSION = 'V001'
 DATE = '2026-11-14'
 DATE_LABEL = '14 novembre 2026'
@@ -132,6 +133,20 @@ def _markdown_link(url, title):
     return f'[{_label(title)}]({url})'
 
 
+def _book_content(slug, fragment, source_url):
+    # The same headings can appear in several parts of the complete book.
+    heading = re.compile(r'(<h[1-6] id=")([^"]+)(">)')
+    anchors = {match[2] for match in heading.finditer(fragment)}
+    fragment = heading.sub(lambda m: f'{m[1]}{slug}-{m[2]}{m[3]}', fragment)
+    return re.sub(r'<a href="#([^"]*)"',
+                  lambda m: f'<a href="#{slug}-{m[1]}"' if m[1] in anchors
+                  else f'<a href="{escape(source_url, quote=True)}#{m[1]}"', fragment)
+
+
+def _download_link(filename, label):
+    return f'<a href="{filename}" download="{filename}">{escape(label)}</a>'
+
+
 def publish_dated_corpus(source, site, base_url):
     """Write the V001 snapshot into Pages and return its canonical index URL."""
     from corpus_reading import LICENSE, add_to_sitemap, document, file_size, link
@@ -160,6 +175,7 @@ def publish_dated_corpus(source, site, base_url):
     credits = 'Agdistys · Diane Serant · Licence CC BY-SA 4.0'
     md_contents = [f'# {TITLE}', '', credits, '', note, '', '## Versions Texte', '']
     html_contents, manifest_volumes = [], []
+    book_sections, book_index = [], []
     full_corpus = bytearray(f'# {TITLE}\n\n{credits}\n\n{note}\n'.encode('utf-8'))
     for slug, target, source_path, title, raw in volumes:
         source_url = base_url + target
@@ -168,6 +184,7 @@ def publish_dated_corpus(source, site, base_url):
         full_corpus.extend(f'\n\n## Édition · {title}\n\nSHA-256 de la source Markdown : `{manifest["sha256"]}`\n\n'.encode('utf-8'))
         full_corpus.extend(raw)
         rows = []
+        book_parts = []
         md_contents.extend([f'### {title}', ''])
         for part, (start, end, first_line, last_line) in enumerate(chunks, 1):
             stem = f'bloc-{part:03}'
@@ -179,6 +196,8 @@ def publish_dated_corpus(source, site, base_url):
             markdown = write(md_name, block)
             label = f'Bloc {part}/{len(chunks)}'
             block_text = block.decode('utf-8')
+            fragment = render_markdown(block_text, base_url=source_url)
+            book_parts.append(_book_content(f'{slug}-{part}', fragment, source_url))
             first_lines = block_text.split('\n', 80)[:80]
             heading = None
             for match in SOURCE_HEADING.finditer('\n'.join(first_lines)[:30_000]):
@@ -190,7 +209,7 @@ def publish_dated_corpus(source, site, base_url):
                     f'<h1>{escape(title)} · {label}</h1>\n'
                     f'<p>{VERSION} · {DATE_LABEL} · lignes {first_line} à {last_line} · '
                     f'{link(stem + ".md", "Ce bloc en Markdown")}</p>\n'
-                    f'<article>{render_markdown(block_text, base_url=source_url)}</article>\n'
+                    f'<article>{fragment}</article>\n'
                     f'<nav aria-label="Suite de la lecture">{nav}</nav>')
             html = write(html_name, document(f'{title} · {label} · {VERSION}', DESCRIPTION,
                                              canonical + html_name, body, canonical + md_name))
@@ -206,6 +225,13 @@ def publish_dated_corpus(source, site, base_url):
         md_contents.append('')
         html_contents.append(f'<h3 id="{slug}">{escape(title)}</h3>\n<ul>{"".join(rows)}</ul>')
         manifest_volumes.append(manifest)
+        book_index.append(f'<li>{link("#" + slug, title)}</li>')
+        book_sections.append(
+            f'<section class="book-volume" id="{slug}" aria-labelledby="{slug}-titre">'
+            f'<h2 id="{slug}-titre">{escape(title)}</h2>'
+            f'<article>{"".join(book_parts)}</article>'
+            '<p><a href="#sommaire">↑ Sommaire du livre</a></p></section>'
+        )
 
     full_corpus.extend(b'\n\n## Editions publiques disponibles en HTML seul\n\n')
     html_links, manifest_html = [], []
@@ -220,7 +246,24 @@ def publish_dated_corpus(source, site, base_url):
         full_corpus.extend((item + '\n').encode('utf-8'))
 
     corpus = write('protocole-aMi.md', full_corpus)
+    book_body = f'''<style>
+    .book-menu{{position:sticky;top:0;z-index:1;padding:.6rem 0;background:#0c0c13;border-bottom:1px solid #745923}}
+    .book-volume{{content-visibility:auto;contain-intrinsic-size:auto 850px;margin:3rem 0;scroll-margin-top:4rem}}
+    @media print{{.book-volume{{content-visibility:visible}}.book-menu{{display:none}}}}
+    </style>
+    <nav class="book-menu" aria-label="Navigation dans le livre"><a href="#sommaire">Sommaire</a> · <a href="#annexes-en-ligne">Éditions complémentaires</a></nav>
+    <h1>Le Livre du Protocole de ConScience aMi</h1>
+    <p>{VERSION} · {DATE_LABEL} · {credits}</p>
+    <p>Les 28 Versions Texte publiques réunies dans ce fichier. Utilise le sommaire ou la recherche de ton navigateur.</p>
+    <h2 id="sommaire">Sommaire</h2>
+    <ol>{"".join(book_index)}</ol>
+    {"".join(book_sections)}
+    <section id="annexes-en-ligne"><h2>Éditions publiques complémentaires en ligne</h2><ul>{"".join(html_links)}</ul></section>
+    <p>{link(LICENSE, 'Consulter la licence CC BY-SA 4.0')}</p>'''
+    book = write(BOOK_NAME, document('Livre du Protocole de ConScience aMi', DESCRIPTION,
+                                    canonical + BOOK_NAME, book_body, canonical + 'protocole-aMi.md'))
     resources = (
+        (BOOK_NAME, 'Lire le livre en un seul fichier HTML'),
         ('protocole-aMi.md', f'Corpus intégral en Markdown · {file_size(corpus["octets"])}'),
         ('manifeste.json', 'Manifeste des sources et des blocs'),
         ('SHA256SUMS.txt', 'Empreintes SHA-256'),
@@ -235,6 +278,8 @@ def publish_dated_corpus(source, site, base_url):
     volume_index = ''.join(html_contents)
     body = f'''<h1>{escape(TITLE)}</h1>
 <p>{credits}</p>
+<h2 id="telechargements">Le livre en un seul fichier</h2>
+<p>{link(BOOK_NAME, 'Ouvrir le livre HTML')} · {_download_link(BOOK_NAME, 'Télécharger le livre HTML')} · {_download_link('protocole-aMi.md', 'Télécharger le Markdown pour une IA')}</p>
 <p>{note}</p>
 <p>{nav} · {link('index.md', 'Sommaire en Markdown')} · {link(ARCHIVE_NAME, 'Télécharger l’édition (ZIP)')}</p>
 <h2>Versions Texte</h2>
@@ -244,7 +289,7 @@ def publish_dated_corpus(source, site, base_url):
     write('index.html', document(TITLE, DESCRIPTION, canonical, body, canonical + 'index.md'))
     write('manifeste.json', json.dumps({
         'schema': 1, 'version': VERSION, 'date': DATE, 'revision_git': REVISION,
-        'corpus': corpus, 'sommaire': {'html': hashes['index.html'], 'markdown': hashes['index.md']},
+        'corpus': corpus, 'livre_html': book, 'sommaire': {'html': hashes['index.html'], 'markdown': hashes['index.md']},
         'versions_texte': manifest_volumes, 'editions_html_seules': manifest_html,
     }, ensure_ascii=False, indent=2) + '\n')
     checksums = ''.join(f'{meta["sha256"]}  {path}\n' for path, meta in sorted(hashes.items()))
@@ -253,6 +298,6 @@ def publish_dated_corpus(source, site, base_url):
         for name in sorted(hashes):
             info = ZipInfo(name, date_time=(2026, 11, 14, 0, 0, 0))
             archive.writestr(info, (directory / name).read_bytes(), compress_type=ZIP_DEFLATED)
-    pages = [canonical]
+    pages = [canonical, canonical + BOOK_NAME]
     pages.extend(canonical + block['html']['fichier'] for volume in manifest_volumes for block in volume['blocs'])
     add_to_sitemap(site/'sitemap.xml', pages)
