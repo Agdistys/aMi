@@ -19,6 +19,8 @@ jobs:
         with:
           fetch-depth: 0
       - run: bash fichiers_depot/assemble-pages.sh . _site
+        env:
+          AMI_PAGES_BASE: ${{ vars.AMI_PAGES_BASE }}
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site

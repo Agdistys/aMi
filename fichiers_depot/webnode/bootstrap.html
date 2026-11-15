@@ -2,16 +2,17 @@
   <p role="status" hidden></p>
   <p data-ami-webnode-fallback hidden><a href="https://agdistys.github.io/aMi/">Lire le Protocole aMi</a></p>
   <script>
-  (async () => {
-    const current = document.currentScript;
-    const anchor = current.closest('[data-ami-webnode-anchor]');
-    if (!anchor || anchor.dataset.loading) return;
-    anchor.dataset.loading = 'true';
+  async function mountAmi(current, anchor, migration = false) {
+    if (!anchor || (migration ? anchor.dataset.amiDualHost : anchor.dataset.loading)) return;
+    if (!migration) {
+      anchor.dataset.loading = 'true';
+      anchor.dataset.amiDualHost = 'true';
+    }
     const status = anchor.querySelector('[role="status"]');
     const fallback = anchor.querySelector('[data-ami-webnode-fallback]');
-    const base = new URL('https://agdistys.github.io/aMi/');
-    const catalogue = new URL('webnode/catalogue-v1.json',base);
+    const hosts = ['https://agdistys.github.io/aMi/', 'https://ami.agdistys.fr/'];
     const route = location.pathname.endsWith('/') ? location.pathname : location.pathname+'/';
+    let base;
     const publicURL = value => {
       const url = new URL(value,base);
       if (url.origin !== base.origin || !url.pathname.startsWith(base.pathname) || url.username || url.password) throw Error('Adresse de lecture invalide.');
@@ -25,11 +26,29 @@
       return a;
     };
     try {
-      const response = await fetch(catalogue,{cache:'no-store',redirect:'error',credentials:'omit'});
-      if (!response.ok || response.url !== catalogue.href) throw Error('Catalogue indisponible.');
-      const data = await response.json();
-      if (data.schema !== 1 || !data.routes || !Object.hasOwn(data.routes,route)) throw Error('Cette page n’est pas dans le catalogue.');
-      const entry = data.routes[route];
+      let entry;
+      for (const host of migration ? [hosts[1]] : hosts) {
+        base = new URL(host);
+        const catalogue = new URL('webnode/catalogue-v1.json',base);
+        try {
+          const response = await fetch(catalogue,{cache:'no-store',redirect:'error',credentials:'omit'});
+          if (!response.ok || response.url !== catalogue.href) continue;
+          const data = await response.json();
+          if (data.schema !== 1 || !data.routes || !Object.hasOwn(data.routes,route)) continue;
+          entry = data.routes[route];
+          break;
+        } catch (_) { /* Try the other public address. */ }
+      }
+      if (!entry) throw Error('Catalogue indisponible pour cette page.');
+      if (migration) {
+        if (!anchor.isConnected) return;
+        const replacement = anchor.cloneNode(false);
+        replacement.dataset.loading = 'true';
+        replacement.dataset.amiDualHost = 'true';
+        replacement.append(status, fallback);
+        anchor.replaceWith(replacement);
+        anchor = replacement;
+      }
       if (entry.href) fallback.replaceChildren(link(entry));
       if (entry.kind === 'link') { anchor.replaceChildren(link(entry)); return; }
       if (entry.kind === 'links') {
@@ -58,6 +77,7 @@
       });
       if (anchor.isConnected) throw Error('L’intégrateur n’a pas ouvert la page.');
     } catch (error) {
+      if (migration && !anchor.dataset.amiDualHost) return;
       if (!anchor.isConnected) return;
       status.textContent = 'Le contenu intégré est momentanément indisponible.';
       if (!anchor.closest('[data-ami-public-block]')) {
@@ -66,6 +86,10 @@
       }
       console.warn('Protocole aMi',error.message);
     }
-  })();
+  }
+  {
+    const current = document.currentScript;
+    mountAmi(current,current.closest('[data-ami-webnode-anchor]'));
+  }
   </script>
 </div>

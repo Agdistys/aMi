@@ -6,6 +6,15 @@
 - [Annexes et MétaMatrice](annexes/)
 - [Fichiers du dépôt](fichiers_depot/) · licence, paramètres Pages, sitemap et empreintes.
 
+## Livre-protocole · édition du 14 novembre 2026
+
+- [Lire l’édition V001 par blocs](https://agdistys.github.io/aMi/lecture/V001_2026-11-14/) · HTML et Markdown.
+- [Télécharger l’édition V001 (ZIP)](https://agdistys.github.io/aMi/lecture/V001_2026-11-14/Protocole-aMi_V001_2026-11-14.zip) · intégrale Markdown, sommaires, 105 blocs en HTML et Markdown, manifeste et empreintes.
+- [Intégrale Markdown V001](https://agdistys.github.io/aMi/lecture/V001_2026-11-14/protocole-aMi.md) · 24,4 Mo. Si le navigateur affiche le texte, utilise **Enregistrer sous**.
+- [Textes des éditions courantes](https://agdistys.github.io/aMi/lecture/) · [Compilation Markdown courante](https://agdistys.github.io/aMi/lecture/protocole-aMi.md) · [Fiche de lecture](https://agdistys.github.io/aMi/lecture/fiche/).
+
+GitHub Pages génère ces fichiers à partir des éditions du dépôt. Le ZIP se télécharge directement.
+
 ## Volumes
 
 | Tome | Volume | Page | Version Texte | Source |

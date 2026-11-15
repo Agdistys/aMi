@@ -8,6 +8,7 @@ from pathlib import Path
 
 from markdown_reading import render_markdown
 from public_graph import publish_graph
+from publisher import publisher_links
 
 
 READING_PATH = 'lecture/'
@@ -171,7 +172,7 @@ def publish_corpus(site, entries, base_url):
         encoding='utf-8',
     )
     publish_graph(site, entries, base_url, reading_page)
-    brief = Path(__file__).with_name('fiche-lecture-ia.md').read_text(encoding='utf-8')
+    brief = publisher_links(Path(__file__).with_name('fiche-lecture-ia.md').read_text(encoding='utf-8'))
     brief_dir = site / BRIEF_PATH
     brief_dir.mkdir(exist_ok=True)
     (brief_dir / 'texte.md').write_text(brief, encoding='utf-8')

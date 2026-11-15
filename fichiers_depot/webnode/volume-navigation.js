@@ -10,8 +10,8 @@
         if (!href || href.startsWith('#') || href.startsWith('?')) continue;
         const url = new URL(href, base);
         let slug;
-        if (url.hostname === 'agdistys.github.io' && url.pathname.startsWith('/aMi/')) {
-          const path = url.pathname.slice('/aMi/'.length);
+        if ((url.hostname === 'agdistys.github.io' && url.pathname.startsWith('/aMi/')) || url.hostname === 'ami.agdistys.fr') {
+          const path = url.pathname.replace(/^\/(?:aMi\/)?/, '');
           slug = routes.files[path.split(/_V[0-9]/)[0]] || routes.pages[path.replace(/\/$/, '')];
         } else if (['agdistys.fr', 'www.agdistys.fr'].includes(url.hostname)) {
           slug = routes.legacy[url.pathname.replace(/^\/|\/$/g, '')];

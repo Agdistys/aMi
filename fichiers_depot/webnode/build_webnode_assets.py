@@ -10,12 +10,12 @@ from urllib.parse import urljoin, urlparse
 import json
 import re
 from dated_corpus import publish_dated_corpus
+from publisher import GITHUB, PUBLISHER, adapter_links, publisher_links
 from public_reading import (
     BAREME, BAREME_LABEL, COMPACT_NAV_CSS, COMPACT_NAV_VOLUMES, CURRENT_SUBLIMATION_LINK, REGISTER,
     SUBLIMATION_LINK, canonicalize, graph_annex, navbar_routes, publish, without_door_titles,
 )
 
-PUBLISHER = 'https://agdistys.github.io/aMi/'
 ROUTE = re.compile(r'/ami(?:-[a-z0-9]+(?:-[a-z0-9]+)*)?/')
 VOLUME_FILE = re.compile(r'(?:volumes_protocole|annexes)/[a-zA-Z0-9_.-]+\.html')
 ANNEX_ROUTE = re.compile(r'/(?:benchmark|catalogue-des-outils-ami|lettre-ouverte|metaconscience|metamatrice)/')
@@ -264,8 +264,9 @@ def index_target(source_dir):
 
 
 def public_href(value):
-    url = urlparse(urljoin(PUBLISHER,value))
-    if url.scheme != 'https' or url.netloc != 'agdistys.github.io' or not url.path.startswith('/aMi/'):
+    url = urlparse(urljoin(PUBLISHER,publisher_links(value)))
+    base = urlparse(PUBLISHER)
+    if url.scheme != 'https' or url.netloc != base.netloc or not url.path.startswith(base.path):
         raise ValueError(f'Lien hors du dépôt : {value}')
     return url.geturl()
 
@@ -292,7 +293,7 @@ def read_annexes(path):
 
 
 def native_entry(code, path, raw, assets, label, href):
-    adapter = adapter_bytes(code)
+    adapter = adapter_bytes(adapter_links(code))
     filename = sha256(adapter).hexdigest()+'.js'
     (assets/filename).write_bytes(adapter)
     return {
@@ -444,7 +445,8 @@ def main():
         shell = once(
             args.annex_shell.read_text(), '/* __AMI_CHARTE_NAV__ */ null',
             json.dumps(navigation, ensure_ascii=False, separators=(',',':')),
-        ).encode('utf-8')
+        )
+        shell = publisher_links(shell).encode('utf-8')
         shell_path = assets/(sha256(shell).hexdigest()+'.js')
         shell_path.write_bytes(shell)
         template = once(args.annex_template.read_text(), '/* __AMI_ANNEX_SHELL__ */', shell.decode())
@@ -452,7 +454,7 @@ def main():
         for route, entry in list(annexes.items()):
             if entry['kind'] != 'link':
                 continue
-            slug = urlparse(entry['href']).path.removeprefix('/aMi/').strip('/')
+            slug = entry['href'].removeprefix(PUBLISHER).strip('/')
             path = routes.get(slug,'')
             if not path.startswith('annexes/'):
                 raise ValueError(f'Annexe hors des routes publiées : {route}')
@@ -469,8 +471,27 @@ def main():
                 code = adapt_annex(template, slug, entry['label'], path, raw)
                 annex_content[slug] = native_entry(code, path, raw, assets, entry['label'], entry['href'])
             annexes[route] = annex_content[slug]
+    for name in ('robots.txt', 'sitemap.xml', 'llms.txt'):
+        file = args.site/name
+        file.write_text(publisher_links(file.read_text()), encoding='utf-8')
     snippet = args.bootstrap.read_text()
     (args.site/'webnode/bloc-webnode-v1.txt').write_text(snippet)
+    # The site-wide header helps the already-pasted v1 blocks after cutover.
+    loader = re.search(r'<script>([\s\S]+?)\n  \{\n    const current = document.currentScript;', snippet)[1]
+    bridge = f'''<script>
+(() => {{
+  const header = document.currentScript;
+  {loader}
+  function migrate() {{
+    document.querySelectorAll('[data-ami-webnode-anchor]:not([data-ami-dual-host])')
+      .forEach(anchor => mountAmi(header, anchor, true));
+  }}
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', migrate, {{once:true}});
+  else migrate();
+}})();
+</script>
+'''
+    (args.site/'webnode/migration-en-tete.txt').write_text(bridge, encoding='utf-8')
     publish(args.source,args.site,routes,volumes['ami'],snippet)
     publish_dated_corpus(args.source, args.site, PUBLISHER)
     if graph and args.annex_template:
@@ -487,6 +508,7 @@ def main():
         )
     elif graph:
         annexes[graph_route] = graph
+    entries['/ami-souvenir/'] = entries['/ami-memoire/']
     catalogue = {'schema':1,'routes':{**entries,**annexes}}
     (args.site/'webnode/catalogue-v1.json').write_text(json.dumps(catalogue,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(f'{len(entries)} intégrateurs natifs, {len(annexes)} routes annexes')

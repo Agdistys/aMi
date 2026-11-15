@@ -7,11 +7,13 @@ import json
 from pathlib import PurePosixPath
 import re
 from subprocess import CalledProcessError, run
+from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 from markdown_reading import render_markdown
 
 
 DATED_PATH = 'lecture/V001_2026-11-14/'
+ARCHIVE_NAME = 'Protocole-aMi_V001_2026-11-14.zip'
 VERSION = 'V001'
 DATE = '2026-11-14'
 DATE_LABEL = '14 novembre 2026'
@@ -234,7 +236,7 @@ def publish_dated_corpus(source, site, base_url):
     body = f'''<h1>{escape(TITLE)}</h1>
 <p>{credits}</p>
 <p>{note}</p>
-<p>{nav} · {link('index.md', 'Sommaire en Markdown')}</p>
+<p>{nav} · {link('index.md', 'Sommaire en Markdown')} · {link(ARCHIVE_NAME, 'Télécharger l’édition (ZIP)')}</p>
 <h2>Versions Texte</h2>
 {volume_index}
 <h2>Éditions publiques disponibles en HTML seul</h2>
@@ -247,6 +249,10 @@ def publish_dated_corpus(source, site, base_url):
     }, ensure_ascii=False, indent=2) + '\n')
     checksums = ''.join(f'{meta["sha256"]}  {path}\n' for path, meta in sorted(hashes.items()))
     write('SHA256SUMS.txt', checksums)
+    with ZipFile(directory / ARCHIVE_NAME, 'w', compression=ZIP_DEFLATED) as archive:
+        for name in sorted(hashes):
+            info = ZipInfo(name, date_time=(2026, 11, 14, 0, 0, 0))
+            archive.writestr(info, (directory / name).read_bytes(), compress_type=ZIP_DEFLATED)
     pages = [canonical]
     pages.extend(canonical + block['html']['fichier'] for volume in manifest_volumes for block in volume['blocs'])
     add_to_sitemap(site/'sitemap.xml', pages)

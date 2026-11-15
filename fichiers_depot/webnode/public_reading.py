@@ -5,14 +5,14 @@ from urllib.parse import urljoin, urlsplit
 import re
 
 from corpus_reading import READING_PATH, publish_corpus
+from publisher import PUBLISHER as PAGES, publisher_links
 
-PAGES = 'https://agdistys.github.io/aMi/'
 REGISTER = 'annexes/Registre_en_ligne.html'
 UNION = 'ami-lunion-du-tout'
 BAREME = PAGES + UNION + '/bareme/'
 BAREME_LABEL = 'Lire les Barèmes et la Grille de Score'
 BAREME_LINK = f'<a href="{BAREME}">{BAREME_LABEL}</a>'
-ALIASES = {'ami-mesures-ia': 'ami-tests', 'metaconscience': 'ami-metamatrice',
+ALIASES = {'ami-mesures-ia': 'ami-tests', 'ami-souvenir': 'ami-memoire', 'metaconscience': 'ami-metamatrice',
            'lettre-ouverte': 'ami-citer-contester-contribuer'}
 HEAD = re.compile(r'<head(?:\s[^>]*)?>', re.I)
 CANONICAL = re.compile(r'<link\b[^>]*\brel=["\']canonical["\'][^>]*>', re.I)
@@ -26,8 +26,10 @@ LEGACY_NAV_LINKS = {
     'benchmark': 'ami-benchmark',
     'catalogue-des-outils-ami': 'ami-catalogue-des-outils',
     'ami-tests': 'ami-tests',
+    'ami-memoire': 'ami-memoire',
+    'ami-souvenir': 'ami-memoire',
 }
-WEBNODE_NAV_ROUTES = {'ami-tests': 'ami-mesures-ia'}
+WEBNODE_NAV_ROUTES = {'ami-tests': 'ami-mesures-ia', 'ami-memoire': 'ami-souvenir'}
 SUBLIMATION_LINK = 'https://www.agdistys.fr/methodologie-sublimation/'
 CURRENT_SUBLIMATION_LINK = 'https://www.agdistys.fr/sublimation/'
 COMPACT_NAV_VOLUMES = {'ami-rencontre', 'ami-justice'}
@@ -64,8 +66,8 @@ def stable_navbar(html, routes, target):
         if value.startswith(('#', '?')):
             return match[0]
         url = urlsplit(urljoin(PAGES + target, value))
-        if url.netloc == 'agdistys.github.io' and url.path.startswith('/aMi/'):
-            relative = url.path.removeprefix('/aMi/')
+        if url.netloc == 'agdistys.github.io' and url.path.startswith('/aMi/') or url.netloc == 'ami.agdistys.fr':
+            relative = url.path.removeprefix('/aMi/').lstrip('/')
             slug = routes['files'].get(re.split(r'_V[0-9]', relative, maxsplit=1)[0])
             slug = slug or routes['pages'].get(relative.strip('/'))
         elif url.netloc in {'agdistys.fr', 'www.agdistys.fr'}:
@@ -333,7 +335,7 @@ def publish(source, site, routes, index, bootstrap):
             'reading_url': html_reading or reading or href(slug),
             'markdown': bool(html_reading),
         })
-        alias_html = relocate(stable_navbar(html, navigation, target), target)
+        alias_html = publisher_links(relocate(stable_navbar(html, navigation, target), target))
         if reading and reading.endswith('.md'):
             alias_html = HEAD.sub(lambda match: match[0]+'\n'+alternate_markdown(reading)+'\n', alias_html, count=1)
         if slug in COMPACT_NAV_VOLUMES:

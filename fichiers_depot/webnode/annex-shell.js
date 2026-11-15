@@ -6,6 +6,7 @@
   const pages = 'https://agdistys.github.io/aMi/';
   const siteRoutes = {
     'ami-tests':'ami-mesures-ia',
+    'ami-memoire':'ami-souvenir',
     'ami-metamatrice':'metaconscience',
     'ami-citer-contester-contribuer':'lettre-ouverte',
   };

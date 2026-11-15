@@ -9,6 +9,17 @@ cp "$source_dir/index.html" "$source_dir/README.md" "$source_dir/llms.txt" "$sit
 for name in LICENSE.md .nojekyll robots.txt sitemap.xml; do
   cp "$source_dir/fichiers_depot/$name" "$site_dir/$name"
 done
+for verification in "$source_dir"/fichiers_depot/google*.html; do
+  [[ -f "$verification" ]] || continue
+  name=${verification##*/}
+  if [[ "$name" =~ ^google[0-9a-f]+\.html$ ]] &&
+      [[ "$(cat "$verification")" == "google-site-verification: $name" ]]; then
+    cp "$verification" "$site_dir/$name"
+  else
+    printf 'Fichier de validation Search Console inattendu : %s\n' "$name" >&2
+    exit 1
+  fi
+done
 
 # Les pages d’accès survivent aux changements de version.
 while IFS=$'\t' read -r slug target; do
