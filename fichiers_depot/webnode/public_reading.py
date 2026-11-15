@@ -371,25 +371,96 @@ def publish(source, site, routes, index, bootstrap):
     (directory/'ami-annexes-graphe.txt').write_text(
         '<ul>\n' + graph_annex('https://www.agdistys.fr/ami-graphe/') + '</ul>\n', encoding='utf-8',
     )
+    def code_link(filename, label):
+        return f'<li><a href="{filename}" data-code>{label}</a></li>'
+
     rows = '\n'.join(
-        f'<li><strong>{escape(title)}</strong> : '
-        + (f'<a href="{slug}-lecture.txt">Ligne à ajouter</a> · ' if direct else '')
-        + f'<a href="{slug}.txt">Bloc complet</a>'
-        + (f' · <a href="{slug}-en-tete.txt">Balise pour l’en-tête</a>' if head else '')
-        + '</li>'
+        f'<li><h3>{escape(title)}</h3><ul class="codes">'
+        + (code_link(f'{slug}-lecture.txt', 'Ligne à ajouter') if direct else '')
+        + code_link(f'{slug}.txt', 'Bloc complet')
+        + (code_link(f'{slug}-en-tete.txt', 'Balise pour l’en-tête') if head else '')
+        + '</ul></li>'
         for slug, title, direct, head in entries
+    )
+    extras = ''.join(
+        code_link(filename, label) for filename, label in (
+            ('ami-graphe.txt', 'Page du graphe'),
+            ('ami-annexes-graphe.txt', 'Lien du graphe dans les Annexes'),
+            ('ami-lecture-ia.txt', 'Fiche de lecture aMi'),
+        )
     )
     (directory/'index.html').write_text(f'''<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Codes Webnode · aMi</title><meta name="robots" content="noindex">
-<style>:root{{color-scheme:dark;background:#101018;color:#f2e5cd;font:1rem/1.65 system-ui,sans-serif}}main{{max-width:68rem;margin:2rem auto;padding-inline:1rem}}a{{color:#ffd06a}}li{{margin:.5rem 0}}</style>
+<style>
+:root{{color-scheme:dark;background:#101018;color:#f2e5cd;font:1rem/1.65 system-ui,sans-serif}}
+main{{max-width:68rem;margin:2rem auto;padding-inline:1rem}}a{{color:#ffd06a}}
+h3{{margin:.15rem 0 .6rem;font-size:1.05rem}}ul{{padding:0;list-style:none}}
+.pages>li,.extras{{background:#171620;border:1px solid #554524;border-radius:.65rem;padding:.85rem 1rem;margin:.65rem 0}}
+.codes{{display:flex;flex-wrap:wrap;gap:.65rem 1.25rem}}
+.codes li{{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem}}
+button{{font:inherit;color:#ffd06a;background:#261f14;border:1px solid #8d6a31;border-radius:.4rem;padding:.25rem .65rem;cursor:pointer}}
+button:disabled{{cursor:wait}}a:focus-visible,button:focus-visible,textarea:focus-visible{{outline:2px solid #ffd06a;outline-offset:3px}}
+textarea{{box-sizing:border-box;width:100%;min-height:7rem}}
+#etat-copie{{position:fixed;bottom:0;inset-inline:1rem;width:fit-content;max-width:calc(100% - 4rem);padding:.5rem .9rem;background:#261f14;border:1px solid #8d6a31;border-radius:.4rem}}
+#etat-copie:empty{{position:absolute;width:1px;height:1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%)}}
+</style>
 </head><body><main>
 <h1>Codes Webnode · aMi</h1>
-<p><strong>Ligne à ajouter :</strong> colle ce code HTML à côté du volume déjà installé. Il affiche l’adresse de la Version Texte en HTML.</p>
-<p><strong>Bloc complet :</strong> à utiliser quand tu installes ou remplaces tout le bloc du volume. Il comprend déjà la ligne de lecture.</p>
-<p><strong>Balise pour l’en-tête :</strong> facultative, à ajouter dans les paramètres SEO de la page correspondante.</p>
-<p><a href="ami-graphe.txt">Bloc pour la page /ami-graphe</a> · <a href="ami-annexes-graphe.txt">Lien du graphe pour le sommaire des annexes</a>.</p>
-<p><a href="ami-lecture-ia.txt">Fiche de lecture à publier directement dans une page Webnode</a>.</p>
-<ul>{rows}</ul></main></body></html>
+<p>Choisis ta page et clique sur <strong>Copier</strong> à côté du code voulu.</p>
+<details><summary>Où coller chaque code dans Webnode ?</summary>
+<p><strong>Ligne à ajouter</strong> dans le contenu si le volume s’affiche déjà et que le lien vers la Version Texte manque.</p>
+<p><strong>Bloc complet</strong> dans le contenu pour installer ou remplacer le volume. Il comprend déjà la ligne de lecture.</p>
+<p><strong>Balise pour l’en-tête</strong> dans le champ Code HTML de l’en-tête de la page, dans ses paramètres SEO.</p>
+</details>
+<section class="extras"><h2>Graphe et fiche de lecture</h2><ul class="codes">{extras}</ul></section>
+<h2>Codes par page</h2>
+<ul class="pages">{rows}</ul>
+<p id="etat-copie" role="status"></p>
+</main>
+<script>
+const status = document.getElementById('etat-copie');
+let clearStatus;
+for (const link of document.querySelectorAll('[data-code]')) {{
+  const button = document.createElement('button');
+  const title = link.closest('.pages > li')?.querySelector('h3')?.textContent;
+  button.type = 'button';
+  button.textContent = 'Copier';
+  button.setAttribute('aria-label', 'Copier · ' + link.textContent + (title ? ' · ' + title : ''));
+  link.after(button);
+  button.addEventListener('click', async () => {{
+    clearTimeout(clearStatus);
+    status.textContent = '';
+    button.disabled = true;
+    let code;
+    try {{
+      const response = await fetch(link.href);
+      if (!response.ok) throw new Error('Code indisponible');
+      code = await response.text();
+    }} catch {{
+      status.textContent = 'Chargement impossible. Clique sur le nom du code pour ouvrir son fichier.';
+    }}
+    if (code !== undefined) {{
+      try {{
+        await navigator.clipboard.writeText(code);
+        button.parentElement.querySelector('textarea')?.remove();
+        status.textContent = 'Copié · ' + link.textContent;
+      }} catch {{
+        const field = button.parentElement.querySelector('textarea') || document.createElement('textarea');
+        field.readOnly = true;
+        field.setAttribute('aria-label', 'Code HTML à copier');
+        field.value = code;
+        button.after(field);
+        field.focus();
+        field.select();
+        status.textContent = 'Code sélectionné. Copie-le avec ⌘C ou Ctrl+C.';
+      }}
+    }}
+    button.disabled = false;
+    clearStatus = setTimeout(() => {{ status.textContent = ''; }}, 3500);
+  }});
+}}
+</script>
+</body></html>
 ''', encoding='utf-8')
     publish_corpus(site, corpus_entries, PAGES)
