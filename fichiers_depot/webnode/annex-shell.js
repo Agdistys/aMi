@@ -767,7 +767,16 @@
     },{passive:true});
     new win.ResizeObserver(schedule).observe(body);
     doc.addEventListener('toggle',schedule,true);
-    if (graph) viewBar.tabs.addEventListener('toggle',schedule);
+    if (graph) {
+      viewBar.tabs.addEventListener('toggle',schedule);
+      viewBar.tabs.addEventListener('click', event => {
+        const hash = event.target.closest?.('a[href^="#"]')?.getAttribute('href');
+        if (!targetByHash(hash) || event.ctrlKey || event.metaKey || event.shiftKey || event.button) return;
+        event.preventDefault();
+        if (host.location.hash !== hash) host.history.pushState(null,'',hash);
+        moveHash(hash);
+      });
+    }
     doc.addEventListener('load',schedule,true);
     doc.fonts?.ready.then(schedule);
     ready = true;
