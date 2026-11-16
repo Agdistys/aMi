@@ -68,6 +68,7 @@
     if (link) reveal(document.getElementById(link.hash.slice(1)));
   }, true);
   if (window === window.parent) {
+    document.documentElement.style.overflowAnchor = 'none';
     const tabs = document.querySelector('nav.tabs');
     const positions = new Map();
     const dock = () => tabs.getBoundingClientRect().bottom + 8;
@@ -85,7 +86,11 @@
       const panel = document.getElementById(event.target.closest('button[data-t]').dataset.t);
       const bounds = panel.getBoundingClientRect();
       const depth = Math.min(positions.get(panel.id) ?? 0,Math.max(0,bounds.height-48));
-      window.scrollBy({top:bounds.top-dock()+depth,behavior:'instant'});
+      const restore = () => window.scrollBy({
+        top:panel.getBoundingClientRect().top-dock()+depth,behavior:'instant',
+      });
+      restore();
+      requestAnimationFrame(() => { if (!panel.hidden) restore(); });
       previous = null;
     });
   }

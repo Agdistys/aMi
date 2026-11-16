@@ -432,6 +432,7 @@ li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;out
 <script>{chapter_script}</script>
 <script>
 if (window === window.parent) {{
+  document.documentElement.style.overflowAnchor = 'none';
   const choices = document.querySelector('.graph-choices');
   const start = document.getElementById('debut-vue-graphe');
   const positions = new Map();
