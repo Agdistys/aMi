@@ -41,6 +41,7 @@
     });
     const cards = tools.querySelectorAll(':scope > details.outil');
     if (cards.length) {
+      tools.parentElement.open = true;
       const intro = tools.querySelector(':scope > p.lead');
       if (intro?.firstChild?.nodeType === Node.TEXT_NODE) {
         intro.firstChild.textContent = intro.firstChild.textContent.replace(

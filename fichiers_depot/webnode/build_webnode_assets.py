@@ -507,6 +507,8 @@ def main():
                                 + quality_current(args.source, {'ami': volumes['ami'], **routes}))
                     text = once(text, 'Où en est chaque page</h2>',
                                 'Historique des contrôles publiés</h2>')
+                    text = once(text, "else if(h && h.indexOf('o-')===0){ ouvre('outils');",
+                                "else if(h && h.indexOf('o-')===0){ ouvre('outils'); history.replaceState(null,'','#'+h);")
                     position = text.lower().rindex('</body>')
                     raw = (text[:position] + style + '<script>' + script + '</script>\n' + text[position:]).encode('utf-8')
                 raw = standalone_annex(raw, slug, entry['label'], shell_path.name)
