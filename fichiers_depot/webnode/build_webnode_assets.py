@@ -469,6 +469,18 @@ def main():
                     raw = source_for(path, args.source, args.site)
                 if slug == 'ami-registre':
                     raw = canonicalize(raw.decode(),slug).encode()
+                if slug == 'ami-controle-qualite':
+                    script = Path(__file__).with_name('quality-folds.js').read_text(encoding='utf-8')
+                    style = ('<style>.cq-chapitre{margin:.75rem 0;border:1px solid #745923;'
+                             'border-radius:.65rem;background:#14121b}'
+                             '.cq-chapitre>summary{cursor:pointer;padding:.7rem 1rem;color:#ffd06a}'
+                             '.cq-chapitre>summary h2{display:inline;margin:0;font-size:clamp(1rem,3vw,1.35rem)}'
+                             '.cq-chapitre-contenu{padding:.5rem 1rem 1rem}'
+                             '.cq-chapitre-contenu table{max-width:100%}'
+                             '</style>')
+                    text = raw.decode('utf-8')
+                    position = text.lower().rindex('</body>')
+                    raw = (text[:position] + style + '<script>' + script + '</script>\n' + text[position:]).encode('utf-8')
                 raw = standalone_annex(raw, slug, entry['label'], shell_path.name)
                 (args.site/path).write_bytes(raw)
                 code = adapt_annex(template, slug, entry['label'], path, raw)

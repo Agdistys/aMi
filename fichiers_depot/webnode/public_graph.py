@@ -1,12 +1,12 @@
 """Build a catalogue graph using only explicit links in the public reading editions."""
 
-from html import escape
+from html import escape, unescape
 import json
 from itertools import combinations
 from pathlib import Path
 from math import cos, hypot, sin, sqrt, tau
 import re
-from urllib.parse import unquote, urljoin, urlsplit
+from urllib.parse import quote, unquote, urljoin, urlsplit
 
 
 SLUG = re.compile(r'ami(?:-[a-z0-9]+)*')
@@ -242,6 +242,50 @@ def edition_rows(graph):
     return '\n'.join(rows)
 
 
+def chapter_map(site, graph):
+    """Use only headings already present in the generated public reading editions."""
+    headings = re.compile(r'<h([23]) id="([^"]+)">(.+?)</h\1>', re.S)
+    nodes, edges = [], []
+    hubs = {}
+    for index, node in enumerate(graph['noeuds'][1:]):
+        slug = node['id']
+        family = _tome(node)
+        color = FAMILIES[family][1]
+        angle = index * tau / (len(graph['noeuds']) - 1) - tau / 4
+        radius = 285 if index % 2 else 490
+        x, y = radius * cos(angle), radius * sin(angle)
+        hub = {'id': slug, 'label': node['titre'], 'url': node.get('lecture', node['url']),
+               'family': family, 'color': color, 'x': round(x), 'y': round(y), 'chapter': False}
+        hubs[slug] = hub
+        nodes.append(hub)
+        if not node.get('markdown'):
+            continue
+        text = (site / slug / 'lecture' / 'index.html').read_text(encoding='utf-8')
+        sections = headings.findall(text.partition('<article>')[2].partition('</article>')[0])
+        if len(sections) > 32:
+            sections = [sections[i * len(sections) // 32] for i in range(32)]
+        for i, (_, identifier, inner) in enumerate(sections):
+            direction = angle + (i % 12 / 11 - .5) * 2.45
+            length = 49 + 27 * (i // 12)
+            chapter = f'{slug}:{i}'
+            nodes.append({
+                'id': chapter, 'label': unescape(re.sub(r'<[^>]+>', '', inner)),
+                'url': hub['url'] + '#' + quote(unescape(identifier)),
+                'family': family, 'color': color, 'chapter': True,
+                'x': round(x + length * cos(direction)), 'y': round(y + length * sin(direction)),
+            })
+            edges.append({'from': slug, 'to': chapter, 'reference': False, 'color': color})
+    for link in graph['liens']:
+        if link['relation'] != 'cite':
+            continue
+        source, target = link['source'], link['cible']
+        if source in hubs and target in hubs:
+            edges.append({'from': source, 'to': target, 'reference': True, 'color': hubs[source]['color']})
+    for index, edge in enumerate(edges):
+        edge['id'] = index
+    return {'nodes': nodes, 'edges': edges}
+
+
 def publish_graph(site, entries, base_url, reading_page):
     """Write the JSON and its public reader into the Pages build."""
     graph = make_graph(site, entries, base_url, reading_page)
@@ -268,6 +312,9 @@ def publish_graph(site, entries, base_url, reading_page):
             for index, link in enumerate(graph['liens'])
         ],
     }, ensure_ascii=False).replace('<', r'\u003c')
+    chapters = chapter_map(site, graph)
+    chapter_data = json.dumps(chapters, ensure_ascii=False).replace('<', r'\u003c')
+    chapter_script = (assets / 'chapter-flower.js').read_text(encoding='utf-8')
     title = graph['titre']
     reading = escape(reading_page, quote=True)
     json_url = escape(urljoin(base_url, 'lecture/graphe.json'), quote=True)
@@ -308,7 +355,20 @@ circle.volume{{fill:#ffe19a}}circle.annexe{{fill:#85dadd}}circle.index{{fill:#ff
 svg :is(line,text){{pointer-events:none}}
 svg a circle{{pointer-events:fill}}
 .graph-controls label{{display:inline-block;padding:.25rem .85rem .25rem .2rem;cursor:pointer}}
-#graphe-vue-fleur:checked ~ .graph-orbits,#graphe-vue-orbite:checked ~ .graph-flower{{display:none}}
+.graph-controls:not(:has(#graphe-vue-orbite:checked)) .graph-orbits,
+.graph-controls:not(:has(#graphe-vue-fleur:checked)) .graph-flower,
+.graph-controls:not(:has(#graphe-vue-chapitres:checked)) .graph-chapters{{display:none}}
+.chapter-layout{{display:grid;grid-template-columns:minmax(0,1fr) minmax(11rem,16rem);gap:.65rem;padding:.65rem}}
+#chapitres-canvas{{height:clamp(420px,72vh,720px);background:#0e1019;border:1px solid #554524;border-radius:.65rem}}
+.chapter-panel{{text-align:left;padding:.65rem;background:#191722;border:1px solid #554524;border-radius:.65rem;overflow-wrap:anywhere}}
+.chapter-panel input[type=search]{{font:inherit;width:100%;box-sizing:border-box}}
+.chapter-panel h3,.chapter-panel p{{margin:.45rem 0}}
+.chapter-panel label{{display:block}}
+.chapter-panel input[type=checkbox]{{accent-color:#ffca65}}
+.chapter-panel button{{border:1px solid #745923;background:#211b23;color:#ffd06a;border-radius:.5rem;font:inherit;padding:.25rem .55rem;cursor:pointer}}
+.chapter-panel ul{{padding-inline-start:1rem}}
+.chapter-panel li{{padding:.1rem 0;background:none}}
+@media(max-width:680px){{.chapter-layout{{grid-template-columns:minmax(0,1fr)}}}}
 svg a:is(:hover,:focus-visible) circle{{stroke:white;stroke-width:3}}svg text{{fill:#160e05;font-size:14px;font-weight:700}}
 ol{{padding-inline-start:2rem}}li{{padding:.7rem .8rem;scroll-margin-top:1rem}}
 li:nth-child(odd),li:target{{background:#16131b}}li:target{{outline:1px solid #ffd06a}}
@@ -318,7 +378,28 @@ li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;out
 <ul class="graph-links"><li><a id="lecture" href="{reading}">Index de Lecture</a></li><li><a href="{json_url}">Données JSON</a></li><li><a href="#editions">Liste des éditions</a></li></ul></header>
 <fieldset class="graph-controls"><legend>Disposition du graphe</legend>
 <input type="radio" name="graphe-vue" id="graphe-vue-orbite"><label for="graphe-vue-orbite">Orbites</label>
-<input type="radio" name="graphe-vue" id="graphe-vue-fleur" checked><label for="graphe-vue-fleur">Fleur synaptique</label>
+<input type="radio" name="graphe-vue" id="graphe-vue-fleur"><label for="graphe-vue-fleur">Réseau des éditions</label>
+<input type="radio" name="graphe-vue" id="graphe-vue-chapitres" checked><label for="graphe-vue-chapitres">Fleur synaptique</label>
+<figure class="graph-chapters">
+<div class="chapter-layout">
+<div id="chapitres-canvas" role="img" aria-label="Fleur synaptique des sections publiques"></div>
+<aside class="chapter-panel">
+<label for="chapitres-recherche">Chercher une section</label>
+<input type="search" id="chapitres-recherche"><ul id="chapitres-resultats"></ul>
+<h3>Fiche</h3><p id="chapitres-fiche" role="status">Clique sur un point pour afficher son lien de lecture.</p>
+<p><button type="button" data-flower-zoom=".75" aria-label="Réduire">−</button>
+<button type="button" data-flower-zoom="1.33" aria-label="Agrandir">+</button>
+<button type="button" data-flower-zoom="0">Recentrer</button></p>
+<details open><summary>Calques</summary>
+<label><input type="checkbox" id="chapitres-feuilles" checked> Sections</label>
+<label><input type="checkbox" id="chapitres-renvois" checked> Renvois entre éditions</label>
+</details>
+<details><summary>Familles</summary>
+{''.join(f'<label><input type="checkbox" data-chapter-family value="{i}" checked> <span aria-hidden="true" style="color:{color}">●</span> {label}</label>' for i, (label, color) in enumerate(FAMILIES))}
+</details></aside>
+</div>
+<figcaption>Chaque grappe relie une édition à ses sections publiques. Pour les éditions longues, la carte présente une sélection de sections et la lecture intégrale reste accessible.</figcaption>
+</figure>
 <figure class="graph-orbits">
 {plot(graph)}
 <figcaption>Le centre représente l’Index de Lecture. L’ambre indique les volumes et le turquoise, les annexes. Les traits turquoise suivent les renvois relevés dans les Versions Texte. Les numéros correspondent à la liste ci-dessous.</figcaption>
@@ -344,5 +425,7 @@ li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;out
 <script>/* {license_text} */
 {vis}</script>
 <script>{flower_script}</script>
+<script id="chapitres-data" type="application/json">{chapter_data}</script>
+<script>{chapter_script}</script>
 </body></html>
 ''', encoding='utf-8')
