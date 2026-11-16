@@ -3,6 +3,7 @@
 from html import escape
 import json
 from itertools import combinations
+from pathlib import Path
 from math import cos, hypot, sin, sqrt, tau
 import re
 from urllib.parse import unquote, urljoin, urlsplit
@@ -242,12 +243,31 @@ def edition_rows(graph):
 
 
 def publish_graph(site, entries, base_url, reading_page):
-    """Write the JSON and its script-free public reader into the Pages build."""
+    """Write the JSON and its public reader into the Pages build."""
     graph = make_graph(site, entries, base_url, reading_page)
     path = site / 'lecture'
     directory = path / 'graphe'
     directory.mkdir(parents=True, exist_ok=True)
     (path / 'graphe.json').write_text(json.dumps(graph, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    assets = Path(__file__).parent
+    vendor = assets / 'vendor'
+    vis = (vendor / 'vis-network-9.1.6.min.js').read_text(encoding='utf-8').split('//# sourceMappingURL=')[0]
+    license_text = (vendor / 'vis-network-LICENSE-MIT').read_text(encoding='utf-8')
+    flower_script = (assets / 'graph-flower.js').read_text(encoding='utf-8')
+    flower_data = json.dumps({
+        'nodes': [
+            {'id': node['id'], 'title': escape(node['titre']), 'type': node['type'],
+             'label': re.sub(r'^.*?\d[.]\d\s*·\s*', '', node['titre']).split(' — ')[0],
+             'color': FAMILIES[_tome(node)][1] if index else '#ffd06a'}
+            for index, node in enumerate(graph['noeuds'])
+        ],
+        'edges': [
+            {'id': index, 'from': link['source'], 'to': link['cible'], 'relation': link['relation'],
+             'color': '#69c5cb' if link['relation'] == 'cite' else '#4a412f',
+             'arrows': {'to': {'enabled': link['relation'] == 'cite', 'scaleFactor': .5}}}
+            for index, link in enumerate(graph['liens'])
+        ],
+    }, ensure_ascii=False).replace('<', r'\u003c')
     title = graph['titre']
     reading = escape(reading_page, quote=True)
     json_url = escape(urljoin(base_url, 'lecture/graphe.json'), quote=True)
@@ -261,7 +281,20 @@ def publish_graph(site, entries, base_url, reading_page):
 <style>
 :root{{color-scheme:dark;background:#09090e;color:#f1e6d3;font:1rem/1.6 system-ui,sans-serif}}
 body{{margin:0}}main{{max-width:65rem;margin:auto;padding:clamp(1rem,4vw,2.5rem)}}
-h1,h2,h3,a{{color:#ffd06a}}h1{{font:700 clamp(1.7rem,5vw,2.7rem)/1.15 Georgia,serif}}
+h1,h2,h3,a{{color:#ffd06a}}h1{{font:700 clamp(1.7rem,5vw,2.7rem)/1.15 Georgia,serif;text-wrap:balance}}
+.graph-header,.graph-controls,.graph-flower fieldset{{text-align:center}}
+.graph-links{{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem 1rem;padding:0}}
+.graph-links li{{padding:0;list-style:none;background:none}}
+.graph-links a,.graph-controls>label,#fleur-ajuster{{display:inline-block;padding:.35rem .85rem;border:1px solid #745923;border-radius:2rem;background:#19151c;color:#ffd06a}}
+.graph-controls>input:checked+label{{background:#ffd06a;color:#17121a}}
+.graph-controls>input:focus-visible+label{{outline:2px solid #fff4d2;outline-offset:3px}}
+.graph-controls>input{{position:absolute;width:1px;height:1px;opacity:0}}
+.graph-controls,.graph-flower fieldset{{border:0;padding:.65rem;margin:0;min-width:0}}
+.graph-controls legend{{margin-inline:auto;color:#f1e6d3}}
+#fleur-canvas{{height:clamp(400px,62vh,650px);background:#0c101a;border:1px solid #554524;border-radius:.65rem;margin:.5rem}}
+.canvas-active>svg{{display:none}}
+#fleur-ajuster{{cursor:pointer;margin:.35rem}}
+#fleur-ajuster[hidden]{{display:none}}
 figure{{margin:1.35rem 0;background:#14121b;border:1px solid #745923;border-radius:.7rem}}
 figcaption{{padding:0 1rem 1rem}}svg{{display:block;width:min(100%,45rem);margin:auto}}
 line.indexe{{stroke:#705832;stroke-width:.8}}line.cite{{stroke:#60c1c4;stroke-width:1;opacity:.6}}
@@ -281,11 +314,11 @@ ol{{padding-inline-start:2rem}}li{{padding:.7rem .8rem;scroll-margin-top:1rem}}
 li:nth-child(odd),li:target{{background:#16131b}}li:target{{outline:1px solid #ffd06a}}
 li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;outline-offset:3px}}
 </style></head><body><main>
-<h1>{title}</h1>
-<p><a id="lecture" href="{reading}">Index de Lecture</a> · <a href="{json_url}">Données JSON</a> · <a href="#editions">Liste des éditions</a></p>
+<header class="graph-header"><h1>{title}</h1>
+<ul class="graph-links"><li><a id="lecture" href="{reading}">Index de Lecture</a></li><li><a href="{json_url}">Données JSON</a></li><li><a href="#editions">Liste des éditions</a></li></ul></header>
 <fieldset class="graph-controls"><legend>Disposition du graphe</legend>
-<input type="radio" name="graphe-vue" id="graphe-vue-orbite" checked><label for="graphe-vue-orbite">Orbites</label>
-<input type="radio" name="graphe-vue" id="graphe-vue-fleur"><label for="graphe-vue-fleur">Fleur synaptique</label>
+<input type="radio" name="graphe-vue" id="graphe-vue-orbite"><label for="graphe-vue-orbite">Orbites</label>
+<input type="radio" name="graphe-vue" id="graphe-vue-fleur" checked><label for="graphe-vue-fleur">Fleur synaptique</label>
 <figure class="graph-orbits">
 {plot(graph)}
 <figcaption>Le centre représente l’Index de Lecture. L’ambre indique les volumes et le turquoise, les annexes. Les traits turquoise suivent les renvois relevés dans les Versions Texte. Les numéros correspondent à la liste ci-dessous.</figcaption>
@@ -296,6 +329,8 @@ li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;out
 <label><input type="checkbox" id="fleur-annexes" checked> Annexes</label>
 <label><input type="checkbox" id="fleur-index" checked> Liens de l’Index</label>
 </fieldset>
+<div id="fleur-canvas" role="img" aria-label="Fleur synaptique interactive des éditions publiques" hidden></div>
+<button type="button" id="fleur-ajuster" hidden>Recentrer la carte</button>
 {plot(graph, flower=True)}
 <figcaption>Les renvois rapprochent les nœuds. Les couleurs indiquent les familles.
 <ul class="graph-families">{''.join(f'<li><span aria-hidden="true" style="color:{color}">●</span> {label}</li>' for label, color in FAMILIES)}</ul>
@@ -304,5 +339,10 @@ li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;out
 </fieldset>
 <h2 id="editions">Les éditions et leurs renvois</h2>
 <ol>{edition_rows(graph)}</ol>
-</main></body></html>
+</main>
+<script id="fleur-data" type="application/json">{flower_data}</script>
+<script>/* {license_text} */
+{vis}</script>
+<script>{flower_script}</script>
+</body></html>
 ''', encoding='utf-8')
