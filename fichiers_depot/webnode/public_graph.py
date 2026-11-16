@@ -1,12 +1,12 @@
 """Build a catalogue graph using only explicit links in the public reading editions."""
 
-from html import escape, unescape
+from html import escape
 import json
 from itertools import combinations
 from pathlib import Path
 from math import cos, hypot, sin, sqrt, tau
 import re
-from urllib.parse import quote, unquote, urljoin, urlsplit
+from urllib.parse import unquote, urljoin, urlsplit
 
 
 SLUG = re.compile(r'ami(?:-[a-z0-9]+)*')
@@ -242,48 +242,24 @@ def edition_rows(graph):
     return '\n'.join(rows)
 
 
-def chapter_map(site, graph):
-    """Use only headings already present in the generated public reading editions."""
-    headings = re.compile(r'<h([23]) id="([^"]+)">(.+?)</h\1>', re.S)
-    nodes, edges = [], []
-    hubs = {}
-    for index, node in enumerate(graph['noeuds'][1:]):
-        slug = node['id']
-        family = _tome(node)
-        color = FAMILIES[family][1]
-        angle = index * tau / (len(graph['noeuds']) - 1) - tau / 4
-        radius = 285 if index % 2 else 490
-        x, y = radius * cos(angle), radius * sin(angle)
-        hub = {'id': slug, 'label': node['titre'], 'url': node.get('lecture', node['url']),
-               'family': family, 'color': color, 'x': round(x), 'y': round(y), 'chapter': False}
-        hubs[slug] = hub
-        nodes.append(hub)
-        if not node.get('markdown'):
+def synaptic_flower(assets, graph, base_url):
+    data = json.loads((assets / 'fleur-synaptique-v002.json').read_text(encoding='utf-8'))
+    known = {urlsplit(node[field]).path.removeprefix(urlsplit(base_url).path)
+             for node in graph['noeuds'] for field in ('url', 'lecture') if field in node}
+    ids = {node['id'] for node in data['nodes']}
+    if len(ids) != len(data['nodes']) or any(
+        edge['from'] not in ids or edge['to'] not in ids for edge in data['edges']
+    ):
+        raise ValueError('Nœuds ou renvois invalides dans la Fleur synaptique.')
+    for node in data['nodes']:
+        if not node.get('url'):
             continue
-        text = (site / slug / 'lecture' / 'index.html').read_text(encoding='utf-8')
-        sections = headings.findall(text.partition('<article>')[2].partition('</article>')[0])
-        if len(sections) > 32:
-            sections = [sections[i * len(sections) // 32] for i in range(32)]
-        for i, (_, identifier, inner) in enumerate(sections):
-            direction = angle + (i % 12 / 11 - .5) * 2.45
-            length = 49 + 27 * (i // 12)
-            chapter = f'{slug}:{i}'
-            nodes.append({
-                'id': chapter, 'label': unescape(re.sub(r'<[^>]+>', '', inner)),
-                'url': hub['url'] + '#' + quote(unescape(identifier)),
-                'family': family, 'color': color, 'chapter': True,
-                'x': round(x + length * cos(direction)), 'y': round(y + length * sin(direction)),
-            })
-            edges.append({'from': slug, 'to': chapter, 'reference': False, 'color': color})
-    for link in graph['liens']:
-        if link['relation'] != 'cite':
-            continue
-        source, target = link['source'], link['cible']
-        if source in hubs and target in hubs:
-            edges.append({'from': source, 'to': target, 'reference': True, 'color': hubs[source]['color']})
-    for index, edge in enumerate(edges):
-        edge['id'] = index
-    return {'nodes': nodes, 'edges': edges}
+        url = urlsplit(node['url'])
+        route = url.path.removeprefix('/')
+        if url.scheme != 'https' or url.netloc != 'ami.agdistys.fr' or url.query or url.fragment or route not in known:
+            raise ValueError(f'Lien hors du catalogue public : {node["id"]}')
+        node['url'] = urljoin(base_url, route)
+    return data
 
 
 def publish_graph(site, entries, base_url, reading_page):
@@ -312,9 +288,9 @@ def publish_graph(site, entries, base_url, reading_page):
             for index, link in enumerate(graph['liens'])
         ],
     }, ensure_ascii=False).replace('<', r'\u003c')
-    chapters = chapter_map(site, graph)
-    chapter_data = json.dumps(chapters, ensure_ascii=False).replace('<', r'\u003c')
-    chapter_script = (assets / 'chapter-flower.js').read_text(encoding='utf-8')
+    synaptic = synaptic_flower(assets, graph, base_url)
+    synaptic_data = json.dumps(synaptic, ensure_ascii=False).replace('<', r'\u003c')
+    synaptic_script = (assets / 'fleur-synaptique.js').read_text(encoding='utf-8')
     title = graph['titre']
     reading = escape(reading_page, quote=True)
     json_url = escape(urljoin(base_url, 'lecture/graphe.json'), quote=True)
@@ -360,7 +336,7 @@ svg a circle{{pointer-events:fill}}
 .graph-controls:not(:has(#graphe-vue-fleur:checked)) .graph-flower,
 .graph-controls:not(:has(#graphe-vue-chapitres:checked)) .graph-chapters{{display:none}}
 .chapter-layout{{display:grid;grid-template-columns:minmax(0,1fr) minmax(11rem,16rem);gap:.65rem;padding:.65rem}}
-#chapitres-canvas{{height:clamp(420px,72vh,720px);background:#0e1019;border:1px solid #554524;border-radius:.65rem}}
+#fleur-synaptique-canvas{{height:clamp(420px,72vh,720px);background:#0e1019;border:1px solid #554524;border-radius:.65rem}}
 .chapter-panel{{text-align:left;padding:.65rem;background:#191722;border:1px solid #554524;border-radius:.65rem;overflow-wrap:anywhere}}
 .chapter-panel input[type=search]{{font:inherit;width:100%;box-sizing:border-box}}
 .chapter-panel h3,.chapter-panel p{{margin:.45rem 0}}
@@ -385,23 +361,17 @@ li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;out
 <div id="debut-vue-graphe" aria-hidden="true"></div>
 <figure class="graph-chapters" id="vue-graphe-chapitres">
 <div class="chapter-layout">
-<div id="chapitres-canvas" role="img" aria-label="Fleur synaptique des sections publiques"></div>
+<div id="fleur-synaptique-canvas" role="img" aria-label="Fleur synaptique des sections publiques"></div>
 <aside class="chapter-panel">
-<label for="chapitres-recherche">Chercher une section</label>
-<input type="search" id="chapitres-recherche"><ul id="chapitres-resultats"></ul>
-<h3>Fiche</h3><p id="chapitres-fiche" role="status">Clique sur un point pour afficher son lien de lecture.</p>
-<p><button type="button" data-flower-zoom=".75" aria-label="Réduire">−</button>
-<button type="button" data-flower-zoom="1.33" aria-label="Agrandir">+</button>
-<button type="button" data-flower-zoom="0">Recentrer</button></p>
-<details open><summary>Calques</summary>
-<label><input type="checkbox" id="chapitres-feuilles" checked> Sections</label>
-<label><input type="checkbox" id="chapitres-renvois" checked> Renvois entre éditions</label>
-</details>
-<details><summary>Familles</summary>
-{''.join(f'<label><input type="checkbox" data-chapter-family value="{i}" checked> <span aria-hidden="true" style="color:{color}">●</span> {label}</label>' for i, (label, color) in enumerate(FAMILIES))}
-</details></aside>
+<label for="fleur-synaptique-recherche">Chercher un concept ou une édition</label>
+<input type="search" id="fleur-synaptique-recherche">
+<h3>Fiche</h3><div id="fleur-synaptique-fiche" aria-live="polite"><p>Clique sur un point pour ouvrir sa fiche.</p></div>
+<p><button type="button" data-fs-zoom=".75" aria-label="Réduire">−</button>
+<button type="button" data-fs-zoom="1.33" aria-label="Agrandir">+</button>
+<button type="button" data-fs-zoom="0">Recentrer</button></p>
+<details><summary>Familles</summary><div id="fleur-synaptique-familles"></div></details></aside>
 </div>
-<figcaption>Chaque grappe relie une édition à ses sections publiques. Pour les éditions longues, la carte présente une sélection de sections et la lecture intégrale reste accessible.</figcaption>
+<figcaption>Le protocole net · {len(synaptic['nodes'])} points et {len(synaptic['edges'])} liens. Les concepts partagés relient les éditions.</figcaption>
 </figure>
 <figure class="graph-orbits" id="vue-graphe-orbites">
 {plot(graph)}
@@ -428,8 +398,8 @@ li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;out
 <script>/* {license_text} */
 {vis}</script>
 <script>{flower_script}</script>
-<script id="chapitres-data" type="application/json">{chapter_data}</script>
-<script>{chapter_script}</script>
+<script id="fleur-synaptique-data" type="application/json">{synaptic_data}</script>
+<script>{synaptic_script}</script>
 <script>
 if (window === window.parent) {{
   document.documentElement.style.overflowAnchor = 'none';
