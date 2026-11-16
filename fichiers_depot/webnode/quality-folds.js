@@ -68,13 +68,25 @@
     if (link) reveal(document.getElementById(link.hash.slice(1)));
   }, true);
   if (window === window.parent) {
-    document.querySelector('nav.tabs').addEventListener('click', event => {
-      const slug = event.target.closest('button[data-t]')?.dataset.t;
-      if (!slug) return;
-      const panel = document.getElementById(slug);
-      const dock = document.querySelector('nav.tabs').getBoundingClientRect().bottom;
-      const top = panel.getBoundingClientRect().top;
-      if (top < dock) window.scrollBy({top:top-dock-8,behavior:'instant'});
+    const tabs = document.querySelector('nav.tabs');
+    const positions = new Map();
+    const dock = () => tabs.getBoundingClientRect().bottom + 8;
+    let previous;
+    tabs.addEventListener('click', event => {
+      const button = event.target.closest('button[data-t]');
+      previous = button?.getAttribute('aria-selected') === 'false'
+        ? main.querySelector(':scope > section:not([hidden])') : null;
+      if (!previous) return;
+      const bounds = previous.getBoundingClientRect();
+      positions.set(previous.id, Math.min(Math.max(0,bounds.height-48),Math.max(0,dock()-bounds.top)));
+    }, true);
+    tabs.addEventListener('click', event => {
+      if (!previous) return;
+      const panel = document.getElementById(event.target.closest('button[data-t]').dataset.t);
+      const bounds = panel.getBoundingClientRect();
+      const depth = Math.min(positions.get(panel.id) ?? 0,Math.max(0,bounds.height-48));
+      window.scrollBy({top:bounds.top-dock()+depth,behavior:'instant'});
+      previous = null;
     });
   }
   if (location.hash) {

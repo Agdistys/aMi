@@ -513,9 +513,10 @@
       }
     }
     function activate(index) {
-      original[index].click();
+      const button = original[index];
+      if (button.getAttribute('aria-selected') === 'true') return;
+      select(button.dataset.t, () => button.click());
       sync();
-      select(original[index].dataset.t);
     }
     for (const [index, button] of buttons.entries()) {
       button.addEventListener('click', () => activate(index));
@@ -574,11 +575,21 @@
     }
 
     const quality = config.slug === 'ami-controle-qualite' && doc.querySelector('nav.tabs');
-    const qualityBar = quality && qualityTabs(frame,chrome.nav,quality,slug => {
+    const qualityPositions = new Map();
+    const qualityBar = quality && qualityTabs(frame,chrome.nav,quality,(slug, activate) => {
       const panel = doc.getElementById(slug);
+      const previous = doc.querySelector('main > section:not([hidden])');
       if (!panel) return;
+      if (previous) {
+        const bounds = rawRect.call(previous);
+        const top = frame.getBoundingClientRect().top + bounds.top;
+        const dock = headerHeight() + qualityBar.tabs.offsetHeight + 8;
+        qualityPositions.set(previous.id,Math.min(Math.max(0,bounds.height-48),Math.max(0,dock-top)));
+      }
+      activate();
       host.history.replaceState(null,'','#'+slug);
-      to(panel,{behavior:'instant'});
+      innerOffset = qualityBar.tabs.offsetHeight;
+      to(panel,{behavior:'instant',depth:qualityPositions.get(slug) ?? 0});
       schedule();
     });
     const sticky = !qualityBar && stickySelectors[config.slug];
@@ -637,9 +648,10 @@
       const pad = headerHeight() + innerOffset + 8;
       if (options.block === 'nearest' && top >= pad && top+bound.height <= host.innerHeight) return;
       const shift = options.block === 'center' ? Math.max(0, (host.innerHeight-pad-bound.height)/2) : 0;
+      const depth = Math.min(options.depth ?? 0,Math.max(0,bound.height-48));
       const surface = scrollSurface(hostRoot);
       (surface || host).scrollTo({
-        top:Math.max(0,(surface?.scrollTop ?? host.scrollY)+top-pad-shift),
+        top:Math.max(0,(surface?.scrollTop ?? host.scrollY)+top-pad-shift+depth),
         behavior:options.behavior || 'auto',
       });
     }
