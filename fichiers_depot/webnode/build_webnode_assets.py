@@ -234,7 +234,7 @@ def adapter_bytes(code):
     script = scripts[0]
     markup = code[:script.start()]+'<span data-ami-adapter-script-slot hidden></span>'+code[script.end():]
     markup = re.sub(r'(<p\b[^>]*\brole="status"[^>]*>)Ouverture[^<]*</p>',
-                    lambda m: m[1]+'</p>',markup)
+                    lambda m: m[1]+'Chargement Protocole aMi</p>',markup)
     markup = re.sub(r'\s*<a data-astro-link\b', '\n  <a hidden data-astro-link', markup)
     markup = '<style>[data-ami-public-block] :is([data-ami-volume-status],[data-astro-status],[data-index-loading],[data-ami-annex-loader] > [role=status]):empty{display:none}</style>'+markup
     prefix = f'''// aMi · intégration Webnode générée.\n{{\n  const entryScript = document.currentScript;
@@ -538,7 +538,9 @@ def main():
 }})();
 </script>
 '''
-    (args.site/'webnode/migration-en-tete.txt').write_text(bridge, encoding='utf-8')
+    loading_head = Path(__file__).with_name('loading-head.html').read_text(encoding='utf-8')
+    (args.site/'webnode/chargement-en-tete.txt').write_text(loading_head, encoding='utf-8')
+    (args.site/'webnode/migration-en-tete.txt').write_text(loading_head + bridge, encoding='utf-8')
     publish(args.source,args.site,routes,volumes['ami'],snippet)
     publish_dated_corpus(args.source, args.site, PUBLISHER)
     if graph and args.annex_template:
