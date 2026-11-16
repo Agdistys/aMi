@@ -480,6 +480,61 @@
     }
   }
 
+  function qualityTabs(frame, source, select) {
+    const doc = frame.ownerDocument;
+    style(doc, 'ami-quality-host-tabs', `
+      .ami-quality-grid{display:grid;grid-template-columns:minmax(0,1fr);min-width:0}
+      .ami-quality-grid>iframe,.ami-quality-tabs{grid-area:1/1}
+      .ami-quality-tabs{align-self:start;position:sticky;top:var(--ami-quality-top,0px);
+        margin-block-start:var(--ami-quality-start,0px);z-index:100;display:grid;
+        grid-template-columns:repeat(6,minmax(0,1fr));background:#09090e;border-bottom:1px solid #766025}
+      .ami-quality-tabs button{min-width:0;min-height:44px;overflow-wrap:anywhere;padding:.48rem .3rem;
+        color:#e6dfdb;background:none;border:0;border-bottom:2px solid transparent;cursor:pointer;
+        font:600 clamp(.75rem,1.5vw,.9rem)/1.25 system-ui,sans-serif}
+      .ami-quality-tabs button .em{display:block;font-size:1.15rem}
+      .ami-quality-tabs button[aria-selected=true]{color:#ffce69;border-bottom-color:#ffca55;background:#201912}
+      .ami-quality-tabs button:focus-visible{outline:2px solid #ffca55;outline-offset:-3px}
+      @media(max-width:660px){.ami-quality-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    `);
+    style(source.ownerDocument, 'ami-quality-source-tabs', `
+      html:not(:fullscreen):not(:has(:fullscreen)) nav.tabs{position:static!important;visibility:hidden;
+        box-sizing:border-box;height:var(--ami-quality-tab-height,auto);min-height:0}
+    `);
+    const grid = frame.parentElement;
+    const tabs = doc.importNode(source,true);
+    tabs.className = 'ami-quality-tabs';
+    grid.append(tabs);
+    const original = [...source.querySelectorAll('button[data-t]')];
+    const buttons = [...tabs.querySelectorAll('button[data-t]')];
+    function sync() {
+      for (const [index, button] of buttons.entries()) {
+        const active = original[index].getAttribute('aria-selected');
+        button.setAttribute('aria-selected',active);
+        button.tabIndex = active === 'true' ? 0 : -1;
+      }
+    }
+    function activate(index) {
+      original[index].click();
+      sync();
+      select(original[index].dataset.t);
+    }
+    for (const [index, button] of buttons.entries()) {
+      button.addEventListener('click', () => activate(index));
+      button.addEventListener('keydown', event => {
+        const direction = {ArrowLeft:-1,ArrowRight:1}[event.key];
+        if (direction === undefined && !['Home','End'].includes(event.key)) return;
+        event.preventDefault();
+        const next = direction === undefined ? (event.key === 'Home' ? 0 : buttons.length-1)
+          : (index + direction + buttons.length) % buttons.length;
+        buttons[next].focus();
+        activate(next);
+      });
+    }
+    new MutationObserver(sync).observe(source,{subtree:true,attributes:true,attributeFilter:['aria-selected']});
+    sync();
+    return {tabs,source,original};
+  }
+
   function connect(frame, chrome, config) {
     const doc = frame.contentDocument;
     const win = frame.contentWindow;
@@ -519,12 +574,30 @@
       }
     }
 
-    const sticky = stickySelectors[config.slug];
+    const quality = frame.parentElement.matches('.ami-quality-grid') && doc.querySelector('nav.tabs');
+    const qualityBar = quality && qualityTabs(frame,quality,slug => {
+      const panel = doc.getElementById(slug);
+      if (!panel) return;
+      host.history.replaceState(null,'','#'+slug);
+      to(panel,{behavior:'instant'});
+      schedule();
+    });
+    const sticky = !qualityBar && stickySelectors[config.slug];
     const fixed = fixedSelectors[config.slug];
     const rememberedFixed = new WeakMap();
     function place() {
       let top = offset();
       innerOffset = 0;
+      if (qualityBar) {
+        const {tabs, source} = qualityBar;
+        const start = Math.max(0,rawRect.call(source).top);
+        const height = tabs.offsetHeight;
+        const dock = chrome.nav.getBoundingClientRect().bottom;
+        tabs.style.setProperty('--ami-quality-top',Math.max(0,dock)+'px');
+        tabs.style.setProperty('--ami-quality-start',start+'px');
+        source.style.setProperty('--ami-quality-tab-height',height+'px');
+        if (frame.getBoundingClientRect().top + start <= dock + 1) innerOffset = height;
+      }
       if (sticky) for (const bar of doc.querySelectorAll(sticky)) {
         if (!bar.getClientRects().length) continue;
         bar.style.setProperty('top',top+'px','important');
@@ -607,6 +680,10 @@
     function moveHash(hash) {
       const target = targetByHash(hash);
       if (!target) return;
+      if (qualityBar) {
+        const panel = target.closest('main > section');
+        if (panel?.hidden) qualityBar.original.find(button => button.dataset.t === panel.id)?.click();
+      }
       reveal(target,true);
       to(target,{behavior:'instant'});
       // The site menu may switch to its fixed height after the initial jump.

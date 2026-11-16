@@ -13,7 +13,7 @@ from dated_corpus import publish_dated_corpus
 from publisher import GITHUB, PUBLISHER, adapter_links, publisher_links
 from public_reading import (
     BAREME, BAREME_LABEL, COMPACT_NAV_CSS, COMPACT_NAV_VOLUMES, CURRENT_SUBLIMATION_LINK, REGISTER,
-    SUBLIMATION_LINK, canonicalize, graph_annex, navbar_routes, publish, without_door_titles,
+    SUBLIMATION_LINK, Excerpt, canonicalize, graph_annex, navbar_routes, publish, without_door_titles,
 )
 
 ROUTE = re.compile(r'/ami(?:-[a-z0-9]+(?:-[a-z0-9]+)*)?/')
@@ -379,6 +379,27 @@ def standalone_annex(raw, slug, label, asset):
     return text.encode('utf-8')
 
 
+def quality_current(source, routes):
+    rows = []
+    for slug, path in routes.items():
+        doc = Excerpt()
+        doc.feed((source/path).read_text(encoding='utf-8'))
+        title = re.sub(r'\s+· Protocole de ConScience aMi$', '', doc.title or slug)
+        version = re.search(r'(?:^|_)(V[0-9]+(?:[.][0-9]+)?)', Path(path).stem)
+        date = re.search(r'20[0-9]{2}-[0-9]{2}-[0-9]{2}', path)
+        url = PUBLISHER + slug + '/'
+        rows.append(f'<tr><td><a href="{escape(url,quote=True)}">{escape(title)}</a></td>'
+                    f'<td>{version[1] if version else "—"}</td><td>{date[0] if date else "—"}</td></tr>')
+    return ('<h2 id="cq-editions-publiees">Éditions publiques actuelles</h2>'
+            '<p>Ce tableau suit les fichiers utilisés pour la publication. La date est celle de l’édition indiquée '
+            'dans le fichier. Les essais et décisions antérieurs restent consignés dans l’historique.</p>'
+            '<p><strong>Charte · vérification du 16 novembre 2026.</strong> La V102 est en ligne. '
+            'Le lexique ThermoCognition emploie encore « dénominateur de C », correction vers Φ signalée '
+            'le 9 novembre. Un lien interne vise aussi une ancre absente.</p>'
+            '<div class="tw"><table><thead><tr><th scope="col">Édition</th><th scope="col">Version</th>'
+            '<th scope="col">Date</th></tr></thead><tbody>' + ''.join(rows) + '</tbody></table></div>')
+
+
 def main():
     parser = ArgumentParser()
     parser.add_argument('--source',type=Path,required=True)
@@ -479,6 +500,10 @@ def main():
                              '.cq-chapitre-contenu table{max-width:100%}'
                              '</style>')
                     text = raw.decode('utf-8')
+                    text = once(text, '<section id="volumes">', '<section id="volumes">\n'
+                                + quality_current(args.source, {'ami': volumes['ami'], **routes}))
+                    text = once(text, 'Où en est chaque page</h2>',
+                                'Historique des contrôles publiés</h2>')
                     position = text.lower().rindex('</body>')
                     raw = (text[:position] + style + '<script>' + script + '</script>\n' + text[position:]).encode('utf-8')
                 raw = standalone_annex(raw, slug, entry['label'], shell_path.name)

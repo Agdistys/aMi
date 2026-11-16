@@ -1,6 +1,10 @@
 (function () {
   const main = document.querySelector('main');
-  const rootDetails = main.querySelectorAll(':scope > aside > details[open]');
+  const history = document.getElementById('hist');
+  for (const aside of [...main.querySelectorAll(':scope > aside')].reverse()) {
+    history.prepend(aside);
+  }
+  const rootDetails = main.querySelectorAll('aside > details[open]');
   for (const details of rootDetails) details.open = false;
   for (const panel of main.querySelectorAll(':scope > section')) {
     let body;
@@ -35,9 +39,19 @@
     const link = event.target.closest?.('a[href^="#"]');
     if (link) reveal(document.getElementById(link.hash.slice(1)));
   }, true);
+  if (window === window.parent) {
+    document.querySelector('nav.tabs').addEventListener('click', event => {
+      const slug = event.target.closest('button[data-t]')?.dataset.t;
+      if (!slug) return;
+      const panel = document.getElementById(slug);
+      const dock = document.querySelector('nav.tabs').getBoundingClientRect().bottom;
+      const top = panel.getBoundingClientRect().top;
+      if (top < dock) window.scrollBy({top:top-dock-8,behavior:'instant'});
+    });
+  }
   if (location.hash) {
     const target = document.getElementById(location.hash.slice(1));
     reveal(target);
-    target?.scrollIntoView();
+    if (target && target.closest('details')) target.scrollIntoView();
   }
 })();
