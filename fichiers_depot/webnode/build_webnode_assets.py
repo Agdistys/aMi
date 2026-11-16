@@ -509,6 +509,8 @@ def main():
                                 'Historique des contrôles publiés</h2>')
                     text = once(text, "else if(h && h.indexOf('o-')===0){ ouvre('outils');",
                                 "else if(h && h.indexOf('o-')===0){ ouvre('outils'); history.replaceState(null,'','#'+h);")
+                    text = once(text, 'tabs[j].focus(); ouvre(tabs[j].dataset.t);',
+                                'tabs[j].focus({preventScroll:true}); tabs[j].click();')
                     position = text.lower().rindex('</body>')
                     raw = (text[:position] + style + '<script>' + script + '</script>\n' + text[position:]).encode('utf-8')
                 raw = standalone_annex(raw, slug, entry['label'], shell_path.name)
