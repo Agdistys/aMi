@@ -314,7 +314,11 @@ h1,h2,h3,a{{color:#ffd06a}}h1{{font:700 clamp(1.7rem,5vw,2.7rem)/1.15 Georgia,se
 .graph-choices>input{{position:absolute;width:1px;height:1px;opacity:0}}
 .graph-controls,.graph-flower fieldset{{border:0;padding:.65rem;margin:0;min-width:0}}
 .graph-controls legend{{margin-inline:auto;color:#f1e6d3}}
-.graph-choices{{position:sticky;top:var(--ami-annex-standalone-top,0px);z-index:2;background:#09090e;padding:.4rem}}
+.graph-navigation{{position:sticky;top:var(--ami-annex-standalone-top,0px);z-index:2;background:#101018;border:1px solid #745923;border-radius:.55rem}}
+.graph-navigation>summary{{cursor:pointer;padding:.45rem;color:#ffd06a;font-weight:650}}
+.graph-choices{{display:flex;flex-wrap:wrap;justify-content:center;gap:.35rem;padding:.3rem .5rem}}
+.graph-navigation .graph-links{{gap:.25rem .9rem;border-top:1px solid #745923;margin:0;padding:.35rem .5rem}}
+.graph-navigation .graph-links a{{border:0;padding:.1rem .2rem;background:none}}
 #fleur-canvas{{height:clamp(400px,62vh,650px);background:#0c101a;border:1px solid #554524;border-radius:.65rem;margin:.5rem}}
 .canvas-active>svg{{display:none}}
 #fleur-ajuster{{cursor:pointer;margin:.35rem}}
@@ -351,14 +355,17 @@ ol{{padding-inline-start:2rem}}li{{padding:.7rem .8rem;scroll-margin-top:1rem}}
 li:nth-child(odd),li:target{{background:#16131b}}li:target{{outline:1px solid #ffd06a}}
 li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;outline-offset:3px}}
 </style></head><body><main>
-<header class="graph-header"><h1>{title}</h1>
-<ul class="graph-links"><li><a id="lecture" href="{reading}">Index de Lecture</a></li><li><a href="{json_url}">Données JSON</a></li><li><a href="#editions">Liste des éditions</a></li></ul></header>
-<fieldset class="graph-controls"><legend>Disposition du graphe</legend>
+<header class="graph-header"><h1>{title}</h1></header>
+<fieldset class="graph-controls" aria-label="Disposition du graphe">
+<details class="graph-navigation" open>
+<summary>Navigation du graphe</summary>
 <div class="graph-choices">
 <input type="radio" name="graphe-vue" id="graphe-vue-orbite" aria-controls="vue-graphe-orbites"><label for="graphe-vue-orbite">Orbites</label>
 <input type="radio" name="graphe-vue" id="graphe-vue-fleur" aria-controls="vue-graphe-reseau"><label for="graphe-vue-fleur">Réseau des éditions</label>
 <input type="radio" name="graphe-vue" id="graphe-vue-chapitres" aria-controls="vue-graphe-chapitres" checked><label for="graphe-vue-chapitres">Fleur synaptique</label></div>
-<div id="debut-vue-graphe" aria-hidden="true"></div>
+<ul class="graph-links"><li><a href="{reading}">Index de Lecture</a></li><li><a href="{json_url}">Données JSON</a></li><li><a href="#editions">Liste des éditions</a></li></ul>
+</details>
+<div id="debut-vue-graphe"><span id="lecture"></span></div>
 <figure class="graph-chapters" id="vue-graphe-chapitres">
 <div class="chapter-layout">
 <div id="fleur-synaptique-canvas" role="img" aria-label="Fleur synaptique des sections publiques"></div>
@@ -404,11 +411,12 @@ li h3,li p{{margin:.15rem 0}}a:focus-visible{{outline:2px solid currentColor;out
 if (window === window.parent) {{
   document.documentElement.style.overflowAnchor = 'none';
   const choices = document.querySelector('.graph-choices');
+  const navigation = document.querySelector('.graph-navigation');
   const start = document.getElementById('debut-vue-graphe');
   const positions = new Map();
   let current = choices.querySelector('input:checked').id;
   choices.addEventListener('change', event => {{
-    const dock = choices.getBoundingClientRect().bottom + 8;
+    const dock = navigation.getBoundingClientRect().bottom + 8;
     const position = start.getBoundingClientRect().top;
     positions.set(current,Math.max(0,dock-position));
     current = event.target.id;

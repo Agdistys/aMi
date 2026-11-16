@@ -487,7 +487,15 @@
       .ami-quality-stack>#amiBarre.ami-annex-bar{position:relative!important;top:0!important}
       .ami-quality-tabs{display:grid;
         grid-template-columns:repeat(6,minmax(0,1fr));background:#09090e;border-bottom:1px solid #766025}
-      .ami-quality-tabs.ami-graph-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .ami-graph-title{margin:0;padding:1.35rem .7rem .8rem;text-align:center;color:#ffd06a;
+        background:#09090e;font:700 clamp(1.55rem,4vw,2.65rem)/1.15 Georgia,serif;text-wrap:balance}
+      .ami-graph-navigation{position:sticky;top:calc(var(--ami-annex-host-top,0px) + var(--ami-graph-header-height,0px));
+        z-index:100;min-width:0;background:#101018;color:#ffd06a;text-align:center;border-bottom:1px solid #766025}
+      .ami-graph-navigation>summary{cursor:pointer;padding:.45rem;font:650 .9rem/1.4 system-ui,sans-serif}
+      .ami-quality-tabs.ami-graph-tabs{grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid #554524}
+      .ami-graph-navigation .graph-links{display:flex;flex-wrap:wrap;justify-content:center;
+        gap:.25rem .9rem;margin:0;padding:.4rem .55rem;list-style:none}
+      .ami-graph-navigation .graph-links a{color:#ffd06a;font:600 .85rem/1.35 system-ui,sans-serif}
       .ami-quality-tabs button{min-width:0;min-height:44px;overflow-wrap:anywhere;padding:.48rem .3rem;
         color:#e6dfdb;background:none;border:0;border-bottom:2px solid transparent;cursor:pointer;
         font:600 clamp(.75rem,1.5vw,.9rem)/1.25 system-ui,sans-serif}
@@ -496,14 +504,28 @@
       .ami-quality-tabs button:focus-visible{outline:2px solid #ffca55;outline-offset:-3px}
       @media(max-width:660px){.ami-quality-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}}
     `);
-    style(source.ownerDocument, 'ami-quality-source-tabs', `
-      html:not(:fullscreen):not(:has(:fullscreen)) ${graph ? '.graph-choices, html:not(:fullscreen):not(:has(:fullscreen)) .graph-controls>legend' : 'nav.tabs'}{display:none!important}
-    `);
-    const stack = element(doc, 'div', 'ami-quality-stack');
+    const inside = 'html:not(:fullscreen):not(:has(:fullscreen))';
+    style(source.ownerDocument, 'ami-quality-source-tabs',
+      (graph ? ['.graph-header','.graph-navigation'] : ['nav.tabs'])
+        .map(selector => inside+' '+selector).join(',')+'{display:none!important}');
     const tabs = graph ? element(doc,'nav') : doc.importNode(source,true);
     tabs.className = 'ami-quality-tabs' + (graph ? ' ami-graph-tabs' : '');
-    nav.before(stack);
-    stack.append(nav,tabs);
+    let stack;
+    if (graph) {
+      const title = doc.importNode(source.ownerDocument.querySelector('.graph-header h1'),true);
+      title.className = 'ami-graph-title';
+      stack = doc.importNode(source.closest('details'),true);
+      stack.className = 'ami-graph-navigation';
+      stack.querySelector('.graph-choices').replaceWith(tabs);
+      nav.after(title,stack);
+      const size = () => stack.style.setProperty('--ami-graph-header-height',nav.offsetHeight+'px');
+      new ResizeObserver(size).observe(nav);
+      size();
+    } else {
+      stack = element(doc, 'div', 'ami-quality-stack');
+      nav.before(stack);
+      stack.append(nav,tabs);
+    }
     const original = [...source.querySelectorAll(graph ? 'input[type=radio]' : 'button[data-t]')];
     if (graph) {
       tabs.setAttribute('role','tablist');
@@ -545,7 +567,7 @@
     if (graph) source.addEventListener('change',sync);
     else new MutationObserver(sync).observe(source,{subtree:true,attributes:true,attributeFilter:['aria-selected']});
     sync();
-    return {tabs,original};
+    return {tabs:graph ? stack : tabs,original};
   }
 
   function connect(frame, chrome, config) {
@@ -745,6 +767,7 @@
     },{passive:true});
     new win.ResizeObserver(schedule).observe(body);
     doc.addEventListener('toggle',schedule,true);
+    if (graph) viewBar.tabs.addEventListener('toggle',schedule);
     doc.addEventListener('load',schedule,true);
     doc.fonts?.ready.then(schedule);
     ready = true;
