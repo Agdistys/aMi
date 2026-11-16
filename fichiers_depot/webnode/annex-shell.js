@@ -480,13 +480,14 @@
     }
   }
 
-  function qualityTabs(frame, nav, source, select) {
+  function viewTabs(frame, nav, source, select, graph) {
     const doc = frame.ownerDocument;
     style(doc, 'ami-quality-host-tabs', `
       .ami-quality-stack{position:sticky;top:var(--ami-annex-host-top,0px);z-index:101;min-width:0}
       .ami-quality-stack>#amiBarre.ami-annex-bar{position:relative!important;top:0!important}
       .ami-quality-tabs{display:grid;
         grid-template-columns:repeat(6,minmax(0,1fr));background:#09090e;border-bottom:1px solid #766025}
+      .ami-quality-tabs.ami-graph-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
       .ami-quality-tabs button{min-width:0;min-height:44px;overflow-wrap:anywhere;padding:.48rem .3rem;
         color:#e6dfdb;background:none;border:0;border-bottom:2px solid transparent;cursor:pointer;
         font:600 clamp(.75rem,1.5vw,.9rem)/1.25 system-ui,sans-serif}
@@ -496,26 +497,37 @@
       @media(max-width:660px){.ami-quality-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}}
     `);
     style(source.ownerDocument, 'ami-quality-source-tabs', `
-      html:not(:fullscreen):not(:has(:fullscreen)) nav.tabs{display:none!important}
+      html:not(:fullscreen):not(:has(:fullscreen)) ${graph ? '.graph-choices, html:not(:fullscreen):not(:has(:fullscreen)) .graph-controls>legend' : 'nav.tabs'}{display:none!important}
     `);
     const stack = element(doc, 'div', 'ami-quality-stack');
-    const tabs = doc.importNode(source,true);
-    tabs.className = 'ami-quality-tabs';
+    const tabs = graph ? element(doc,'nav') : doc.importNode(source,true);
+    tabs.className = 'ami-quality-tabs' + (graph ? ' ami-graph-tabs' : '');
     nav.before(stack);
     stack.append(nav,tabs);
-    const original = [...source.querySelectorAll('button[data-t]')];
-    const buttons = [...tabs.querySelectorAll('button[data-t]')];
+    const original = [...source.querySelectorAll(graph ? 'input[type=radio]' : 'button[data-t]')];
+    if (graph) {
+      tabs.setAttribute('role','tablist');
+      tabs.setAttribute('aria-label','Vues du graphe');
+      for (const input of original) {
+        const button = element(doc,'button',null,input.labels[0].textContent);
+        button.type = 'button';
+        button.setAttribute('role','tab');
+        tabs.append(button);
+      }
+    }
+    const buttons = [...tabs.querySelectorAll('button')];
+    const isSelected = item => graph ? item.checked : item.getAttribute('aria-selected') === 'true';
     function sync() {
       for (const [index, button] of buttons.entries()) {
-        const active = original[index].getAttribute('aria-selected');
-        button.setAttribute('aria-selected',active);
-        button.tabIndex = active === 'true' ? 0 : -1;
+        const active = isSelected(original[index]);
+        button.setAttribute('aria-selected',String(active));
+        button.tabIndex = active ? 0 : -1;
       }
     }
     function activate(index) {
       const button = original[index];
-      if (button.getAttribute('aria-selected') === 'true') return;
-      select(button.dataset.t, () => button.click());
+      if (isSelected(button)) return;
+      select(graph ? button.getAttribute('aria-controls') : button.dataset.t, () => button.click());
       sync();
     }
     for (const [index, button] of buttons.entries()) {
@@ -530,7 +542,8 @@
         activate(next);
       });
     }
-    new MutationObserver(sync).observe(source,{subtree:true,attributes:true,attributeFilter:['aria-selected']});
+    if (graph) source.addEventListener('change',sync);
+    else new MutationObserver(sync).observe(source,{subtree:true,attributes:true,attributeFilter:['aria-selected']});
     sync();
     return {tabs,original};
   }
@@ -575,30 +588,32 @@
     }
 
     const quality = config.slug === 'ami-controle-qualite' && doc.querySelector('nav.tabs');
-    const qualityPositions = new Map();
-    const qualityBar = quality && qualityTabs(frame,chrome.nav,quality,(slug, activate) => {
+    const graph = config.slug === 'ami-graphe' && doc.querySelector('.graph-choices');
+    const viewPositions = new Map();
+    const viewBar = (quality || graph) && viewTabs(frame,chrome.nav,quality || graph,(slug, activate) => {
       const panel = doc.getElementById(slug);
-      const previous = doc.querySelector('main > section:not([hidden])');
+      const previousId = graph?.querySelector?.('input:checked')?.getAttribute('aria-controls');
+      const previous = graph ? doc.getElementById(previousId) : doc.querySelector('main > section:not([hidden])');
       if (!panel) return;
       if (previous) {
         const bounds = rawRect.call(previous);
         const top = frame.getBoundingClientRect().top + bounds.top;
-        const dock = headerHeight() + qualityBar.tabs.offsetHeight + 8;
-        qualityPositions.set(previous.id,Math.min(Math.max(0,bounds.height-48),Math.max(0,dock-top)));
+        const dock = headerHeight() + viewBar.tabs.offsetHeight + 8;
+        viewPositions.set(previous.id,Math.min(Math.max(0,bounds.height-48),Math.max(0,dock-top)));
       }
       activate();
-      host.history.replaceState(null,'','#'+slug);
-      innerOffset = qualityBar.tabs.offsetHeight;
-      to(panel,{behavior:'instant',depth:qualityPositions.get(slug) ?? 0});
+      if (quality) host.history.replaceState(null,'','#'+slug);
+      innerOffset = viewBar.tabs.offsetHeight;
+      to(panel,{behavior:'instant',depth:viewPositions.get(slug) ?? 0});
       schedule();
-    });
-    const sticky = !qualityBar && stickySelectors[config.slug];
+    },Boolean(graph));
+    const sticky = !viewBar && stickySelectors[config.slug];
     const fixed = fixedSelectors[config.slug];
     const rememberedFixed = new WeakMap();
     function place() {
       let top = offset();
       innerOffset = 0;
-      if (qualityBar) innerOffset = qualityBar.tabs.offsetHeight;
+      if (viewBar) innerOffset = viewBar.tabs.offsetHeight;
       if (sticky) for (const bar of doc.querySelectorAll(sticky)) {
         if (!bar.getClientRects().length) continue;
         bar.style.setProperty('top',top+'px','important');
@@ -682,9 +697,9 @@
     function moveHash(hash) {
       const target = targetByHash(hash);
       if (!target) return;
-      if (qualityBar) {
+      if (quality) {
         const panel = target.closest('main > section');
-        if (panel?.hidden) qualityBar.original.find(button => button.dataset.t === panel.id)?.click();
+        if (panel?.hidden) viewBar.original.find(button => button.dataset.t === panel.id)?.click();
       }
       reveal(target,true);
       to(target,{behavior:'instant'});
