@@ -380,7 +380,7 @@
       scheduled = false;
       const surface = scrollSurface(host);
       const top = surface ? 0 : inset(doc, chrome.nav);
-      chrome.nav.style.setProperty('--ami-annex-host-top', top+'px');
+      host.style.setProperty('--ami-annex-host-top', top+'px');
       const bounds = host === doc.body ? doc.documentElement.getBoundingClientRect() : host.getBoundingClientRect();
       const max = surface ? Math.max(1,surface.scrollHeight-surface.clientHeight)
         : Math.max(1,bounds.height-win.innerHeight+top);
@@ -480,13 +480,12 @@
     }
   }
 
-  function qualityTabs(frame, source, select) {
+  function qualityTabs(frame, nav, source, select) {
     const doc = frame.ownerDocument;
     style(doc, 'ami-quality-host-tabs', `
-      .ami-quality-grid{display:grid;grid-template-columns:minmax(0,1fr);min-width:0}
-      .ami-quality-grid>iframe,.ami-quality-tabs{grid-area:1/1}
-      .ami-quality-tabs{align-self:start;position:sticky;top:var(--ami-quality-top,0px);
-        margin-block-start:var(--ami-quality-start,0px);z-index:100;display:grid;
+      .ami-quality-stack{position:sticky;top:var(--ami-annex-host-top,0px);z-index:101;min-width:0}
+      .ami-quality-stack>#amiBarre.ami-annex-bar{position:relative!important;top:0!important}
+      .ami-quality-tabs{display:grid;
         grid-template-columns:repeat(6,minmax(0,1fr));background:#09090e;border-bottom:1px solid #766025}
       .ami-quality-tabs button{min-width:0;min-height:44px;overflow-wrap:anywhere;padding:.48rem .3rem;
         color:#e6dfdb;background:none;border:0;border-bottom:2px solid transparent;cursor:pointer;
@@ -497,13 +496,13 @@
       @media(max-width:660px){.ami-quality-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}}
     `);
     style(source.ownerDocument, 'ami-quality-source-tabs', `
-      html:not(:fullscreen):not(:has(:fullscreen)) nav.tabs{position:static!important;visibility:hidden;
-        box-sizing:border-box;height:var(--ami-quality-tab-height,auto);min-height:0}
+      html:not(:fullscreen):not(:has(:fullscreen)) nav.tabs{display:none!important}
     `);
-    const grid = frame.parentElement;
+    const stack = element(doc, 'div', 'ami-quality-stack');
     const tabs = doc.importNode(source,true);
     tabs.className = 'ami-quality-tabs';
-    grid.append(tabs);
+    nav.before(stack);
+    stack.append(nav,tabs);
     const original = [...source.querySelectorAll('button[data-t]')];
     const buttons = [...tabs.querySelectorAll('button[data-t]')];
     function sync() {
@@ -532,7 +531,7 @@
     }
     new MutationObserver(sync).observe(source,{subtree:true,attributes:true,attributeFilter:['aria-selected']});
     sync();
-    return {tabs,source,original};
+    return {tabs,original};
   }
 
   function connect(frame, chrome, config) {
@@ -541,7 +540,7 @@
     if (!doc?.body) return false;
     const host = frame.ownerDocument.defaultView;
     const body = doc.body;
-    const hostRoot = chrome.nav.parentElement;
+    const hostRoot = chrome.nav.closest('[data-ami-annex-chrome]');
     const rawRect = win.Element.prototype.getBoundingClientRect;
     const nativeInto = win.Element.prototype.scrollIntoView;
     const nativeScroll = win.scrollTo.bind(win);
@@ -574,8 +573,8 @@
       }
     }
 
-    const quality = frame.parentElement.matches('.ami-quality-grid') && doc.querySelector('nav.tabs');
-    const qualityBar = quality && qualityTabs(frame,quality,slug => {
+    const quality = config.slug === 'ami-controle-qualite' && doc.querySelector('nav.tabs');
+    const qualityBar = quality && qualityTabs(frame,chrome.nav,quality,slug => {
       const panel = doc.getElementById(slug);
       if (!panel) return;
       host.history.replaceState(null,'','#'+slug);
@@ -588,16 +587,7 @@
     function place() {
       let top = offset();
       innerOffset = 0;
-      if (qualityBar) {
-        const {tabs, source} = qualityBar;
-        const start = Math.max(0,rawRect.call(source).top);
-        const height = tabs.offsetHeight;
-        const dock = chrome.nav.getBoundingClientRect().bottom;
-        tabs.style.setProperty('--ami-quality-top',Math.max(0,dock)+'px');
-        tabs.style.setProperty('--ami-quality-start',start+'px');
-        source.style.setProperty('--ami-quality-tab-height',height+'px');
-        if (frame.getBoundingClientRect().top + start <= dock + 1) innerOffset = height;
-      }
+      if (qualityBar) innerOffset = qualityBar.tabs.offsetHeight;
       if (sticky) for (const bar of doc.querySelectorAll(sticky)) {
         if (!bar.getClientRects().length) continue;
         bar.style.setProperty('top',top+'px','important');

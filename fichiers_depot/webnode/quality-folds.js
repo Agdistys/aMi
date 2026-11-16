@@ -23,6 +23,33 @@
       }
     }
   }
+  const tools = document.querySelector('#outils .cq-chapitre-contenu');
+  if (tools) {
+    const families = [
+      ['Auditer et vérifier', /audit|verif|contraste|sonde|mes_cibles|passe[-_](rapport|photo|essai|tourner)/i],
+      ['Navigation, intégration et plein écran', /webnode|collant|iframe|plein_ecran|barre|pied|cadre|pont|coins/i],
+      ['Écriture, couleurs et lexique', /palette|couleur|majuscul|_texte|defs|jetons|_forme|_bom/i],
+      ['Construire et publier les outils', /chaine|amiblocs|profil|page_cq|ville|cascade/i],
+      ['Adapter un volume', /./],
+    ].map(([title, pattern]) => {
+      const group = document.createElement('details');
+      group.className = 'cq-chapitre';
+      const heading = document.createElement('summary');
+      heading.textContent = title;
+      group.append(heading);
+      return {pattern,group};
+    });
+    const cards = tools.querySelectorAll(':scope > details.outil');
+    if (cards.length) {
+      const intro = tools.querySelector(':scope > p.lead');
+      if (intro?.firstChild?.nodeType === Node.TEXT_NODE) {
+        intro.firstChild.textContent = intro.firstChild.textContent.replace(
+          "Dans l'ordre où ils se rejouent sur une page.", 'Outils classés par usage.');
+      }
+      for (const {group} of families) cards[0].before(group);
+      for (const card of cards) families.find(({pattern}) => pattern.test(card.id)).group.append(card);
+    }
+  }
   function reveal(target) {
     if (!target) return;
     const panel = target.closest('main > section');

@@ -393,9 +393,9 @@ def quality_current(source, routes):
     return ('<h2 id="cq-editions-publiees">Éditions publiques actuelles</h2>'
             '<p>Ce tableau suit les fichiers utilisés pour la publication. La date est celle de l’édition indiquée '
             'dans le fichier. Les essais et décisions antérieurs restent consignés dans l’historique.</p>'
-            '<p><strong>Charte · vérification du 16 novembre 2026.</strong> La V102 est en ligne. '
-            'Le lexique ThermoCognition emploie encore « dénominateur de C », correction vers Φ signalée '
-            'le 9 novembre. Un lien interne vise aussi une ancre absente.</p>'
+            '<p><strong>Charte · 16 novembre 2026.</strong> La V103 distingue le rapport C de l’Indice Φ '
+            'dans le lexique ThermoCognition. Le renvoi du lexique conduit au chapitre sur la fin de vie '
+            'dans Complémentarité.</p>'
             '<div class="tw"><table><thead><tr><th scope="col">Édition</th><th scope="col">Version</th>'
             '<th scope="col">Date</th></tr></thead><tbody>' + ''.join(rows) + '</tbody></table></div>')
 
@@ -500,6 +500,9 @@ def main():
                              '.cq-chapitre-contenu table{max-width:100%}'
                              '</style>')
                     text = raw.decode('utf-8')
+                    text, count = re.subn(r'<p class="ami-public-note"[^>]*>[^<]+</p>\n?', '', text, count=1)
+                    if count != 1:
+                        raise ValueError('Bandeau historique du Contrôle Qualité introuvable')
                     text = once(text, '<section id="volumes">', '<section id="volumes">\n'
                                 + quality_current(args.source, {'ami': volumes['ami'], **routes}))
                     text = once(text, 'Où en est chaque page</h2>',

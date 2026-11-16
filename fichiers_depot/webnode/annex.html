@@ -77,14 +77,7 @@
       }
     }, {once:true});
     frame.srcdoc = content;
-    if (config.slug === 'ami-controle-qualite') {
-      const grid = document.createElement('div');
-      grid.className = 'ami-quality-grid';
-      grid.append(frame);
-      holder.insertBefore(grid,chrome.footer);
-    } else {
-      holder.insertBefore(frame,chrome.footer);
-    }
+    holder.insertBefore(frame,chrome.footer);
   } catch (error) {
     console.warn('Chargement de l’annexe aMi',error);
     showFallback();
