@@ -8,7 +8,7 @@ import re
 
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
 SECTIONS = ('t8-3-mondes', 't8-plans', 't8-tore')
-SCRIPTS = ('c21-son-sim', 'tr81-js', 'v057-tri-js')
+SCRIPTS = ('c21-son-sim', 'tr81-js', 'v057-tri-js', 'v089-axis-js')
 CSS_KEYS = ('.t8-', '.tr81', '.v057-', '.q49-mo', '.q49-pli', '.c7-pl', '#ami-canon{', '.c21-')
 
 
