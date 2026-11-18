@@ -387,6 +387,7 @@ def publish(source, site, routes, index, bootstrap):
             ('ami-graphe.txt', 'Page du graphe'),
             ('ami-annexes-graphe.txt', 'Lien du graphe dans les Annexes'),
             ('ami-lecture-ia.txt', 'Fiche de lecture aMi'),
+            ('ami-plans-tore.txt', 'Les 8 Plans de ConScience et le Tore'),
         )
     )
     (directory/'index.html').write_text(f'''<!doctype html>
@@ -413,7 +414,7 @@ textarea{{box-sizing:border-box;width:100%;min-height:7rem}}
 <p><strong>Bloc complet</strong> dans le contenu pour installer ou remplacer le volume. Il comprend déjà la ligne de lecture.</p>
 <p><strong>Balise pour l’en-tête</strong> dans le champ Code HTML de l’en-tête de la page, dans ses paramètres SEO.</p>
 </details>
-<section class="extras"><h2>Graphe et fiche de lecture</h2><ul class="codes">{extras}</ul></section>
+<section class="extras" id="blocs-complementaires"><h2>Blocs complémentaires</h2><ul class="codes">{extras}</ul></section>
 <h2>Codes par page</h2>
 <ul class="pages">{rows}</ul>
 <p id="etat-copie" role="status"></p>

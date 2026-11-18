@@ -10,6 +10,7 @@ from urllib.parse import urljoin, urlparse
 import json
 import re
 from dated_corpus import publish_dated_corpus
+from plans_tore import publish_plans_tore
 from publisher import GITHUB, PUBLISHER, adapter_links, publisher_links
 from public_reading import (
     BAREME, BAREME_LABEL, COMPACT_NAV_CSS, COMPACT_NAV_VOLUMES, CURRENT_SUBLIMATION_LINK, REGISTER,
@@ -543,6 +544,7 @@ def main():
     (args.site/'webnode/migration-en-tete.txt').write_text(loading_head + bridge, encoding='utf-8')
     publish(args.source,args.site,routes,volumes['ami'],snippet)
     publish_dated_corpus(args.source, args.site, PUBLISHER)
+    publish_plans_tore(args.source, args.site, routes, PUBLISHER)
     if graph and args.annex_template:
         slug, path = 'ami-graphe', 'annexes/Graphe_Public_aMi.html'
         graph_page = (args.site/'lecture/graphe/index.html').read_bytes()
