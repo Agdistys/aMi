@@ -219,9 +219,22 @@ def webnode_block(bootstrap, title, description, opening, slug, direct):
 
 def publish_union_bareme(alias, html, target):
     """Expose both source grids on a stable, script-free reading page."""
-    card = re.search(r'(<div class="cm2-card" id="cm2-bareme">[\s\S]+?)\s*(?=<div class="cm2-card"(?:\s|>))', html)
-    if not card or not card[1].endswith('</div>') or '✍️ barème de travail · 🔍 à éprouver' not in card[1]:
+    def source_card(anchor):
+        start = re.search(r'<div\b[^>]*\bid="' + re.escape(anchor) + r'"[^>]*>', html)
+        if not start:
+            return ''
+        depth = 0
+        for token in re.finditer(r'<div\b[^>]*>|</div\s*>', html[start.start():], re.I):
+            depth += -1 if token[0].lower().startswith('</') else 1
+            if depth == 0:
+                return html[start.start():start.start()+token.end()]
+        raise ValueError(f'Carte incomplète : {anchor}')
+    card = source_card('cm2-bareme')
+    if not card or '✍️ barème de travail · 🔍 à éprouver' not in card:
         raise ValueError('Le Barème de la Charte Mathématique est introuvable ou incomplet.')
+    raccord = ''.join(source_card(anchor) for anchor in (
+        'cm2-bareme-zones', 'cm2-procedures', 'cm2-portee-modeles',
+    ))
     score = re.search(
         r'<section id="grille-score">\s*<details[^>]*><summary>.*?</summary>'
         r'<div class="u31-corps">(.*?)</div></details></section>', html, re.S,
@@ -258,10 +271,11 @@ a:focus-visible{{outline:2px solid currentColor;outline-offset:3px}}
 <p><a href="{href(UNION)}">Ouvrir L’Union du TouT</a> · <a href="{href(UNION)}texte.md">Lire la Version Texte complète</a></p>
 <ul>
 <li><a href="#cm2-bareme">Le Barème de la Charte Mathématique</a> : niveaux 0 à 5 pour I, U et P.</li>
+<li><a href="#cm2-bareme-zones">Du Barème aux Huit Zones</a> : convention publiée, bornes et cas non calculables.</li>
 <li><a href="#grille-score">La Grille de Score</a> : dix items cotés de 0 à 3 pour comparer deux moments avec C_grille.</li>
 </ul>
 <section aria-labelledby="titre-bareme"><h2 id="titre-bareme">Le Barème de la Charte Mathématique · I, U et P</h2>
-{clean(card[1])}</section>
+{clean(card + raccord)}</section>
 <section id="grille-score"><h2>La Grille de Score · C_grille</h2>
 {clean(score[1])}</section>
 <p>Licence <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.fr">CC BY-SA 4.0</a>.</p>
