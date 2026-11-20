@@ -22,8 +22,8 @@ def date_note(iso_date, source_title, source_url, edition='', key=''):
 
 SCRIPT = r'''(function(){'use strict';if(window.__amiEditorialDate)return;window.__amiEditorialDate=true;
 var current=null,home=null,next=null;
-function close(){if(!current)return;var box=document.getElementById(current.getAttribute('aria-controls'));if(box){box.hidden=true;if(home)home.insertBefore(box,next&&next.parentNode===home?next:null);}current.setAttribute('aria-expanded','false');current=null;home=null;next=null;}
-function place(button,box){var r=button.getBoundingClientRect();home=box.parentNode;next=box.nextSibling;document.body.appendChild(box);box.style.left='16px';box.style.top='16px';box.hidden=false;var b=box.getBoundingClientRect();var width=document.documentElement.clientWidth||window.innerWidth;var height=window.innerHeight;var x=Math.max(12,Math.min(r.left,width-b.width-12));var y=r.bottom+8;if(y+b.height>height-12)y=Math.max(12,r.top-b.height-8);box.style.left=x+'px';box.style.top=y+'px';}
+function close(){if(!current)return;var box=document.getElementById(current.getAttribute('aria-controls'));if(box){if(typeof box.hidePopover==='function'&&box.matches(':popover-open'))box.hidePopover();box.hidden=true;if(home)home.insertBefore(box,next&&next.parentNode===home?next:null);}current.setAttribute('aria-expanded','false');current=null;home=null;next=null;}
+function place(button,box){var r=button.getBoundingClientRect();box.hidden=false;if(typeof box.showPopover==='function'){box.setAttribute('popover','manual');box.showPopover();}else{home=box.parentNode;next=box.nextSibling;document.body.appendChild(box);}box.style.left='16px';box.style.top='16px';var b=box.getBoundingClientRect();var width=document.documentElement.clientWidth||window.innerWidth;var height=window.innerHeight;var x=Math.max(12,Math.min(r.left,width-b.width-12));var y=r.bottom+8;if(y+b.height>height-12)y=Math.max(12,r.top-b.height-8);box.style.left=x+'px';box.style.top=y+'px';}
 document.addEventListener('click',function(e){var button=e.target.closest&&e.target.closest('button.ami-date-note');if(button){var was=current===button;close();if(!was){var box=document.getElementById(button.getAttribute('aria-controls'));if(box){current=button;button.setAttribute('aria-expanded','true');place(button,box);}}return;}if(current&&!(e.target.closest&&e.target.closest('.ami-date-pop')))close();});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&current){var button=current;close();button.focus();}});
 window.addEventListener('resize',close,{passive:true});document.addEventListener('scroll',close,{passive:true,capture:true});
@@ -41,7 +41,7 @@ ROOT span.ami-date-pop[hidden]{display:none!important}
 ROOT span.ami-date-pop a{color:#ffd06a!important;text-decoration:underline!important}
 ROOT span.ami-date-pop small{font-size:.82em!important;color:#b9b5c5!important}
 ROOT .ami-date-pop strong{font-weight:600!important;color:#eee9df!important}
-'''.replace('ROOT span.ami-date-pop','span.ami-date-pop').replace('ROOT .ami-date-pop','.ami-date-pop').replace('ROOT',prefix)
+'''.replace('position:fixed!important;z-index:', 'position:fixed!important;margin:0!important;right:auto!important;bottom:auto!important;z-index:').replace('ROOT span.ami-date-pop','span.ami-date-pop').replace('ROOT .ami-date-pop','.ami-date-pop').replace('ROOT',prefix)
     addition='<style id="ami-editorial-date-css">'+css+'</style>'
     script='<script id="ami-editorial-date-js">'+SCRIPT+'</script>'
     assert 'id="ami-editorial-date-css"' not in document
