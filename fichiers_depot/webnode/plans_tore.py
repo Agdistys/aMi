@@ -10,6 +10,19 @@ VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'met
 SECTIONS = ('t8-3-mondes', 't8-plans', 't8-tore')
 SCRIPTS = ('c21-son-sim', 'tr81-js', 'v057-tri-js', 'v089-axis-js')
 CSS_KEYS = ('.t8-', '.tr81', '.v057-', '.q49-mo', '.q49-pli', '.c7-pl', '#ami-canon{', '.c21-')
+PLAN_IDS = ('plan:DO', 'plan:RÉ', 'plan:MI', 'plan:FA', 'plan:SOL', 'plan:LA', 'plan:SI', 'plan:∞')
+
+
+def validate_plan_matrix(block):
+    """Do not silently publish the former thirteen-line legend again."""
+    rows = re.findall(r'<tr class="t8-matrice-row t8-row-[^"]+" data-plan-id="([^"]+)"', block)
+    cards = re.findall(r'<li class="c7-pl" data-plan-id="([^"]+)"', block)
+    if tuple(rows) != PLAN_IDS or tuple(cards) != PLAN_IDS:
+        raise ValueError('La matrice validée et les huit cartes doivent porter les mêmes Plans, dans le même ordre.')
+    if 'id="t8-matrice-passage"' not in block or 'class="t8-lg-un"' in block:
+        raise ValueError('Ancienne légende des Plans : la matrice en miroir est requise.')
+    if block.count('📕 Article du Code Peinal') != 9:
+        raise ValueError('Le Code Peinal doit figurer dans La Culture : légende et huit cartes.')
 
 
 class Sections(HTMLParser):
@@ -53,6 +66,7 @@ def publish_plans_tore(source_dir, site_dir, routes, publisher):
     parser.feed(source)
     if set(parser.blocks) != set(SECTIONS):
         raise ValueError('Sections des huit Plans manquantes')
+    validate_plan_matrix(parser.blocks['t8-plans'])
     styles = []
     for match in re.finditer(r'<style\b[^>]*>(.*?)</style>', source, re.S):
         if any(key in match[1] for key in CSS_KEYS) or 'id="q236-shared-fonts"' in match[0]:
