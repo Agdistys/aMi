@@ -1,6 +1,7 @@
 """Build stable public editions and static excerpts for Webnode."""
 from html import escape, unescape
 from html.parser import HTMLParser
+from editorial_metadata import date_note, install_date_notes
 from urllib.parse import urljoin, urlsplit
 import re
 
@@ -247,7 +248,10 @@ def publish_union_bareme(alias, html, target):
     directory = alias / 'bareme'
     directory.mkdir(exist_ok=True)
     title = 'Barèmes et Grille de Score · L’Union du TouT'
-    (directory/'index.html').write_text(f'''<!doctype html>
+    source_date = re.search(r'<meta\b[^>]*content="([^"]+)"[^>]*name="ami:date"', html)
+    published_date = source_date[1] if source_date else '2026-11-20'
+    provenance = date_note(published_date, 'Édition de L’Union du TouT', PAGES + target, 'Union · édition V' + version, 'lecture-bareme')
+    page = f'''<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="description" content="Deux extraits de L’Union du TouT : le barème de travail I, U, P (0 à 5) et la grille de score C_grille (dix items de 0 à 3).">
@@ -265,9 +269,9 @@ td,th{{padding:.65rem;vertical-align:top;border:1px solid #745923;text-align:sta
 .g2{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}}
 a:focus-visible{{outline:2px solid currentColor;outline-offset:3px}}
 @media(max-width:640px){{.g2{{grid-template-columns:1fr}}table{{min-width:36rem}}}}
-</style></head><body><main>
+</style></head><body><main id="ami-bareme">
 <h1>{title}</h1>
-<p>Agdistys · Diane Serant · Deux extraits de L’Union du TouT V{version}. Les deux grilles ont des usages et des échelles distincts.</p>
+<p>Agdistys · Diane Serant · L’Union du TouT {provenance}<br>Les deux grilles ont des usages et des échelles distincts.</p>
 <p><a href="{href(UNION)}">Ouvrir L’Union du TouT</a> · <a href="{href(UNION)}texte.md">Lire la Version Texte complète</a></p>
 <ul>
 <li><a href="#cm2-bareme">Le Barème de la Charte Mathématique</a> : niveaux 0 à 5 pour I, U et P.</li>
@@ -280,7 +284,9 @@ a:focus-visible{{outline:2px solid currentColor;outline-offset:3px}}
 {clean(score[1])}</section>
 <p>Licence <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.fr">CC BY-SA 4.0</a>.</p>
 </main></body></html>
-''', encoding='utf-8')
+'''
+    page = install_date_notes(page, 'ami-bareme')
+    (directory/'index.html').write_text(page, encoding='utf-8')
 
 
 def union_reading_links(html):
