@@ -25052,6 +25052,7 @@ body .ami-pied .ap-fin .f-grille{grid-template-columns:1fr auto 1fr!important}
    var out = [];
    var tous = [R].concat([].slice.call(R.querySelectorAll('*')));
    tous.forEach(function(e){
+     if(e.classList.contains('ami-date-pop'))return;
      var c = getComputedStyle(e);
      if (c.position !== 'sticky' && c.position !== 'fixed') return;
      if (/^(TH|THEAD|TR|TD|CAPTION)$/.test(e.tagName)) return;   /* en-tête de tableau */

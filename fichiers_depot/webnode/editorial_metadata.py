@@ -32,6 +32,11 @@ window.addEventListener('resize',close,{passive:true});document.addEventListener
 
 def install_date_notes(document, root_id):
     assert document.count('id="'+root_id+'"') == 1, root_id
+    # A provenance note is a floating note, not a sticky navigation bar.
+    scanner = 'tous.forEach(function(e){\n     var c = getComputedStyle(e);'
+    if scanner in document:
+        assert document.count(scanner) == 1
+        document = document.replace(scanner, "tous.forEach(function(e){\n     if(e.classList.contains('ami-date-pop'))return;\n     var c = getComputedStyle(e);", 1)
     prefix = '#'+root_id
     css = '''ROOT button.ami-date-note{font:inherit!important;font-size:.7em!important;line-height:1.2!important;letter-spacing:normal!important;text-transform:none!important;color:inherit!important;background:transparent!important;border:0!important;padding:.12em .35em!important;display:inline-flex!important;align-items:center;justify-content:center;vertical-align:middle;cursor:pointer;border-radius:.3em;margin:0 .12em;box-shadow:none!important;min-width:0!important;width:auto!important;height:auto!important}
 ROOT button.ami-date-note span{font:inherit!important;pointer-events:none}

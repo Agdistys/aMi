@@ -6023,6 +6023,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
                 ? R.parentElement : R;
    var tous = [PORTEE].concat([].slice.call(PORTEE.querySelectorAll('*')));
    tous.forEach(function(e){
+     if(e.classList.contains('ami-date-pop'))return;
      var c = getComputedStyle(e);
      if (c.position !== 'sticky' && c.position !== 'fixed') return;
      if (/^(TH|THEAD|TR|TD|CAPTION)$/.test(e.tagName)) return;   /* en-tête de tableau */

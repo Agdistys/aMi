@@ -10465,6 +10465,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
      [].forEach.call(PORTEE.querySelectorAll('[style*="position"]'), function(e){ if (vus.indexOf(e) < 0) vus.push(e); });
      return vus; })();
    tous.forEach(function(e){
+     if(e.classList.contains('ami-date-pop'))return;
      var c = getComputedStyle(e);
      if (c.position !== 'sticky' && c.position !== 'fixed') return;
      if (/^(TH|THEAD|TR|TD|CAPTION)$/.test(e.tagName)) return;   /* en-tête de tableau */
