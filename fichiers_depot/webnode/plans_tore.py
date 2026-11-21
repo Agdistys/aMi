@@ -8,7 +8,7 @@ import re
 
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
 SECTIONS = ('t8-tore', 't8-plans', 't8-3-mondes')
-SCRIPTS = ('c21-son-sim', 'tr81-js', 'v057-tri-js', 'v089-axis-js', 'v091-explorateur-js')
+SCRIPTS = ('c21-son-sim', 'tr81-js', 'v057-tri-js', 'v089-axis-js', 'v092-explorateur-js')
 CSS_KEYS = ('.t8-', '.tr81', '.v057-', '.q49-mo', '.q49-pli', '.c7-pl', '#ami-canon{', '.c21-')
 PLAN_IDS = ('plan:DO', 'plan:RÉ', 'plan:MI', 'plan:FA', 'plan:SOL', 'plan:LA', 'plan:SI', 'plan:∞')
 
@@ -23,6 +23,8 @@ def validate_plan_matrix(block):
         raise ValueError('Les deux lectures sont requises : Symétrie et Spectre avec ses définitions.')
     if len(re.findall(r'<li class="t8-lg-[^"]+"',block)) != 13:
         raise ValueError('Les treize définitions du Spectre doivent rester présentes.')
+    if 'class="v092-cycle"' not in block or 'class="v092-culture-note"' not in block:
+        raise ValueError('La phrase commune centrée et la note Culture rattachée sont requises.')
     if block.count('📕 Article du Code Peinal') != 10:
         raise ValueError('Le Code Peinal doit figurer dans Culture : Spectre, Symétrie et huit cartes.')
 
