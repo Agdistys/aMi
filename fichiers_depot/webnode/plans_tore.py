@@ -7,22 +7,24 @@ import re
 
 
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
-SECTIONS = ('t8-3-mondes', 't8-plans', 't8-tore')
-SCRIPTS = ('c21-son-sim', 'tr81-js', 'v057-tri-js', 'v089-axis-js')
+SECTIONS = ('t8-tore', 't8-plans', 't8-3-mondes')
+SCRIPTS = ('c21-son-sim', 'tr81-js', 'v057-tri-js', 'v089-axis-js', 'v091-explorateur-js')
 CSS_KEYS = ('.t8-', '.tr81', '.v057-', '.q49-mo', '.q49-pli', '.c7-pl', '#ami-canon{', '.c21-')
 PLAN_IDS = ('plan:DO', 'plan:RÉ', 'plan:MI', 'plan:FA', 'plan:SOL', 'plan:LA', 'plan:SI', 'plan:∞')
 
 
 def validate_plan_matrix(block):
-    """Do not silently publish the former thirteen-line legend again."""
+    """Keep the accepted matrix and the explanatory Spectrum together."""
     rows = re.findall(r'<tr class="t8-matrice-row t8-row-[^"]+" data-plan-id="([^"]+)"', block)
     cards = re.findall(r'<li class="c7-pl" data-plan-id="([^"]+)"', block)
     if tuple(rows) != PLAN_IDS or tuple(cards) != PLAN_IDS:
         raise ValueError('La matrice validée et les huit cartes doivent porter les mêmes Plans, dans le même ordre.')
-    if 'id="t8-matrice-passage"' not in block or 'class="t8-lg-un"' in block:
-        raise ValueError('Ancienne légende des Plans : la matrice en miroir est requise.')
-    if block.count('📕 Article du Code Peinal') != 9:
-        raise ValueError('Le Code Peinal doit figurer dans La Culture : légende et huit cartes.')
+    if 'id="t8-matrice-passage"' not in block or 'id="t8-spectre"' not in block:
+        raise ValueError('Les deux lectures sont requises : Symétrie et Spectre avec ses définitions.')
+    if len(re.findall(r'<li class="t8-lg-[^"]+"',block)) != 13:
+        raise ValueError('Les treize définitions du Spectre doivent rester présentes.')
+    if block.count('📕 Article du Code Peinal') != 10:
+        raise ValueError('Le Code Peinal doit figurer dans Culture : Spectre, Symétrie et huit cartes.')
 
 
 class Sections(HTMLParser):
@@ -144,14 +146,15 @@ body{overflow-x:clip}
 #ami-vol-complementarite #ami-canon .plans-entree h1{margin:.25rem 0;font:700 clamp(1.8rem,5vw,2.8rem)/1.15 "Cormorant Garamond",Georgia,serif;color:#ffc545}
 #ami-vol-complementarite #ami-canon .plans-entree a{color:#ffc545}
 #ami-vol-complementarite #ami-canon .plans-entree p{margin:.4rem 0!important}
+body.ami-plans-standalone #ami-vol-complementarite #ami-canon .v091-title{display:none!important}
 #ami-vol-complementarite #ami-canon #t8-plans{max-width:75rem;margin-inline:auto}
 #ami-vol-complementarite #ami-canon :is(button,summary){min-height:44px}
 #ami-vol-complementarite #ami-canon :is(button,a,summary):focus-visible{outline:2px solid #ffc545;outline-offset:3px}
 @media(max-width:480px){#ami-vol-complementarite #ami-canon{padding-inline:.55rem}}
 @media print{details>div{display:block!important}}
 </style>
-</head><body><main id="ami-vol-complementarite"><div id="ami-canon">
-<header class="plans-entree"><h1>Les 8 Plans de ConScience</h1><p><a href="''' + publisher + '''ami-complementarite/" target="_blank" rel="noopener">Complémentarité · Protocole aMi</a> · <a href="''' + publisher + '''ami-complementarite/#courages-plans" target="_blank" rel="noopener">Les Huit Courages</a> · <a href="index.html" download="8_Plans_de_ConScience_et_Tore_aMi.html">Télécharger ce bloc HTML</a></p></header>
+</head><body class="ami-plans-standalone"><main id="ami-vol-complementarite"><div id="ami-canon">
+<header class="plans-entree"><h1>Les 8 Plans<br>Le Passage en Miroir</h1><p><a href="''' + publisher + '''ami-complementarite/" target="_blank" rel="noopener">Complémentarité · Protocole aMi</a> · <a href="''' + publisher + '''ami-complementarite/#courages-plans" target="_blank" rel="noopener">Les Huit Courages</a> · <a href="index.html" download="8_Plans_de_ConScience_et_Tore_aMi.html">Télécharger cette page HTML</a></p></header>
 ''' + blocks + '''
 <p class="plans-entree">Agdistys · Diane Serant · <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.fr" target="_blank" rel="noopener">CC BY-SA 4.0</a></p>
 </div></main>
