@@ -31,7 +31,7 @@
 #ami-vol-complementarite #ami-canon .t8-matrice td:nth-child(2)::before{content:'Ce qui soutient le passage';display:block;font-size:.7rem;color:#b4d4bc;margin-bottom:.4rem}
 #ami-vol-complementarite #ami-canon .t8-matrice td:nth-child(3)::before{content:'Ce qui le compromet';display:block;font-size:.7rem;color:#e3bdc4;margin-bottom:.4rem}
 }
-</style><style id="v091-lecture-css">#ami-vol-complementarite #ami-canon .v091-explorer [hidden]{display:none!important}
+</style><style id="v091-lecture-css">#ami-vol-complementarite #ami-canon #t8-tore .tr81 [hidden]{display:none!important}
 #ami-vol-complementarite #ami-canon .v091-controls{padding:1rem;border:1px solid #796333;border-radius:12px;margin:1rem auto;max-width:70rem;background:#13131c;text-align:center}
 #ami-vol-complementarite #ami-canon .v091-control-row{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:.55rem;margin:.6rem 0}
 #ami-vol-complementarite #ami-canon .v091-controls button,#ami-vol-complementarite #ami-canon .v091-controls select{min-height:44px;padding:.55rem .95rem;border:1px solid #796333;border-radius:999px;color:#eee9df;background:#11111a;font:500 1rem/1.35 Jost,system-ui,sans-serif;cursor:pointer;max-width:100%}
@@ -47,7 +47,7 @@
 #ami-vol-complementarite #ami-canon .t8-spectrum>ul{min-width:0;flex:1;list-style:none!important;padding:0!important;margin:0!important}
 #ami-vol-complementarite #ami-canon .t8-spectrum li{font:400 1rem/1.6 Jost,system-ui,sans-serif;margin:0 0 .85rem!important}
 #ami-vol-complementarite #ami-canon .t8-spectrum li b{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.16em;color:#ffd06a}
-#ami-vol-complementarite #ami-canon .t8-spectrum .c7-fl{flex:0 0 16px;align-self:stretch;position:relative;display:block!important;width:16px;min-height:6rem;border-radius:0;background:linear-gradient(to bottom,#ffc545 0,#5dc877 var(--axis-green,35%),#fff var(--axis-white-a,49.8%),#fff var(--axis-white-b,50.2%),#e23838 var(--axis-red,65%),#030305 100%);clip-path:polygon(50% 0,100% 18px,63% 18px,63% calc(100% - 18px),100% calc(100% - 18px),50% 100%,0 calc(100% - 18px),37% calc(100% - 18px),37% 18px,0 18px)}
+#ami-vol-complementarite #ami-canon .t8-spectrum .c7-fl{flex:0 0 16px;align-self:stretch;position:relative;display:block!important;width:16px;min-height:6rem;border-radius:0;background:linear-gradient(to bottom,#ffc545 0,#5dc877 var(--axis-green,35%),#fff var(--axis-white-a,49.8%),#fff var(--axis-white-b,50.2%),#e23838 var(--axis-red,65%),#030305 100%)!important;clip-path:polygon(50% 0,100% 18px,63% 18px,63% calc(100% - 18px),100% calc(100% - 18px),50% 100%,0 calc(100% - 18px),37% calc(100% - 18px),37% 18px,0 18px)}
 #ami-vol-complementarite #ami-canon .t8-spectrum .c7-fl::before,#ami-vol-complementarite #ami-canon .t8-spectrum .c7-fl::after{display:none!important;content:none!important}
 #ami-vol-complementarite #ami-canon #t8-plans.v091-embedded-plans{padding:0!important;margin:1rem 0!important;border:0!important;background:none!important;box-shadow:none!important;max-width:none!important}
 #ami-vol-complementarite #ami-canon #t8-plans.v091-embedded-plans>summary{display:none!important}
@@ -67,7 +67,7 @@
 #ami-vol-complementarite #ami-canon .tr81.v091-layout-table .tr81-tw{display:block;max-height:min(75vh,52rem);overflow:auto!important;overscroll-behavior:contain;border:1px solid #796333;border-radius:12px}
 #ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t{display:table!important;width:100%!important;min-width:82rem!important;table-layout:fixed!important;border-collapse:separate!important;border-spacing:0!important}
 #ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t caption{display:table-caption!important;padding:.75rem!important;font-size:1.2rem!important}
-#ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t thead{display:table-header-group!important}
+#ami-vol-complementarite #ami-canon .tr81.v091-layout-table[data-v] table.tr81-t thead{display:table-header-group!important}
 #ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t tbody{display:table-row-group!important}
 #ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t tr{display:table-row!important;border:0!important;margin:0!important;padding:0!important;max-width:none!important}
 #ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t :is(th,td){display:table-cell!important;width:auto!important;padding:.65rem!important;border:1px solid #79633333!important;border-radius:0!important;font-size:.9rem;vertical-align:top!important}
@@ -11088,6 +11088,7 @@ box.addEventListener('click',function(e){var b=e.target.closest&&e.target.closes
     arrow.style.setProperty('--axis-white-a', Math.max(0, center - 2) + 'px');
     arrow.style.setProperty('--axis-white-b', Math.min(box.height, center + 2) + 'px');
     arrow.style.setProperty('--axis-red', (center + (box.height - center) * .35) + 'px');
+    arrow.style.setProperty('background-image', 'linear-gradient(to bottom,#ffc545 0px,#5dc877 '+(center*.65)+'px,#fff '+Math.max(0,center-2)+'px,#fff '+Math.min(box.height,center+2)+'px,#e23838 '+(center+(box.height-center)*.35)+'px,#030305 '+box.height+'px)', 'important');
   }
   function schedule() {
     if (pending) return;
