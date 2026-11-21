@@ -71,7 +71,7 @@
 #ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t tbody{display:table-row-group!important}
 #ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t tr{display:table-row!important;border:0!important;margin:0!important;padding:0!important;max-width:none!important}
 #ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t :is(th,td){display:table-cell!important;width:auto!important;padding:.65rem!important;border:1px solid #79633333!important;border-radius:0!important;font-size:.9rem;vertical-align:top!important}
-#ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t thead th{position:sticky!important;top:0!important;z-index:20;background:#191821!important;color:#ffd06a!important;font-size:.96rem!important}
+#ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t thead th{position:sticky!important;top:var(--v091-sticky-offset,0px)!important;z-index:20;background:#191821!important;color:#ffd06a!important;font-size:.96rem!important}
 #ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t tr>:first-child{position:sticky!important;left:0!important;z-index:10;width:13rem!important;background:#14141d!important}
 #ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t thead tr>:first-child{z-index:25}
 #ami-vol-complementarite #ami-canon .tr81.v091-layout-table table.tr81-t td::before{display:none!important;content:none!important}
@@ -11450,6 +11450,24 @@ setTimeout(pose,0);
       strata.push({cell,content,section,nodes:[...cell.childNodes]});
     }
   }
+  let headerFrame=0,lastHeaderOffset=-1;
+  function scheduleHeader(){
+    if(headerFrame)return;
+    headerFrame=requestAnimationFrame(()=>{
+      headerFrame=0;if(layout!=='table'||!tw.clientHeight)return;
+      let covered=0;
+      for(const bar of document.querySelectorAll('#evo-nav,.evo-subtabs,.ami-barre')){
+        const rect=bar.getBoundingClientRect(),position=getComputedStyle(bar).position;
+        if((position==='sticky'||position==='fixed')&&rect.height>0&&rect.height<innerHeight*.4&&rect.top<innerHeight*.4&&rect.bottom>0)covered=Math.max(covered,rect.bottom);
+      }
+      const row=table.querySelector('thead tr');
+      const offset=Math.min(Math.max(0,tw.clientHeight-row.getBoundingClientRect().height),Math.max(0,covered+(covered?4:0)-tw.getBoundingClientRect().top));
+      if(Math.abs(offset-lastHeaderOffset)<.5)return;
+      lastHeaderOffset=offset;tw.style.setProperty('--v091-sticky-offset',offset+'px');
+    });
+  }
+  addEventListener('scroll',scheduleHeader,{capture:true,passive:true});
+  addEventListener('resize',scheduleHeader,{passive:true});
   function transfer(){
     for(const item of strata){const parent=layout==='fiche'?item.content:item.cell;for(const n of item.nodes)parent.append(n);}
     for(const item of headings){const parent=layout==='fiche'?item.content:item.cell;for(const n of item.nodes)parent.append(n);}
@@ -11484,7 +11502,7 @@ setTimeout(pose,0);
       if(layout==='table')item.cell.classList.remove('tr81-off');
     }
     controls.querySelector('[data-v091-read]').textContent=key?'Lire la fiche de '+select.selectedOptions[0].textContent:'Lire les fiches des huit Plans';
-    wrapper.dataset.plan=key;
+    wrapper.dataset.plan=key;scheduleHeader();
   }
   function setPause(){
     root.classList.toggle('v091-motion-paused',paused);wrapper.classList.toggle('v091-paused',paused);
