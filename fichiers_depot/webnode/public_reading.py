@@ -436,7 +436,7 @@ textarea{{box-sizing:border-box;width:100%;min-height:7rem}}
 <details><summary>Où coller chaque code dans Webnode ?</summary>
 <p><strong>Ligne à ajouter</strong> dans le contenu si le volume s’affiche déjà et que le lien vers la Version Texte manque.</p>
 <p><strong>Bloc complet</strong> dans le contenu pour installer ou remplacer le volume. Il comprend déjà la ligne de lecture.</p>
-<p><strong>Complémentarité :</strong> le Bloc complet comprend maintenant tout le texte dans le HTML initial, avec les modes Lecture continue et Vue à onglets. Remplace son ancien bloc HTML par ce Bloc complet ; une simple Ligne à ajouter ne peut pas inclure le volume entier.</p>
+<p><strong>Complémentarité :</strong> le Bloc complet conserve le texte dans le HTML initial et ouvre le vrai volume en Lecture fluide mise en forme. Le bouton Vue Humaine sur sa couverture retrouve les onglets. Remplace son ancien bloc HTML par ce Bloc complet ; une simple Ligne à ajouter ne peut pas inclure le volume entier.</p>
 <p><strong>Balise pour l’en-tête</strong> dans le champ Code HTML de l’en-tête de la page, dans ses paramètres SEO.</p>
 </details>
 <section class="extras" id="blocs-complementaires"><h2>Blocs complémentaires</h2><ul class="codes">{extras}</ul></section>
