@@ -4,6 +4,38 @@ from hashlib import sha256
 from html import escape
 from pathlib import Path
 import json
+import re,base64
+
+class Resources(HTMLParser):
+    def __init__(self,text,target,url):
+        super().__init__(convert_charrefs=False)
+        self.text=text;self.target=target;self.url=url;self.edits=[];self.script=None;self.template=0;self.lines=[0]
+        for line in text.splitlines(keepends=True):self.lines.append(self.lines[-1]+len(line))
+        self.feed(text)
+    def at(self):
+        line,col=self.getpos();return self.lines[line-1]+col
+    def asset(self,data,suffix):
+        name=sha256(data).hexdigest()+suffix;(self.target/name).write_bytes(data);return self.url+name
+    def handle_starttag(self,tag,attrs):
+        attrs=dict(attrs);raw=self.get_starttag_text();at=self.at()
+        if tag=='template':self.template+=1
+        if tag=='img' and attrs.get('src','').startswith('data:image/'):
+            match=re.fullmatch(r'data:image/(png|jpeg|webp|gif|svg\+xml);base64,(.*)',attrs['src'],re.S)
+            if match:
+                url=self.asset(base64.b64decode(match[2]),'.'+('svg' if match[1]=='svg+xml' else match[1]))
+                new=re.sub(r'\bsrc=([\"\'])data:image/.*?\1','src="'+url+'"',raw,flags=re.S)
+                self.edits.append((at,at+len(raw),new))
+        if tag=='script' and not self.template and not attrs.get('src') and attrs.get('type','').lower() in ('','text/javascript','application/javascript'):
+            self.script=(at,at+len(raw),raw)
+    def handle_endtag(self,tag):
+        if tag=='script' and self.script:
+            a,start,raw=self.script;end=self.at();url=self.asset(self.text[start:end].encode(),'.js')
+            self.edits.append((a,end+len('</script>'),raw[:-1]+' src="'+url+'"></script>'));self.script=None
+        if tag=='template':self.template-=1
+    def result(self):
+        text=self.text
+        for a,b,value in reversed(self.edits):text=text[:a]+value+text[b:]
+        return text
 
 class Document(HTMLParser):
     def __init__(self, text):
@@ -46,7 +78,8 @@ def single_content_block(html, source, site, pages):
     target=Path(site)/'webnode/single-content';target.mkdir(parents=True,exist_ok=True)
     (target/(digest+'.css')).write_bytes(css)
     href=pages+'webnode/single-content/'+digest+'.css'
+    body=Resources(doc.body(),target,pages+'webnode/single-content/').result()
     return ('<div id="ami-single-webnode" data-ami-public-block data-ami-single-content="ami-complementarite">'
             +''.join(doc.links)+'<link rel="stylesheet" href="'+escape(href,quote=True)+'">'
-            '<script>document.body.classList.add("lecture");</script>'+doc.body()+
+            '<script>document.body.classList.add("lecture");</script>'+body+
             '''<script>(()=>{const root=document.getElementById('ami-single-webnode');for(let p=root.parentElement;p&&p!==document.body;p=p.parentElement){const s=getComputedStyle(p);if(s.overflowX==='hidden')p.style.overflowX='clip';if(s.overflowY==='hidden')p.style.overflowY='visible';}window.dispatchEvent(new Event('resize'));})();</script></div>''')
