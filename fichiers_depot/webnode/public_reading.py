@@ -7,6 +7,7 @@ import re
 
 from corpus_reading import READING_PATH, publish_corpus
 from publisher import PUBLISHER as PAGES, publisher_links
+from initial_reading import FULL_INITIAL_ROUTES, full_initial_block
 
 REGISTER = 'annexes/Registre_en_ligne.html'
 UNION = 'ami-lunion-du-tout'
@@ -377,9 +378,12 @@ def publish(source, site, routes, index, bootstrap):
         (alias/'index.html').write_text(alias_html)
         if slug == 'ami':
             (site/'index.html').write_text(alias_html)
-        (directory/(slug+'.txt')).write_text(webnode_block(
-            bootstrap, title, summary.description, excerpt(blocks, 10500), slug, direct,
-        ))
+        block = (full_initial_block(bootstrap, title, slug, direct, md.read_text(), PAGES + target)
+                 if slug in FULL_INITIAL_ROUTES and md.is_file() else webnode_block(
+                     bootstrap, title, summary.description, excerpt(blocks, 10500), slug, direct))
+        if len(block.encode('utf-8')) > 4_000_000:
+            raise ValueError('Bloc Webnode supérieur à 4 Mo : '+slug)
+        (directory/(slug+'.txt')).write_text(block)
     for route, slug in ALIASES.items():
         (directory/(route+'.txt')).write_bytes((directory/(slug+'.txt')).read_bytes())
         for suffix in ('-lecture.txt', '-en-tete.txt'):
@@ -432,6 +436,7 @@ textarea{{box-sizing:border-box;width:100%;min-height:7rem}}
 <details><summary>Où coller chaque code dans Webnode ?</summary>
 <p><strong>Ligne à ajouter</strong> dans le contenu si le volume s’affiche déjà et que le lien vers la Version Texte manque.</p>
 <p><strong>Bloc complet</strong> dans le contenu pour installer ou remplacer le volume. Il comprend déjà la ligne de lecture.</p>
+<p><strong>Complémentarité :</strong> le Bloc complet comprend maintenant tout le texte dans le HTML initial, avec les modes Lecture continue et Vue à onglets. Remplace son ancien bloc HTML par ce Bloc complet ; une simple Ligne à ajouter ne peut pas inclure le volume entier.</p>
 <p><strong>Balise pour l’en-tête</strong> dans le champ Code HTML de l’en-tête de la page, dans ses paramètres SEO.</p>
 </details>
 <section class="extras" id="blocs-complementaires"><h2>Blocs complémentaires</h2><ul class="codes">{extras}</ul></section>
