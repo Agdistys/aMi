@@ -6,6 +6,10 @@
 - [Annexes et MétaMatrice](annexes/)
 - [Fichiers du dépôt](fichiers_depot/) · licence, paramètres Pages, sitemap et empreintes.
 
+## Essai de lecture · Complémentarité
+
+[Ouvrir la page d’essai à contenu unique](https://ami.agdistys.fr/annexes/Essai_Entree_Humaine_aMi.html) · entrée humaine, lecture fluide et huit seuils de sécurité. Essai publié pour vérification, sans généralisation aux autres volumes.
+
 ## Livre-protocole · édition du 14 novembre 2026
 
 - [Télécharger le pack IA (ZIP)](https://agdistys.github.io/aMi/lecture/Pack-IA-aMi.zip) · fiche, livre Markdown, graphe public et MétaMatrice publique.
