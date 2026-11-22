@@ -8,6 +8,7 @@ import re
 from corpus_reading import READING_PATH, publish_corpus
 from publisher import PUBLISHER as PAGES, publisher_links
 from initial_reading import FULL_INITIAL_ROUTES, full_initial_block
+from single_content import single_content_block
 
 REGISTER = 'annexes/Registre_en_ligne.html'
 UNION = 'ami-lunion-du-tout'
@@ -378,7 +379,8 @@ def publish(source, site, routes, index, bootstrap):
         (alias/'index.html').write_text(alias_html)
         if slug == 'ami':
             (site/'index.html').write_text(alias_html)
-        block = (full_initial_block(bootstrap, title, slug, direct, md.read_text(), PAGES + target)
+        block = (single_content_block(html, source, site, PAGES) if slug == 'ami-complementarite' else
+                 full_initial_block(bootstrap, title, slug, direct, md.read_text(), PAGES + target)
                  if slug in FULL_INITIAL_ROUTES and md.is_file() else webnode_block(
                      bootstrap, title, summary.description, excerpt(blocks, 10500), slug, direct))
         if len(block.encode('utf-8')) > 4_000_000:
@@ -436,7 +438,7 @@ textarea{{box-sizing:border-box;width:100%;min-height:7rem}}
 <details><summary>Où coller chaque code dans Webnode ?</summary>
 <p><strong>Ligne à ajouter</strong> dans le contenu si le volume s’affiche déjà et que le lien vers la Version Texte manque.</p>
 <p><strong>Bloc complet</strong> dans le contenu pour installer ou remplacer le volume. Il comprend déjà la ligne de lecture.</p>
-<p><strong>Complémentarité :</strong> le Bloc complet conserve le texte dans le HTML initial et ouvre le vrai volume en Lecture fluide mise en forme. Le bouton Vue Humaine sur sa couverture retrouve les onglets. Remplace son ancien bloc HTML par ce Bloc complet ; une simple Ligne à ajouter ne peut pas inclure le volume entier.</p>
+<p><strong>Complémentarité :</strong> le Bloc complet contient une seule version du volume, directement dans le HTML initial. L’écran d’entrée propose la Vue Ergonomique ; la lecture fluide se déroule juste dessous. Remplace entièrement l’ancien bloc par celui-ci.</p>
 <p><strong>Balise pour l’en-tête</strong> dans le champ Code HTML de l’en-tête de la page, dans ses paramètres SEO.</p>
 </details>
 <section class="extras" id="blocs-complementaires"><h2>Blocs complémentaires</h2><ul class="codes">{extras}</ul></section>

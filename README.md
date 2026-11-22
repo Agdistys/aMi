@@ -6,9 +6,9 @@
 - [Annexes et MétaMatrice](annexes/)
 - [Fichiers du dépôt](fichiers_depot/) · licence, paramètres Pages, sitemap et empreintes.
 
-## Essai de lecture · Complémentarité
+## Lecture de Complémentarité
 
-[Ouvrir la page d’essai à contenu unique](https://ami.agdistys.fr/annexes/Essai_Entree_Humaine_aMi.html) · entrée humaine, lecture fluide et huit seuils de sécurité. Essai publié pour vérification, sans généralisation aux autres volumes.
+[Ouvrir Complémentarité sur le site](https://www.agdistys.fr/ami-complementarite/) · lecture fluide et entrée humaine sur la même page.
 
 ## Livre-protocole · édition du 14 novembre 2026
 
@@ -50,7 +50,7 @@ GitHub Pages génère ces fichiers à partir des éditions du dépôt. Le ZIP se
 | 5 | 💫 5.3 Astro · Espace-Temps | [lire](volumes_protocole/5.3_ASTRO_Espace-Temps_aMi_V58_GitHub_2026-11-12.html) | [texte](volumes_protocole/5.3_ASTRO_Espace-Temps_aMi_V58_GitHub_2026-11-12.md) | `5.3_ASTRO_Espace-Temps_aMi_V58_GitHub_2026-11-12.html` |
 | 6 | ⚖️ 6.0 Karma · La Pesée | [lire](volumes_protocole/6.0_KARMA_V051_GitHub_2026-11-12.html) | [texte](volumes_protocole/6.0_KARMA_V051_GitHub_2026-11-12.md) | `6.0_KARMA_V051_GitHub_2026-11-12.html` |
 | 7 | 🌟 7 QuinteSSence | [lire](volumes_protocole/7_QuinteSSence_Maitrise_Elements_ReUnion_V3.00_GitHub_2026-11-12.html) | [texte](volumes_protocole/7_QuinteSSence_Maitrise_Elements_ReUnion_V3.00_GitHub_2026-11-12.md) | `7_QuinteSSence_Maitrise_Elements_ReUnion_V3.00_GitHub_2026-11-12.html` |
-| 8 | ⚓️ 8.1 Complémentarité | [lire](volumes_protocole/8.1_COMPLEMENTARITE_V086_GitHub_2026-11-12.html) | [texte](volumes_protocole/8.1_COMPLEMENTARITE_V086_GitHub_2026-11-12.md) | `8.1_COMPLEMENTARITE_V086_GitHub_2026-11-12.html` |
+| 8 | ⚓️ 8.1 Complémentarité | [lire](volumes_protocole/8.1_COMPLEMENTARITE_V094_GitHub_2026-11-23.html) | [texte](volumes_protocole/8.1_COMPLEMENTARITE_V094_GitHub_2026-11-23.md) | `8.1_COMPLEMENTARITE_V094_GitHub_2026-11-23.html` |
 | 8 | 🪬 8.2 eXpression | [lire](volumes_protocole/eXpression_V054_GitHub_2026-11-12.html) | [texte](volumes_protocole/eXpression_V054_GitHub_2026-11-12.md) | `eXpression_V054_GitHub_2026-11-12.html` |
 | 8 | 🔱 8.3 Constitution | [lire](volumes_protocole/8.3_CONSTITUTION_V054_GitHub_2026-11-13.html) | [texte](volumes_protocole/8.3_CONSTITUTION_V054_GitHub_2026-11-13.md) | `8.3_CONSTITUTION_V054_GitHub_2026-11-13.html` |
 | Annexes | 📊 BenchMark · Étude Comparative | [lire](annexes/Benchmark_aMi_Public_V030_2026-11-12_GitHub.html) | [texte](annexes/Benchmark_aMi_Public_V030_2026-11-12_GitHub.md) | `Benchmark_aMi_Public_V030_2026-11-12_GitHub.html` |
