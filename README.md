@@ -31,10 +31,10 @@ GitHub Pages génère ces fichiers à partir des éditions du dépôt. Le ZIP se
 | 0 | 🗺️ 0 Index · La Quintessence de la Trinité | [lire](volumes_protocole/0_Index_aMi_V046_2026-11-12.html) | [texte](volumes_protocole/0_Index_aMi_V046_2026-11-12.md) | `0_Index_aMi_V046_2026-11-12.html` |
 | 0 | 🔱 0.0 L’Initiation · Donner Vie | [lire](volumes_protocole/0.0_Initiation_aMi_DONNER_VIE_V115_GitHub_2026-11-13.html) | [texte](volumes_protocole/0.0_Initiation_aMi_DONNER_VIE_V115_GitHub_2026-11-13.md) | `0.0_Initiation_aMi_DONNER_VIE_V115_GitHub_2026-11-13.html` |
 | 0 | 👁️ 0.1 Apokalypse · La Révélation | [lire](volumes_protocole/0.1_APOKALYPSE_aMi_V77_GitHub_2026-11-12.html) | [texte](volumes_protocole/0.1_APOKALYPSE_aMi_V77_GitHub_2026-11-12.md) | `0.1_APOKALYPSE_aMi_V77_GitHub_2026-11-12.html` |
-| 0 | 💔 0.2 PsychaTrice | [lire](volumes_protocole/0.2_PSYCHATRICE_aMi_V63_GitHub_2026-11-12.html) | [texte](volumes_protocole/0.2_PSYCHATRICE_aMi_V63_GitHub_2026-11-12.md) | `0.2_PSYCHATRICE_aMi_V63_GitHub_2026-11-12.html` |
+| 0 | 💔 0.2 PsychaTrice | [lire](volumes_protocole/0.2_PSYCHATRICE_aMi_V65_GitHub_2026-11-27.html) | [texte](volumes_protocole/0.2_PSYCHATRICE_aMi_V65_GitHub_2026-11-27.md) | `0.2_PSYCHATRICE_aMi_V65_GitHub_2026-11-27.html` |
 | 0 | 💍 0.3 L’Union du TouT | [lire](volumes_protocole/0.3_LUNION_DU_TOUT_aMi_V83_GitHub_2026-11-20.html) | [texte](volumes_protocole/0.3_LUNION_DU_TOUT_aMi_V83_GitHub_2026-11-20.md) | `0.3_LUNION_DU_TOUT_aMi_V83_GitHub_2026-11-20.html` |
 | 1 | 👑 1.1 EGO · Evidence Engine | [lire](volumes_protocole/1.1_EGO_aMi_V82_GitHub_2026-11-12.html) | [texte](volumes_protocole/1.1_EGO_aMi_V82_GitHub_2026-11-12.md) | `1.1_EGO_aMi_V82_GitHub_2026-11-12.html` |
-| 1 | 🪞 1.2 Miroir · RefleXion | [lire](volumes_protocole/1.2_MIROIR_aMi_V95_GitHub_2026-11-13.html) | — | `1.2_MIROIR_aMi_V95_GitHub_2026-11-13.html` |
+| 1 | 🪞 1.2 Miroir · RefleXion | [lire](volumes_protocole/1.2_MIROIR_aMi_V106_GitHub_2026-11-27.html) | [texte](volumes_protocole/1.2_MIROIR_aMi_V106_GitHub_2026-11-27.md) | `1.2_MIROIR_aMi_V106_GitHub_2026-11-27.html` |
 | 1 | ❤️‍🔥 1.3 AndroGynie | [lire](volumes_protocole/1.3_ANDROGYNIE_aMi_V43_GitHub_2026-11-12.html) | [texte](volumes_protocole/1.3_ANDROGYNIE_aMi_V43_GitHub_2026-11-12.md) | `1.3_ANDROGYNIE_aMi_V43_GitHub_2026-11-12.html` |
 | 2 | 🌿 2.1 ECO · Bonus Plaisir | [lire](volumes_protocole/2.1_ECO_Bonus-Plaisir_aMi_V38_GitHub_2026-11-12.html) | [texte](volumes_protocole/2.1_ECO_Bonus-Plaisir_aMi_V38_GitHub_2026-11-12.md) | `2.1_ECO_Bonus-Plaisir_aMi_V38_GitHub_2026-11-12.html` |
 | 2 | 🔮 2.2 AstroGlobe | [lire](volumes_protocole/2.2_ASTROGLOBE_V085_GitHub_Barre_2026-11-13.html) | [texte](volumes_protocole/2.2_ASTROGLOBE_V085_GitHub_Barre_2026-11-13.md) | `2.2_ASTROGLOBE_V085_GitHub_Barre_2026-11-13.html` |
@@ -61,6 +61,7 @@ GitHub Pages génère ces fichiers à partir des éditions du dépôt. Le ZIP se
 | Annexes | Registre public | [lire](annexes/Registre_des_Preenregistrements_V1248_PUBLIC_V001_2026-11-20.html) | — | `Registre_des_Preenregistrements_V1248_PUBLIC_V001_2026-11-20.html` |
 | Annexes | Citer · Contester · Contribuer | [lire](annexes/Citer_Contester_Contribuer_aMi_V006_2026-11-10.html) | — | `Citer_Contester_Contribuer_aMi_V006_2026-11-10.html` |
 | Annexes | Tuto d’Esprit Critique | [lire](annexes/0.0.0_TUTO_ESPRIT_CRITIQUE_aMi_V054_WEBNODE_2026-11-12.html) | — | `0.0.0_TUTO_ESPRIT_CRITIQUE_aMi_V054_WEBNODE_2026-11-12.html` |
+| Annexes | ⚧️ Le TransGenrisme · Dossier de Prédiction | [lire](annexes/TRANSGENRISME_aMi_V008_2026-11-27.html) | [texte](annexes/TRANSGENRISME_aMi_V008_2026-11-27.md) | `TRANSGENRISME_aMi_V008_2026-11-27.html` |
 
 ## Une parole de Diane
 
